@@ -95,9 +95,9 @@ int rxExpectedLen = 0;
 // Timing
 long lastPollTime = 0;
 int pollInterval = 200;
-long lastFullPollTime = 0;
-int fullPollInterval = 2000;  // full read every 2 seconds
+// (full reads now happen as part of the rotating poll cycle)
 boolean gotFirstFullRead = false;
+int fullReadFlags = 0;  // bitmask: 1=voltage, 2=current
 
 // --- Data logging ---
 boolean logging = false;
@@ -239,7 +239,22 @@ void sendReadRegister(int register_) {
 }
 
 void sendReadAll() {
-  sendReadRegister(REG_ALL);
+  fullReadFlags = 0;
+  // DPS-150 does NOT support the bulk REG_ALL (0xFF) read properly.
+  // It returns only 12 bytes instead of 109+. So we read individual registers.
+  sendReadRegister(REG_SET_VOLTAGE); // set voltage (0xC0)
+  sendReadRegister(REG_SET_CURRENT); // set current (0xDE)
+  sendReadRegister(REG_TEMPERATURE); // temperature (0xC4)
+  sendReadRegister(REG_OUTPUT);      // output on/off (0xDB)
+  sendReadRegister(REG_MODE);        // CV/CC mode (0xDD)
+  sendReadRegister(REG_PROTECTION);  // protection status (0xDC)
+  sendReadRegister(REG_OVP);         // protection limits
+  sendReadRegister(REG_OCP);
+  sendReadRegister(REG_OPP);
+  sendReadRegister(REG_OTP);
+  sendReadRegister(REG_BRIGHTNESS);  // brightness (0xD6)
+  sendReadRegister(REG_CAP_AH);     // capacity Ah
+  sendReadRegister(REG_CAP_WH);     // capacity Wh
 }
 
 void sendReadLive() {
@@ -345,11 +360,15 @@ void processResponsePacket(int[] buf, int len) {
   else if (reg == REG_MAX_CURR && dataLen >= 4) {
     maxCurrent = leToFloat(buf[4], buf[5], buf[6], buf[7]);
   }
-  else if (reg == REG_SET_VOLTAGE && dataLen >= 4) {
+  else if ((reg == REG_SET_VOLTAGE || reg == REG_WRITE_VOLT) && dataLen >= 4) {
     setVoltage = leToFloat(buf[4], buf[5], buf[6], buf[7]);
+    fullReadFlags |= 1;
+    checkFullRead();
   }
-  else if (reg == REG_SET_CURRENT && dataLen >= 4) {
+  else if ((reg == REG_SET_CURRENT || reg == REG_WRITE_CURR) && dataLen >= 4) {
     setCurrent = leToFloat(buf[4], buf[5], buf[6], buf[7]);
+    fullReadFlags |= 2;
+    checkFullRead();
   }
   else if (reg == REG_OVP && dataLen >= 4) {
     ovpLimit = leToFloat(buf[4], buf[5], buf[6], buf[7]);
@@ -363,31 +382,9 @@ void processResponsePacket(int[] buf, int len) {
   else if (reg == REG_OTP && dataLen >= 4) {
     otpLimit = leToFloat(buf[4], buf[5], buf[6], buf[7]);
   }
-  else if (reg == REG_ALL && dataLen >= 109) {
-    setVoltage  = leToFloat(buf[4+4], buf[4+5], buf[4+6], buf[4+7]);
-    setCurrent  = leToFloat(buf[4+8], buf[4+9], buf[4+10], buf[4+11]);
-    liveVoltage = leToFloat(buf[4+12], buf[4+13], buf[4+14], buf[4+15]);
-    liveCurrent = leToFloat(buf[4+16], buf[4+17], buf[4+18], buf[4+19]);
-    livePower   = leToFloat(buf[4+20], buf[4+21], buf[4+22], buf[4+23]);
-    temperature = leToFloat(buf[4+24], buf[4+25], buf[4+26], buf[4+27]);
-    for (int i = 0; i < 6; i++) {
-      int off = 4 + 28 + i * 8;
-      presetV[i] = leToFloat(buf[off], buf[off+1], buf[off+2], buf[off+3]);
-      presetA[i] = leToFloat(buf[off+4], buf[off+5], buf[off+6], buf[off+7]);
-    }
-    maxVoltage = leToFloat(buf[4+76], buf[4+77], buf[4+78], buf[4+79]);
-    maxCurrent = leToFloat(buf[4+80], buf[4+81], buf[4+82], buf[4+83]);
-    ovpLimit = leToFloat(buf[4+84], buf[4+85], buf[4+86], buf[4+87]);
-    ocpLimit = leToFloat(buf[4+88], buf[4+89], buf[4+90], buf[4+91]);
-    oppLimit = leToFloat(buf[4+92], buf[4+93], buf[4+94], buf[4+95]);
-    otpLimit = leToFloat(buf[4+96], buf[4+97], buf[4+98], buf[4+99]);
-    capacityAh = leToFloat(buf[4+96], buf[4+97], buf[4+98], buf[4+99]);
-    capacityWh = leToFloat(buf[4+100], buf[4+101], buf[4+102], buf[4+103]);
-    if (dataLen > 107) outputOn = (buf[4+107] == 1);
-    if (dataLen > 108) outputMode = buf[4+108];
-    if (dataLen > 109) protectionStatus = buf[4+109];
-    addHistorySample();
-    onFullReadReceived();
+  // REG_ALL (0xFF) — DPS-150 returns only 12 bytes; just ignore it gracefully
+  else if (reg == REG_ALL) {
+    // Not supported properly on DPS-150, individual register reads are used instead
   }
 
   for (int i = 0; i < 6; i++) {
@@ -439,20 +436,54 @@ void disconnectFromPSU() {
   connected = false;
   connectedPortName = "";
   gotFirstFullRead = false;
+  fullReadFlags = 0;
 }
 
 // --- Polling ---
+int pollCycle = 0;
+
 void pollPSU() {
   if (!connected || serialPort == null) return;
   long now = millis();
   if (now - lastPollTime >= pollInterval) {
     lastPollTime = now;
     sendReadLive();
+
+    // Every 5th cycle (~1s), read a group of extra registers (rotating)
+    pollCycle++;
+    if (pollCycle % 5 == 0) {
+      int group = (pollCycle / 5) % 4;
+      switch (group) {
+        case 0:
+          sendReadRegister(REG_WRITE_VOLT);
+          sendReadRegister(REG_WRITE_CURR);
+          sendReadRegister(REG_OUTPUT);
+          break;
+        case 1:
+          sendReadRegister(REG_TEMPERATURE);
+          sendReadRegister(REG_MODE);
+          sendReadRegister(REG_PROTECTION);
+          break;
+        case 2:
+          sendReadRegister(REG_OVP);
+          sendReadRegister(REG_OCP);
+          sendReadRegister(REG_OPP);
+          sendReadRegister(REG_OTP);
+          break;
+        case 3:
+          sendReadRegister(REG_BRIGHTNESS);
+          sendReadRegister(REG_CAP_AH);
+          sendReadRegister(REG_CAP_WH);
+          break;
+      }
+    }
   }
-  // Periodic full read for setpoints, temperature, protection, presets, etc.
-  if (now - lastFullPollTime >= fullPollInterval) {
-    lastFullPollTime = now;
-    sendReadAll();
+}
+
+void checkFullRead() {
+  // Once we've received both set voltage and set current, trigger the callback
+  if ((fullReadFlags & 3) == 3) {
+    onFullReadReceived();
   }
 }
 

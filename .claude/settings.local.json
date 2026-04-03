@@ -11,7 +11,12 @@
       "WebFetch(domain:manuals.plus)",
       "WebFetch(domain:www.manualslib.com)",
       "WebFetch(domain:device.report)",
-      "WebFetch(domain:www.frc-net.co.jp)"
+      "WebFetch(domain:www.frc-net.co.jp)",
+      "Bash(cc:*)",
+      "Bash(./test_set_current:*)",
+      "Bash(ls:*)",
+      "Bash(/Users/pvc/Documents/Processing/DPS150_PSU/test_set_current:*)",
+      "Bash(gcc:*)"
     ]
   }
 }

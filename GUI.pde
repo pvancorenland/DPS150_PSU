@@ -628,9 +628,8 @@ void handleGUIKey(char k, int kCode) {
   }
 }
 
-// Called when a REG_ALL response is received from the PSU
+// Called when set voltage + set current have been received from the PSU
 void onFullReadReceived() {
-  // Populate text fields with actual PSU setpoints on first read
   if (!gotFirstFullRead) {
     gotFirstFullRead = true;
     tfSetVoltage.setFloat(setVoltage);
@@ -640,6 +639,7 @@ void onFullReadReceived() {
     tfOPP.setFloat(oppLimit);
     tfOTP.setFloat(otpLimit);
     println("Initial read: V=" + nf(setVoltage,0,3) + " A=" + nf(setCurrent,0,3));
+    setStatus("Connected — Set: " + nf(setVoltage,0,3) + "V / " + nf(setCurrent,0,3) + "A");
   }
 }
 
