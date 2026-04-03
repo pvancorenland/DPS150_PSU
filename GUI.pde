@@ -55,6 +55,9 @@ Button btnApplyBrightness;
 // --- Logging ---
 Button btnStartLog, btnStopLog;
 
+// --- Advanced window ---
+Button btnOpenAdvanced;
+
 // --- Status bar ---
 String statusMessage = "Ready";
 long statusTime = 0;
@@ -181,6 +184,14 @@ void initGUI() {
   sliderBrightness = new Slider(px2 + 110, py2 + 108, 80, 16, "Brightness", 0, 20);
   btnApplyBrightness = new Button(px2 + 110, py2 + 130, 80, 18, "Set");
   btnApplyBrightness.bgColor = #1B5E20;
+
+  // Advanced button (top bar, far right)
+  btnOpenAdvanced = new Button(WIN_W - 100, 6, 90, 28, "Advanced");
+  btnOpenAdvanced.bgColor = #4A148C;
+  btnOpenAdvanced.hoverColor = #7B1FA2;
+
+  // Init advanced window
+  initAdvanced();
 }
 
 void refreshPorts() {
@@ -249,6 +260,7 @@ void drawGUI() {
   btnConnect.draw();
   btnDisconnect.draw();
   if (!connected) btnRefreshPorts.draw();
+  btnOpenAdvanced.draw();
 
   // ---- LEFT SIDE: Gauges ----
   // Subtle divider
@@ -420,12 +432,28 @@ void drawGUI() {
   fill(COL_TEXT_DIM);
   textAlign(RIGHT, CENTER);
   text("DPS-150 Control  |  " + nf(frameRate, 0, 0) + " fps", WIN_W - 10, WIN_H - 11);
+
+  // ---- ADVANCED OVERLAY (drawn last, on top) ----
+  drawAdvanced();
+  updateAdvanced();
 }
 
 // ============================================================
 // INPUT HANDLING
 // ============================================================
 void handleGUIClick() {
+  // --- Advanced window (handles its own clicks when open) ---
+  if (advancedOpen) {
+    handleAdvancedClick();
+    return;  // block clicks to main GUI while advanced is open
+  }
+
+  // --- Advanced button ---
+  if (btnOpenAdvanced.clicked()) {
+    advancedOpen = true;
+    return;
+  }
+
   // --- Top bar ---
   if (!connected) {
     if (btnPortPrev.clicked() && selectedPortIndex > 0) {
@@ -556,6 +584,12 @@ void handleGUIRelease() {
 }
 
 void handleGUIKey(char k, int kCode) {
+  // Advanced window gets keys first
+  if (advancedOpen) {
+    handleAdvancedKey(k, kCode);
+    return;
+  }
+
   tfSetVoltage.handleKey(k, kCode);
   tfSetCurrent.handleKey(k, kCode);
   tfOVP.handleKey(k, kCode);

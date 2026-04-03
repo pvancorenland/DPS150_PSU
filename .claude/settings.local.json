@@ -6,7 +6,12 @@
       "WebSearch",
       "WebFetch(domain:www.rickmakes.com)",
       "WebFetch(domain:www.elektormagazine.com)",
-      "WebFetch(domain:www.eevblog.com)"
+      "WebFetch(domain:www.eevblog.com)",
+      "WebFetch(domain:www.fnirsi.com)",
+      "WebFetch(domain:manuals.plus)",
+      "WebFetch(domain:www.manualslib.com)",
+      "WebFetch(domain:device.report)",
+      "WebFetch(domain:www.frc-net.co.jp)"
     ]
   }
 }
