@@ -474,9 +474,7 @@ void handleGUIClick() {
     setStatus("Connecting to " + availablePorts[selectedPortIndex] + "...");
     if (connectToPort(availablePorts[selectedPortIndex])) {
       setStatus("Connected to " + connectedPortName);
-      // Pre-populate text fields with PSU's current setpoints
-      tfSetVoltage.setFloat(setVoltage);
-      tfSetCurrent.setFloat(setCurrent);
+      gotFirstFullRead = false;  // wait for async ReadAll response
     } else {
       setStatus("Connection failed!");
     }
@@ -627,6 +625,21 @@ void handleGUIKey(char k, int kCode) {
       println("APPLY (Enter): V=" + nf(v,0,3) + " A=" + nf(a,0,3));
       setStatus("Applied: " + nf(v,0,3) + "V / " + nf(a,0,3) + "A");
     }
+  }
+}
+
+// Called when a REG_ALL response is received from the PSU
+void onFullReadReceived() {
+  // Populate text fields with actual PSU setpoints on first read
+  if (!gotFirstFullRead) {
+    gotFirstFullRead = true;
+    tfSetVoltage.setFloat(setVoltage);
+    tfSetCurrent.setFloat(setCurrent);
+    tfOVP.setFloat(ovpLimit);
+    tfOCP.setFloat(ocpLimit);
+    tfOPP.setFloat(oppLimit);
+    tfOTP.setFloat(otpLimit);
+    println("Initial read: V=" + nf(setVoltage,0,3) + " A=" + nf(setCurrent,0,3));
   }
 }
 

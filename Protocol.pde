@@ -95,6 +95,9 @@ int rxExpectedLen = 0;
 // Timing
 long lastPollTime = 0;
 int pollInterval = 200;
+long lastFullPollTime = 0;
+int fullPollInterval = 2000;  // full read every 2 seconds
+boolean gotFirstFullRead = false;
 
 // --- Data logging ---
 boolean logging = false;
@@ -384,6 +387,7 @@ void processResponsePacket(int[] buf, int len) {
     if (dataLen > 108) outputMode = buf[4+108];
     if (dataLen > 109) protectionStatus = buf[4+109];
     addHistorySample();
+    onFullReadReceived();
   }
 
   for (int i = 0; i < 6; i++) {
@@ -434,6 +438,7 @@ void disconnectFromPSU() {
   }
   connected = false;
   connectedPortName = "";
+  gotFirstFullRead = false;
 }
 
 // --- Polling ---
@@ -443,6 +448,11 @@ void pollPSU() {
   if (now - lastPollTime >= pollInterval) {
     lastPollTime = now;
     sendReadLive();
+  }
+  // Periodic full read for setpoints, temperature, protection, presets, etc.
+  if (now - lastFullPollTime >= fullPollInterval) {
+    lastFullPollTime = now;
+    sendReadAll();
   }
 }
 
