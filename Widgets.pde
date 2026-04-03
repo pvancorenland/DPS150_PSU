@@ -391,7 +391,7 @@ class Button {
   }
 
   boolean clicked() {
-    return enabled && hovered;
+    return enabled && mouseX >= x && mouseX <= x+w && mouseY >= y && mouseY <= y+h;
   }
 }
 
@@ -442,7 +442,9 @@ class ToggleButton {
     text(state ? "OUTPUT ON" : "OUTPUT OFF", x + w/2, y + h/2 + 4);
   }
 
-  boolean clicked() { return hovered; }
+  boolean clicked() {
+    return mouseX >= x && mouseX <= x+w && mouseY >= y && mouseY <= y+h;
+  }
 }
 
 // ============================================================
@@ -491,7 +493,9 @@ class TextField {
     text(display, x + 6, y + h/2);
   }
 
-  boolean clicked() { return hovered; }
+  boolean clicked() {
+    return mouseX >= x && mouseX <= x+w && mouseY >= y && mouseY <= y+h;
+  }
 
   void handleKey(char k, int kCode) {
     if (!focused) return;
@@ -563,7 +567,9 @@ class Slider {
     }
   }
 
-  boolean pressedOn() { return hovered; }
+  boolean pressedOn() {
+    return mouseX >= x-5 && mouseX <= x+w+5 && mouseY >= y-10 && mouseY <= y+h+10;
+  }
 }
 
 // ============================================================
