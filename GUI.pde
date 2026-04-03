@@ -474,6 +474,9 @@ void handleGUIClick() {
     setStatus("Connecting to " + availablePorts[selectedPortIndex] + "...");
     if (connectToPort(availablePorts[selectedPortIndex])) {
       setStatus("Connected to " + connectedPortName);
+      // Pre-populate text fields with PSU's current setpoints
+      tfSetVoltage.setFloat(setVoltage);
+      tfSetCurrent.setFloat(setCurrent);
     } else {
       setStatus("Connection failed!");
     }
@@ -507,10 +510,21 @@ void handleGUIClick() {
   // --- Apply ---
   if (btnApply.clicked() && connected) {
     float v = constrain(tfSetVoltage.getFloat(), 0, maxVoltage);
-    float a = constrain(tfSetCurrent.getFloat(), 0, maxCurrent);
+    float a = tfSetCurrent.getFloat();
+    // Don't send 0A — use existing setCurrent if field is empty
+    if (a < 0.001 && tfSetCurrent.value.length() == 0) {
+      a = setCurrent;
+    }
+    a = constrain(a, 0, maxCurrent);
     sendSetVoltage(v);
     sendSetCurrent(a);
-    setStatus("Set: " + nf(v,0,3) + "V / " + nf(a,0,3) + "A");
+    // Update local state immediately so displays reflect the change
+    setVoltage = v;
+    setCurrent = a;
+    tfSetVoltage.setFloat(v);
+    tfSetCurrent.setFloat(a);
+    println("APPLY: V=" + nf(v,0,3) + " A=" + nf(a,0,3));
+    setStatus("Applied: " + nf(v,0,3) + "V / " + nf(a,0,3) + "A");
   }
 
   // --- Presets ---
@@ -601,10 +615,17 @@ void handleGUIKey(char k, int kCode) {
   if (k == ENTER || k == RETURN) {
     if ((tfSetVoltage.focused || tfSetCurrent.focused) && connected) {
       float v = constrain(tfSetVoltage.getFloat(), 0, maxVoltage);
-      float a = constrain(tfSetCurrent.getFloat(), 0, maxCurrent);
+      float a = tfSetCurrent.getFloat();
+      if (a < 0.001 && tfSetCurrent.value.length() == 0) a = setCurrent;
+      a = constrain(a, 0, maxCurrent);
       sendSetVoltage(v);
       sendSetCurrent(a);
-      setStatus("Set: " + nf(v,0,3) + "V / " + nf(a,0,3) + "A");
+      setVoltage = v;
+      setCurrent = a;
+      tfSetVoltage.setFloat(v);
+      tfSetCurrent.setFloat(a);
+      println("APPLY (Enter): V=" + nf(v,0,3) + " A=" + nf(a,0,3));
+      setStatus("Applied: " + nf(v,0,3) + "V / " + nf(a,0,3) + "A");
     }
   }
 }
