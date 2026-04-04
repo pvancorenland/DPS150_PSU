@@ -18,7 +18,7 @@ Slider sliderVset, sliderIset;
 DigitalReadout readoutPower, readoutSetV, readoutSetA;
 ScrollingGraph graph;
 StatusBadge badgeCV, badgeCC;
-Panel panelPresets, panelInfo, panelProtection;
+Panel panelGauges, panelOutput, panelSetControls, panelPresets, panelInfo, panelProtection;
 
 String statusMessage = "Ready";
 long statusTime = 0;
@@ -28,7 +28,21 @@ long outputToggleTime = 0;
 // LAYOUT CONSTANTS
 // ============================================================
 static final int WIN_W = 1100, WIN_H = 720;
-static final int TOP_BAR_H = 40, LEFT_W = 620, RIGHT_W = 470;
+static final int TOP_BAR_H = 40;
+
+// Left column
+static final float LX = 8, LW = 612;
+static final float GAUGE_Y = 44, GAUGE_H = 260;
+static final float RDO_Y = 308, RDO_H = 44;
+static final float GRAPH_Y = 356, GRAPH_H = 254;
+
+// Right column
+static final float RX = 630, RW = 462;
+static final float OUT_Y = 44, OUT_H = 90;
+static final float SET_Y = 138, SET_H = 96;
+static final float PRE_Y = 238, PRE_H = 176;
+static final float BOT_Y = 418, BOT_H = 192;
+static final float INFO_W = 227, PROT_W = 231;
 
 // ============================================================
 // Cached CP5 controller references (avoid per-frame string lookups)
@@ -102,44 +116,62 @@ void initGUI() {
   // --- Connected-only group ---
   grpConnected = cp5.addGroup("grpConnected").setPosition(0, 0).setSize(WIN_W, WIN_H).hideBar().hide();
 
-  // --- Gauges ---
-  gaugeVoltage = new CircularGauge(155, 175, 120, "OUTPUT VOLTAGE", "V", 0, 30, COL_VOLT, COL_VOLT_DIM);
-  gaugeCurrent = new CircularGauge(430, 175, 120, "OUTPUT CURRENT", "A", 0, 5, COL_CURR, COL_CURR_DIM);
+  // --- Panels ---
+  panelGauges = new Panel(LX, GAUGE_Y, LW, GAUGE_H, "Meters");
+  // panelReadouts: drawn as simple border in drawConnectedGUI (too slim for full header)
+  // graph: self-styled widget with own border/header
+  panelOutput = new Panel(RX, OUT_Y, RW, OUT_H, "Output Control");
+  panelSetControls = new Panel(RX, SET_Y, RW, SET_H, "Set Points");
+  panelPresets = new Panel(RX, PRE_Y, RW, PRE_H, "Presets");
+  panelInfo = new Panel(RX, BOT_Y, INFO_W, BOT_H, "Device Info");
+  panelProtection = new Panel(RX + INFO_W + 4, BOT_Y, PROT_W, BOT_H, "Protection");
+
+  // --- Gauges (inside panelGauges) ---
+  float gcx = panelGauges.contentX(), gcy = panelGauges.contentY();
+  float gch = panelGauges.contentH();
+  float gaugeCenter = gcy + gch / 2 + 4;
+  gaugeVoltage = new CircularGauge(gcx + 140, gaugeCenter, 120, "OUTPUT VOLTAGE", "V", 0, 30, COL_VOLT, COL_VOLT_DIM);
+  gaugeCurrent = new CircularGauge(gcx + 415, gaugeCenter, 120, "OUTPUT CURRENT", "A", 0, 5, COL_CURR, COL_CURR_DIM);
   gaugeCurrent.majorTicks = 5;
-  sliderVset = cp5.addSlider("sliderVset").setPosition(278, 70).setSize(24, 220)
+  sliderVset = cp5.addSlider("sliderVset").setPosition(gcx + 263, gcy + 2).setSize(24, (int)(gch - 4))
     .setRange(0, 30).setValue(0).setLabel("Vset").setGroup(grpConnected);
   sliderVset.setColorBackground(color(0x1A, 0x1A, 0x25));
   sliderVset.setColorForeground(COL_VOLT);
   sliderVset.setColorActive(COL_VOLT);
-  sliderIset = cp5.addSlider("sliderIset").setPosition(553, 70).setSize(24, 220)
+  sliderIset = cp5.addSlider("sliderIset").setPosition(gcx + 538, gcy + 2).setSize(24, (int)(gch - 4))
     .setRange(0, 5).setValue(0).setLabel("Iset").setGroup(grpConnected);
   sliderIset.setColorBackground(color(0x1A, 0x1A, 0x25));
   sliderIset.setColorForeground(COL_CURR);
   sliderIset.setColorActive(COL_CURR);
 
-  // --- Readouts ---
-  readoutPower = new DigitalReadout(180, 305, 200, 32, "W", "POWER", COL_POWER);
-  readoutSetV  = new DigitalReadout(30, 305, 140, 32, "V", "SET", COL_VOLT);
-  readoutSetA  = new DigitalReadout(400, 305, 140, 32, "A", "SET", COL_CURR);
+  // --- Readouts (inside readouts strip) ---
+  float rdoMid = RDO_Y + RDO_H / 2;
+  int rdoH = 30;
+  readoutSetV  = new DigitalReadout(LX + 22, rdoMid - rdoH/2, 160, rdoH, "V", "SET", COL_VOLT);
+  readoutPower = new DigitalReadout(LX + 192, rdoMid - rdoH/2, 220, rdoH, "W", "POWER", COL_POWER);
+  readoutSetA  = new DigitalReadout(LX + 422, rdoMid - rdoH/2, 160, rdoH, "A", "SET", COL_CURR);
 
-  // --- Graph ---
-  graph = new ScrollingGraph(15, 350, LEFT_W - 20, 230);
+  // --- Graph (self-styled, fills graph area) ---
+  graph = new ScrollingGraph(LX + 4, GRAPH_Y, LW - 8, GRAPH_H - 28);
+  graph.title = "Graph";
 
-  cGraphV = cp5.addButton("btnGraphV").setPosition(20, 585).setSize(55, 20).setLabel("Voltage").setGroup(grpConnected);
+  float gbtnY = GRAPH_Y + GRAPH_H - 24;
+  cGraphV = cp5.addButton("btnGraphV").setPosition(LX + 12, gbtnY).setSize(55, 20).setLabel("Voltage").setGroup(grpConnected);
   applyTheme(cGraphV, 0xFF664D00, 0xFF806000, 0xFF997300);
-  cGraphA = cp5.addButton("btnGraphA").setPosition(80, 585).setSize(55, 20).setLabel("Current").setGroup(grpConnected);
+  cGraphA = cp5.addButton("btnGraphA").setPosition(LX + 72, gbtnY).setSize(55, 20).setLabel("Current").setGroup(grpConnected);
   applyTheme(cGraphA, 0xFF005662, 0xFF00707D, 0xFF008A98);
-  cGraphW = cp5.addButton("btnGraphW").setPosition(140, 585).setSize(50, 20).setLabel("Power").setGroup(grpConnected);
+  cGraphW = cp5.addButton("btnGraphW").setPosition(LX + 132, gbtnY).setSize(50, 20).setLabel("Power").setGroup(grpConnected);
   applyTheme(cGraphW, 0xFF1B5E20, 0xFF2E7D32, 0xFF43A047);
 
-  cStartLog = cp5.addButton("btnStartLog").setPosition(350, 585).setSize(80, 20).setLabel("Start Log").setGroup(grpConnected);
+  cStartLog = cp5.addButton("btnStartLog").setPosition(LX + 342, gbtnY).setSize(80, 20).setLabel("Start Log").setGroup(grpConnected);
   applyGreenTheme(cStartLog);
-  cStopLog = cp5.addButton("btnStopLog").setPosition(440, 585).setSize(75, 20).setLabel("Stop Log").setGroup(grpConnected);
+  cStopLog = cp5.addButton("btnStopLog").setPosition(LX + 432, gbtnY).setSize(75, 20).setLabel("Stop Log").setGroup(grpConnected);
   applyRedTheme(cStopLog);
 
-  // --- Output toggle ---
-  float rx = LEFT_W + 15;
-  cOutput = (Toggle) cp5.addToggle("btnOutput").setPosition(rx, 50).setSize((int)(RIGHT_W - 30), 52)
+  // --- Output toggle (inside panelOutput) ---
+  float ocx = panelOutput.contentX(), ocy = panelOutput.contentY();
+  float ocw = panelOutput.contentW();
+  cOutput = (Toggle) cp5.addToggle("btnOutput").setPosition(ocx, ocy).setSize((int)ocw, 36)
     .setValue(false).setGroup(grpConnected);
   cOutput.setColorBackground(color(0x3E, 0x1A, 0x1A));
   cOutput.setColorForeground(color(0x00, 0xE6, 0x76));
@@ -147,27 +179,28 @@ void initGUI() {
   cOutput.setColorCaptionLabel(color(0xE0, 0xE0, 0xE8));
   cOutput.getCaptionLabel().setText("OUTPUT").align(ControlP5.CENTER, ControlP5.CENTER);
 
-  badgeCV = new StatusBadge(rx, 108, 50, 22, "CV", COL_VOLT);
-  badgeCC = new StatusBadge(rx + 56, 108, 50, 22, "CC", COL_CURR);
+  badgeCV = new StatusBadge(ocx, ocy + 40, 50, 22, "CV", COL_VOLT);
+  badgeCC = new StatusBadge(ocx + 56, ocy + 40, 50, 22, "CC", COL_CURR);
 
-  // --- Set controls ---
-  float setY = 145;
-  cTfSetV = cp5.addTextfield("tfSetVoltage").setPosition(rx, setY + 18).setSize(150, 30)
+  // --- Set controls (inside panelSetControls) ---
+  float scx = panelSetControls.contentX(), scy = panelSetControls.contentY();
+  float scw = panelSetControls.contentW();
+  cTfSetV = cp5.addTextfield("tfSetVoltage").setPosition(scx, scy + 8).setSize(150, 28)
     .setLabel("Set Voltage (0-30V)").setGroup(grpConnected);
   styleCp5Textfield(cTfSetV);
-  cTfSetA = cp5.addTextfield("tfSetCurrent").setPosition(rx + 230, setY + 18).setSize(150, 30)
+  cTfSetA = cp5.addTextfield("tfSetCurrent").setPosition(scx + 225, scy + 8).setSize(150, 28)
     .setLabel("Set Current (0-5A)").setGroup(grpConnected);
   styleCp5Textfield(cTfSetA);
 
   int[][] adjBtns = {
-    {(int)(rx+155), (int)(setY+18), 30, 14},  // voltUp
-    {(int)(rx+155), (int)(setY+34), 30, 14},  // voltDown
-    {(int)(rx+190), (int)(setY+18), 30, 14},  // voltUpFine
-    {(int)(rx+190), (int)(setY+34), 30, 14},  // voltDownFine
-    {(int)(rx+385), (int)(setY+18), 30, 14},  // currUp
-    {(int)(rx+385), (int)(setY+34), 30, 14},  // currDown
-    {(int)(rx+420), (int)(setY+18), 30, 14},  // currUpFine
-    {(int)(rx+420), (int)(setY+34), 30, 14},  // currDownFine
+    {(int)(scx+155), (int)(scy+8),  30, 14},  // voltUp
+    {(int)(scx+155), (int)(scy+22), 30, 14},  // voltDown
+    {(int)(scx+188), (int)(scy+8),  30, 14},  // voltUpFine
+    {(int)(scx+188), (int)(scy+22), 30, 14},  // voltDownFine
+    {(int)(scx+380), (int)(scy+8),  30, 14},  // currUp
+    {(int)(scx+380), (int)(scy+22), 30, 14},  // currDown
+    {(int)(scx+413), (int)(scy+8),  30, 14},  // currUpFine
+    {(int)(scx+413), (int)(scy+22), 30, 14},  // currDownFine
   };
   String[] adjNames = {"btnVoltUp","btnVoltDown","btnVoltUpFine","btnVoltDownFine",
                        "btnCurrUp","btnCurrDown","btnCurrUpFine","btnCurrDownFine"};
@@ -178,13 +211,11 @@ void initGUI() {
     applyDarkTheme(c);
   }
 
-  c = cp5.addButton("btnApply").setPosition(rx, setY + 55).setSize((int)(RIGHT_W - 30), 30)
+  c = cp5.addButton("btnApply").setPosition(scx, scy + 40).setSize((int)scw, 22)
     .setLabel("APPLY SETTINGS").setGroup(grpConnected);
   applyGreenTheme(c);
 
-  // --- Presets ---
-  float presetY = setY + 95;
-  panelPresets = new Panel(rx, presetY, RIGHT_W - 30, 175, "Express Data — Presets");
+  // --- Presets (inside panelPresets) ---
   for (int i = 0; i < 6; i++) {
     float px = panelPresets.contentX() + (i % 3) * 148;
     float py = panelPresets.contentY() + (i / 3) * 72;
@@ -195,13 +226,10 @@ void initGUI() {
   }
 
   // --- Info panel ---
-  float infoY = presetY + 185;
-  panelInfo = new Panel(rx, infoY, (RIGHT_W - 40)/2, 175, "Device Info");
-  c = cp5.addButton("btnRefreshAll").setPosition(rx + 5, infoY + 150).setSize(80, 20).setLabel("Refresh All").setGroup(grpConnected);
+  c = cp5.addButton("btnRefreshAll").setPosition(panelInfo.contentX() + 5, panelInfo.contentY() + 130).setSize(80, 20).setLabel("Refresh All").setGroup(grpConnected);
   applyDarkTheme(c);
 
   // --- Protection panel ---
-  panelProtection = new Panel(rx + (RIGHT_W - 40)/2 + 10, infoY, (RIGHT_W - 40)/2, 175, "Protection");
   float px2 = panelProtection.contentX();
   float py2 = panelProtection.contentY();
 
@@ -330,16 +358,26 @@ void drawGUI() {
 
 /** Draw the connected-state GUI (gauges, graph, controls). Separated for clarity. */
 void drawConnectedGUI() {
-  float rx = LEFT_W + 15;
 
-  // ---- LEFT SIDE ----
-  stroke(COL_BORDER);
-  strokeWeight(1);
-  line(LEFT_W + 5, TOP_BAR_H + 5, LEFT_W + 5, WIN_H - 5);
-  fill(COL_PANEL, 80);
-  noStroke();
-  rect(10, TOP_BAR_H + 8, LEFT_W - 15, 255, 6);
+  // ---- DRAW ALL PANELS ----
+  panelGauges.draw();
 
+  // Readouts strip — slim panel, no header
+  fill(COL_PANEL); stroke(COL_BORDER); strokeWeight(1);
+  rect(LX, RDO_Y, LW, RDO_H, 5);
+
+  // Graph area — the ScrollingGraph widget draws its own border/header
+  // Draw a subtle panel border behind it to frame the buttons area below
+  fill(COL_PANEL); stroke(COL_BORDER); strokeWeight(1);
+  rect(LX, GRAPH_Y, LW, GRAPH_H, 5);
+
+  panelOutput.draw();
+  panelSetControls.draw();
+  panelPresets.draw();
+  panelInfo.draw();
+  panelProtection.draw();
+
+  // ---- LEFT SIDE: Gauges ----
   gaugeVoltage.value = psu.liveVoltage;
   gaugeCurrent.value = psu.liveCurrent;
   gaugeVoltage.draw();
@@ -357,6 +395,7 @@ void drawConnectedGUI() {
     sliderIset.setBroadcast(true);
   }
 
+  // ---- LEFT SIDE: Readouts ----
   readoutPower.setValue(psu.livePower, 3, 2);
   readoutSetV.setValue(psu.setVoltage, 2, 3);
   readoutSetA.setValue(psu.setCurrent, 1, 3);
@@ -364,6 +403,7 @@ void drawConnectedGUI() {
   readoutSetV.draw();
   readoutSetA.draw();
 
+  // ---- LEFT SIDE: Graph ----
   graph.draw();
 
   // Update graph toggle colors only when state changes
@@ -387,14 +427,14 @@ void drawConnectedGUI() {
     float blink = sin(millis() * 0.008) > 0 ? 255 : 100;
     fill(color(255, 50, 50, (int)blink));
     noStroke();
-    ellipse(535, 595, 8, 8);
+    ellipse(LX + 527, GRAPH_Y + GRAPH_H - 14, 8, 8);
     fill(COL_TEXT_DIM);
     textAlign(LEFT, CENTER);
     textSize(9);
-    text("REC " + psu.logSampleCount + " samples", 542, 595);
+    text("REC " + psu.logSampleCount + " samples", LX + 534, GRAPH_Y + GRAPH_H - 14);
   }
 
-  // ---- RIGHT SIDE ----
+  // ---- RIGHT SIDE: Output ----
   // Sync output toggle — skip for 2s after user click to avoid fighting
   if ((millis() - outputToggleTime) > 2000 && cOutput.getState() != psu.outputOn) {
     cOutput.setBroadcast(false);
@@ -408,19 +448,20 @@ void drawConnectedGUI() {
   badgeCC.draw();
 
   // Protection status text
+  float ocx = panelOutput.contentX();
+  float ocy = panelOutput.contentY();
   textAlign(LEFT, CENTER);
   if (psu.protectionStatus != PROT_OK) {
     fill(COL_OFF);
     textSize(12);
-    text(psu.protectionStatusText(), rx + 120, 119);
+    text(psu.protectionStatusText(), ocx + 120, ocy + 49);
   } else {
     fill(COL_ON, 150);
     textSize(10);
-    text("Normal", rx + 120, 119);
+    text("Normal", ocx + 120, ocy + 49);
   }
 
-  // Presets
-  panelPresets.draw();
+  // ---- RIGHT SIDE: Presets ----
   for (int i = 0; i < 6; i++) {
     float ppx = panelPresets.contentX() + (i % 3) * 148;
     float ppy = panelPresets.contentY() + (i / 3) * 72;
@@ -439,8 +480,7 @@ void drawConnectedGUI() {
     text(nf(psu.presetA[i], 0, 2) + " A", ppx + 5, ppy + 40);
   }
 
-  // Info panel
-  panelInfo.draw();
+  // ---- RIGHT SIDE: Info panel ----
   float ix = panelInfo.contentX();
   float iy = panelInfo.contentY();
   textAlign(LEFT, TOP);
@@ -461,9 +501,7 @@ void drawConnectedGUI() {
   fill(psu.outputMode == MODE_CV ? COL_VOLT : COL_CURR);
   text(psu.outputMode == MODE_CV ? "CV" : "CC", ix + 75, iy);
 
-  // Protection panel
-  panelProtection.draw();
-
+  // ---- RIGHT SIDE: Protection panel ----
   // Brightness slider is synced once in onSetpointsReceived(), not every frame
 }
 
@@ -660,9 +698,11 @@ void onSetpointsReceived() {
   cBrightness.setValue(psu.brightness);
   cBrightness.setBroadcast(true);
   sliderVset.setBroadcast(false);
+  if (psu.maxVoltage > 0) sliderVset.setRange(0, psu.maxVoltage);
   sliderVset.setValue(psu.setVoltage);
   sliderVset.setBroadcast(true);
   sliderIset.setBroadcast(false);
+  if (psu.maxCurrent > 0) sliderIset.setRange(0, psu.maxCurrent);
   sliderIset.setValue(psu.setCurrent);
   sliderIset.setBroadcast(true);
   setStatus("Set: " + nf(psu.setVoltage, 0, 3) + "V / " + nf(psu.setCurrent, 0, 3) + "A");
