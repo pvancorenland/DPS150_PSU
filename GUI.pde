@@ -1,77 +1,117 @@
-// GUI.pde — Full layout matching official Fnirsi software style
-// Left: Gauges + graph | Right: Controls + presets + info
+/**
+ * @file GUI.pde
+ * @brief Full GUI layout matching the official Fnirsi PC software style.
+ *
+ * Left side: circular gauges, digital readouts, scrolling graph.
+ * Right side: output toggle, set-point controls, presets, device info,
+ * protection settings, brightness slider, and logging controls.
+ *
+ * All protocol state is accessed through the global @c psu instance.
+ */
 
 // ============================================================
 // GUI WIDGETS
 // ============================================================
 
-// --- Connection bar ---
+/// @name Connection Bar Widgets
+/// @{
 String[] availablePorts;
 int selectedPortIndex = 0;
 String selectedPortName = "";
 Button btnPortPrev, btnPortNext;
 Button btnConnect, btnDisconnect, btnRefreshPorts;
+/// @}
 
-// --- Gauges ---
+/// @name Gauge Widgets
+/// @{
 CircularGauge gaugeVoltage, gaugeCurrent;
+/// @}
 
-// --- Digital readouts ---
+/// @name Digital Readout Widgets
+/// @{
 DigitalReadout readoutPower, readoutSetV, readoutSetA;
+/// @}
 
-// --- Graph ---
+/// @name Graph Widgets
+/// @{
 ScrollingGraph graph;
 Button btnGraphV, btnGraphA, btnGraphW;
+/// @}
 
-// --- Output toggle ---
+/// @name Output Toggle
+/// @{
 ToggleButton btnOutput;
+/// @}
 
-// --- Mode badges ---
+/// @name Mode Badges
+/// @{
 StatusBadge badgeCV, badgeCC;
+/// @}
 
-// --- Set controls ---
+/// @name Set-Point Controls
+/// @{
 TextField tfSetVoltage, tfSetCurrent;
 Button btnApply;
 Button btnVoltUp, btnVoltDown, btnVoltUpFine, btnVoltDownFine;
 Button btnCurrUp, btnCurrDown, btnCurrUpFine, btnCurrDownFine;
+/// @}
 
-// --- Preset panel ---
+/// @name Preset Panel
+/// @{
 Panel panelPresets;
 Button[] btnPresetLoad = new Button[6];
 Button[] btnPresetSave = new Button[6];
+/// @}
 
-// --- Info panel ---
+/// @name Info Panel
+/// @{
 Panel panelInfo;
 Button btnRefreshAll;
+/// @}
 
-// --- Protection panel ---
+/// @name Protection Panel
+/// @{
 Panel panelProtection;
 TextField tfOVP, tfOCP, tfOPP, tfOTP;
 Button btnApplyProtection;
+/// @}
 
-// --- Brightness ---
+/// @name Brightness Controls
+/// @{
 Slider sliderBrightness;
 Button btnApplyBrightness;
+/// @}
 
-// --- Logging ---
+/// @name Logging Controls
+/// @{
 Button btnStartLog, btnStopLog;
+/// @}
 
-// --- Advanced window ---
+/// @name Advanced Window
+/// @{
 Button btnOpenAdvanced;
+/// @}
 
-// --- Status bar ---
-String statusMessage = "Ready";
-long statusTime = 0;
-long outputToggleTime = 0;  // suppress poll overriding outputOn right after toggle
+/// @name Status Bar
+/// @{
+String statusMessage = "Ready";         ///< Current status bar message
+long statusTime = 0;                    ///< millis() when status was last set
+long outputToggleTime = 0;              ///< Suppresses poll-override of outputOn after toggle
+/// @}
 
 // ============================================================
 // LAYOUT CONSTANTS
 // ============================================================
-static final int WIN_W = 1100;
-static final int WIN_H = 720;
-static final int TOP_BAR_H = 40;
-static final int LEFT_W = 620;
-static final int RIGHT_W = 470;
+static final int WIN_W = 1100;   ///< Window width
+static final int WIN_H = 720;    ///< Window height
+static final int TOP_BAR_H = 40; ///< Top connection bar height
+static final int LEFT_W = 620;   ///< Left panel width (gauges + graph)
+static final int RIGHT_W = 470;  ///< Right panel width (controls)
 
+/**
+ * Update the status bar message.
+ * @param msg Text to display
+ */
 void setStatus(String msg) {
   statusMessage = msg;
   statusTime = millis();
@@ -80,6 +120,8 @@ void setStatus(String msg) {
 // ============================================================
 // INIT
 // ============================================================
+
+/** Initialise all GUI widgets and perform initial port scan. */
 void initGUI() {
   // Scan ports
   refreshPorts();
@@ -125,9 +167,6 @@ void initGUI() {
   // Mode badges
   badgeCV = new StatusBadge(rx, 108, 50, 22, "CV", COL_VOLT);
   badgeCC = new StatusBadge(rx + 56, 108, 50, 22, "CC", COL_CURR);
-
-  // Protection status badge area (right of CV/CC)
-  // (drawn inline in drawGUI)
 
   // --- Set controls ---
   float setY = 145;
@@ -195,6 +234,7 @@ void initGUI() {
   initAdvanced();
 }
 
+/** Refresh the list of available serial ports and auto-select the DPS-150 if found. */
 void refreshPorts() {
   availablePorts = Serial.list();
   selectedPortIndex = 0;
@@ -214,6 +254,14 @@ void refreshPorts() {
 // ============================================================
 // DRAW
 // ============================================================
+
+/**
+ * Draw the entire GUI.
+ *
+ * When disconnected, shows a splash message with port selection.
+ * When connected, renders gauges, graph, set-point controls,
+ * presets, device info, protection settings, and the status bar.
+ */
 void drawGUI() {
   background(COL_BG);
 
@@ -221,7 +269,6 @@ void drawGUI() {
   fill(COL_PANEL);
   noStroke();
   rect(0, 0, WIN_W, TOP_BAR_H);
-  // Bottom edge line
   stroke(COL_BORDER);
   strokeWeight(1);
   line(0, TOP_BAR_H, WIN_W, TOP_BAR_H);
@@ -277,12 +324,10 @@ void drawGUI() {
   if (psu.connected) {
 
   // ---- LEFT SIDE: Gauges ----
-  // Subtle divider
   stroke(COL_BORDER);
   strokeWeight(1);
   line(LEFT_W + 5, TOP_BAR_H + 5, LEFT_W + 5, WIN_H - 5);
 
-  // Gauge background panels
   fill(COL_PANEL, 80);
   noStroke();
   rect(10, TOP_BAR_H + 8, LEFT_W - 15, 255, 6);
@@ -317,7 +362,7 @@ void drawGUI() {
   btnStartLog.draw();
   btnStopLog.draw();
 
-  // Logging status
+  // Logging status indicator
   if (psu.logging) {
     fill(COL_OFF);
     float blink = sin(millis() * 0.008) > 0 ? 255 : 100;
@@ -371,19 +416,16 @@ void drawGUI() {
     float ppx = panelPresets.contentX() + (i % 3) * 148;
     float ppy = panelPresets.contentY() + (i / 3) * 72;
 
-    // Preset card
     fill(COL_PANEL_LITE);
     stroke(COL_BORDER);
     strokeWeight(0.5);
     rect(ppx, ppy, 140, 65, 3);
 
-    // Preset number
     fill(COL_ACCENT);
     textAlign(LEFT, TOP);
     textSize(10);
     text("P" + (i+1), ppx + 5, ppy + 4);
 
-    // Values
     fill(COL_VOLT);
     textSize(13);
     text(nf(psu.presetV[i], 0, 2) + " V", ppx + 5, ppy + 20);
@@ -442,7 +484,6 @@ void drawGUI() {
   textSize(10);
   text(statusMessage, 8, WIN_H - 11);
 
-  // Right side of status bar
   fill(COL_TEXT_DIM);
   textAlign(RIGHT, CENTER);
   text("DPS-150 Control  |  " + nf(frameRate, 0, 0) + " fps", WIN_W - 10, WIN_H - 11);
@@ -455,11 +496,20 @@ void drawGUI() {
 // ============================================================
 // INPUT HANDLING
 // ============================================================
+
+/**
+ * Handle all mouse-click events for the main GUI.
+ *
+ * Dispatches to the Advanced overlay if it is open, otherwise
+ * processes clicks on the connection bar, output toggle,
+ * set-point controls, presets, protection settings, brightness,
+ * graph toggles, and logging buttons.
+ */
 void handleGUIClick() {
   // --- Advanced window (handles its own clicks when open) ---
   if (advancedOpen) {
     handleAdvancedClick();
-    return;  // block clicks to main GUI while advanced is open
+    return;
   }
 
   // --- Advanced button ---
@@ -524,15 +574,13 @@ void handleGUIClick() {
   if (btnApply.clicked() && psu.connected) {
     float v = constrain(tfSetVoltage.getFloat(), 0, psu.maxVoltage);
     float a = tfSetCurrent.getFloat();
-    // Don't send 0A — use existing setCurrent if field is empty
     if (a < 0.001 && tfSetCurrent.value.length() == 0) {
       a = psu.setCurrent;
     }
     a = constrain(a, 0, psu.maxCurrent);
     psu.sendSetVoltage(v);
-    delay(100);  // PSU needs time between commands
+    delay(100);
     psu.sendSetCurrent(a);
-    // Update local state immediately so displays reflect the change
     psu.setVoltage = v;
     psu.setCurrent = a;
     tfSetVoltage.setFloat(v);
@@ -608,10 +656,19 @@ void handleGUIClick() {
   }
 }
 
+/** Handle mouse-release events (slider drag release). */
 void handleGUIRelease() {
   sliderBrightness.dragging = false;
 }
 
+/**
+ * Handle keyboard input for set-point text fields and protection fields.
+ *
+ * Enter/Return in a set-point field triggers an Apply.
+ *
+ * @param k    The character typed
+ * @param kCode The key code
+ */
 void handleGUIKey(char k, int kCode) {
   // Advanced window gets keys first
   if (advancedOpen) {
@@ -634,7 +691,7 @@ void handleGUIKey(char k, int kCode) {
       if (a < 0.001 && tfSetCurrent.value.length() == 0) a = psu.setCurrent;
       a = constrain(a, 0, psu.maxCurrent);
       psu.sendSetVoltage(v);
-      delay(100);  // PSU needs time between commands
+      delay(100);
       psu.sendSetCurrent(a);
       psu.setVoltage = v;
       psu.setCurrent = a;
@@ -646,7 +703,12 @@ void handleGUIKey(char k, int kCode) {
   }
 }
 
-// Called when setpoints are received from PSU (after connect or ALL dump)
+/**
+ * Callback invoked when set-point values are received from the PSU.
+ *
+ * Populates the voltage/current text fields and protection limit fields
+ * with the values reported by the hardware.
+ */
 void onSetpointsReceived() {
   tfSetVoltage.setFloat(psu.setVoltage);
   tfSetCurrent.setFloat(psu.setCurrent);
@@ -658,6 +720,11 @@ void onSetpointsReceived() {
   setStatus("Set: " + nf(psu.setVoltage, 0, 3) + "V / " + nf(psu.setCurrent, 0, 3) + "A");
 }
 
+/**
+ * Adjust a numeric text field by a delta, clamped to its min/max range.
+ * @param tf    Target text field
+ * @param delta Amount to add (positive or negative)
+ */
 void adjustField(TextField tf, float delta) {
   float val = constrain(tf.getFloat() + delta, tf.minVal, tf.maxVal);
   tf.setFloat(val);
@@ -666,8 +733,12 @@ void adjustField(TextField tf, float delta) {
 // ============================================================
 // MOUSE WHEEL for graph zoom
 // ============================================================
+
+/**
+ * Zoom the graph voltage and current scales with the mouse wheel.
+ * @param e Scroll amount (positive = zoom out, negative = zoom in)
+ */
 void handleMouseWheel(float e) {
-  // Zoom voltage scale with mouse wheel when over graph
   if (mouseX >= graph.x && mouseX <= graph.x + graph.w &&
       mouseY >= graph.y && mouseY <= graph.y + graph.h) {
     if (e > 0) {

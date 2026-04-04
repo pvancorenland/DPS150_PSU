@@ -1,48 +1,85 @@
-// Widgets.pde — Enhanced GUI widgets with circular gauges, graphs, and lab instrument styling
+/**
+ * @file Widgets.pde
+ * @brief Reusable GUI widgets with circular gauges, graphs, and lab instrument styling.
+ *
+ * Provides the visual building blocks for the DPS-150 control interface:
+ * - CircularGauge — analog-style meter with needle and arc
+ * - ScrollingGraph — real-time V/A/W strip chart
+ * - Panel — titled container with header bar
+ * - Button — click-able button with hover state
+ * - ToggleButton — large ON/OFF button with LED indicator
+ * - TextField — numeric input field with cursor
+ * - Slider — draggable slider with value display
+ * - StatusBadge — small mode indicator (CV/CC)
+ * - DigitalReadout — seven-segment style numeric display
+ */
 
 // ============================================================
 // COLOR PALETTE — professional instrument look
 // ============================================================
-static final color COL_BG           = #1C1C28;
-static final color COL_PANEL        = #232336;
-static final color COL_PANEL_HEADER = #2A2A44;
-static final color COL_PANEL_LITE   = #2E2E4A;
-static final color COL_BORDER       = #3A3A5C;
-static final color COL_ACCENT       = #4A90D9;
-static final color COL_ACCENT_LITE  = #6BB0FF;
-static final color COL_TEXT         = #E0E0E8;
-static final color COL_TEXT_DIM     = #888899;
-static final color COL_DIM          = #555566;
-static final color COL_VOLT         = #FFD54F;  // warm amber
-static final color COL_VOLT_DIM     = #664D00;
-static final color COL_CURR         = #4DD0E1;  // teal cyan
-static final color COL_CURR_DIM     = #005662;
-static final color COL_POWER        = #81C784;  // soft green
-static final color COL_POWER_DIM    = #1B5E20;
-static final color COL_ON           = #00E676;
-static final color COL_OFF          = #FF5252;
-static final color COL_WARN         = #FF9800;
-static final color COL_BTN          = #2E3B55;
-static final color COL_BTN_HOVER    = #3D5070;
-static final color COL_BTN_ACTIVE   = #4A6590;
-static final color COL_INPUT_BG     = #171722;
-static final color COL_INPUT_BORDER = #3A3A5C;
-static final color COL_GRAPH_BG     = #14141E;
-static final color COL_GRID         = #252538;
+
+/** @name Color Constants
+ *  Dark-theme palette designed for extended lab use.
+ *  @{ */
+static final color COL_BG           = #1C1C28;  ///< Window background
+static final color COL_PANEL        = #232336;  ///< Panel body
+static final color COL_PANEL_HEADER = #2A2A44;  ///< Panel header bar
+static final color COL_PANEL_LITE   = #2E2E4A;  ///< Lighter panel variant
+static final color COL_BORDER       = #3A3A5C;  ///< Border / separator
+static final color COL_ACCENT       = #4A90D9;  ///< Primary accent (blue)
+static final color COL_ACCENT_LITE  = #6BB0FF;  ///< Light accent
+static final color COL_TEXT         = #E0E0E8;  ///< Primary text
+static final color COL_TEXT_DIM     = #888899;  ///< Secondary / label text
+static final color COL_DIM          = #555566;  ///< Dim elements
+static final color COL_VOLT         = #FFD54F;  ///< Voltage color (warm amber)
+static final color COL_VOLT_DIM     = #664D00;  ///< Voltage dim
+static final color COL_CURR         = #4DD0E1;  ///< Current color (teal cyan)
+static final color COL_CURR_DIM     = #005662;  ///< Current dim
+static final color COL_POWER        = #81C784;  ///< Power color (soft green)
+static final color COL_POWER_DIM    = #1B5E20;  ///< Power dim
+static final color COL_ON           = #00E676;  ///< Output-ON indicator
+static final color COL_OFF          = #FF5252;  ///< Output-OFF / alarm
+static final color COL_WARN         = #FF9800;  ///< Warning indicator
+static final color COL_BTN          = #2E3B55;  ///< Button normal
+static final color COL_BTN_HOVER    = #3D5070;  ///< Button hover
+static final color COL_BTN_ACTIVE   = #4A6590;  ///< Button active / pressed
+static final color COL_INPUT_BG     = #171722;  ///< Text field background
+static final color COL_INPUT_BORDER = #3A3A5C;  ///< Text field border
+static final color COL_GRAPH_BG     = #14141E;  ///< Graph background
+static final color COL_GRID         = #252538;  ///< Graph grid lines
+/** @} */
 
 // ============================================================
-// CIRCULAR GAUGE — analog meter style
+/**
+ * @class CircularGauge
+ * @brief Analog-style circular gauge with needle, arc, ticks, and digital readout.
+ *
+ * Draws a 270° arc gauge centered at (cx, cy) with configurable range,
+ * colors, and tick marks.  The current value is shown both as a needle
+ * deflection and a centered digital number.
+ */
 // ============================================================
 class CircularGauge {
-  float cx, cy, radius;
-  float minVal, maxVal;
-  float value = 0;
-  String label, unit;
-  color gaugeColor, gaugeDim;
-  int majorTicks, minorTicks;
-  float startAngle = PI * 0.75;   // 135 degrees (lower-left)
-  float sweepAngle = PI * 1.5;    // 270 degree sweep
+  float cx, cy, radius;       ///< Center coordinates and radius
+  float minVal, maxVal;        ///< Value range
+  float value = 0;             ///< Current display value
+  String label, unit;          ///< Label text and unit suffix
+  color gaugeColor, gaugeDim;  ///< Active and dim arc colors
+  int majorTicks, minorTicks;  ///< Tick subdivision counts
+  float startAngle = PI * 0.75;  ///< Arc start angle (135°, lower-left)
+  float sweepAngle = PI * 1.5;   ///< Arc sweep (270°)
 
+  /**
+   * @param cx         Center X
+   * @param cy         Center Y
+   * @param radius     Gauge radius in pixels
+   * @param label      Bottom label text
+   * @param unit       Value unit suffix ("V", "A", etc.)
+   * @param minVal     Minimum scale value
+   * @param maxVal     Maximum scale value
+   * @param gaugeColor Active arc and needle color
+   * @param gaugeDim   Dim / background arc color
+   */
   CircularGauge(float cx, float cy, float radius, String label, String unit,
                 float minVal, float maxVal, color gaugeColor, color gaugeDim) {
     this.cx = cx;
@@ -58,6 +95,7 @@ class CircularGauge {
     this.minorTicks = 5;
   }
 
+  /** Draw the gauge at its configured position. */
   void draw() {
     pushMatrix();
     translate(cx, cy);
@@ -85,7 +123,7 @@ class CircularGauge {
     strokeWeight(10);
     arc(0, 0, radius*1.7, radius*1.7, startAngle, valueAngle);
 
-    // Glow effect on the value arc
+    // Glow effect
     stroke(gaugeColor, 40);
     strokeWeight(18);
     arc(0, 0, radius*1.7, radius*1.7, startAngle, valueAngle);
@@ -134,11 +172,9 @@ class CircularGauge {
     float needleLen = radius * 0.72;
     float nx = cos(needleAngle) * needleLen;
     float ny = sin(needleAngle) * needleLen;
-    // Needle shadow
     stroke(0, 60);
     strokeWeight(3);
     line(2, 2, nx+2, ny+2);
-    // Needle body
     stroke(gaugeColor);
     strokeWeight(2.5);
     line(0, 0, nx, ny);
@@ -170,23 +206,37 @@ class CircularGauge {
 }
 
 // ============================================================
-// SCROLLING GRAPH — real-time V/A/W plot
+/**
+ * @class ScrollingGraph
+ * @brief Real-time scrolling strip chart for voltage, current, and power.
+ *
+ * Reads sample data from the global @c psu instance's history ring-buffers
+ * and plots up to three traces (V, A, W) with independent Y-axis scales.
+ * Supports mouse-wheel zoom.
+ */
 // ============================================================
 class ScrollingGraph {
-  float x, y, w, h;
-  String title;
-  boolean showVoltage = true;
-  boolean showCurrent = true;
-  boolean showPower = false;
-  float voltScale = 30.0;
-  float currScale = 5.0;
-  float powerScale = 150.0;
+  float x, y, w, h;              ///< Position and size
+  String title;                   ///< Title text shown in header bar
+  boolean showVoltage = true;     ///< Show voltage trace
+  boolean showCurrent = true;     ///< Show current trace
+  boolean showPower = false;      ///< Show power trace
+  float voltScale = 30.0;        ///< Voltage Y-axis maximum
+  float currScale = 5.0;         ///< Current Y-axis maximum
+  float powerScale = 150.0;      ///< Power Y-axis maximum
 
+  /**
+   * @param x X position
+   * @param y Y position
+   * @param w Width
+   * @param h Height
+   */
   ScrollingGraph(float x, float y, float w, float h) {
     this.x = x; this.y = y; this.w = w; this.h = h;
     this.title = "Waveform";
   }
 
+  /** Draw the graph and all enabled traces. */
   void draw() {
     // Background
     fill(COL_GRAPH_BG);
@@ -237,7 +287,7 @@ class ScrollingGraph {
       line(xx, gy, xx, gy + gh);
     }
 
-    // Y-axis labels (voltage scale on left)
+    // Y-axis labels
     fill(COL_TEXT_DIM);
     textSize(8);
     textAlign(RIGHT, CENTER);
@@ -310,55 +360,72 @@ class ScrollingGraph {
 }
 
 // ============================================================
-// PANEL — titled panel with header
+/**
+ * @class Panel
+ * @brief Titled panel container with a header bar.
+ */
 // ============================================================
 class Panel {
-  float x, y, w, h;
-  String title;
+  float x, y, w, h;   ///< Position and size
+  String title;        ///< Header title text
 
+  /**
+   * @param x     X position
+   * @param y     Y position
+   * @param w     Width
+   * @param h     Height
+   * @param title Header text
+   */
   Panel(float x, float y, float w, float h, String title) {
     this.x = x; this.y = y; this.w = w; this.h = h;
     this.title = title;
   }
 
+  /** Draw the panel with shadow, body, header bar, and title. */
   void draw() {
-    // Shadow
     fill(0, 30);
     noStroke();
     rect(x+2, y+2, w, h, 5);
-    // Body
     fill(COL_PANEL);
     stroke(COL_BORDER);
     strokeWeight(1);
     rect(x, y, w, h, 5);
-    // Header
     fill(COL_PANEL_HEADER);
     noStroke();
     rect(x+1, y+1, w-2, 24, 4, 4, 0, 0);
-    // Title
     fill(COL_TEXT);
     textAlign(LEFT, CENTER);
     textSize(11);
     text(title, x + 10, y + 13);
   }
 
-  float contentX() { return x + 8; }
-  float contentY() { return y + 30; }
-  float contentW() { return w - 16; }
-  float contentH() { return h - 36; }
+  float contentX() { return x + 8; }   ///< Left edge of content area
+  float contentY() { return y + 30; }  ///< Top edge of content area
+  float contentW() { return w - 16; }  ///< Content area width
+  float contentH() { return h - 36; }  ///< Content area height
 }
 
 // ============================================================
-// BUTTON — enhanced with icon support
+/**
+ * @class Button
+ * @brief Clickable button with hover highlight and optional rounding.
+ */
 // ============================================================
 class Button {
-  float x, y, w, h;
-  String label;
-  color bgColor, hoverColor, textColor;
-  boolean hovered = false;
-  boolean enabled = true;
-  boolean rounded = false;
+  float x, y, w, h;                ///< Position and size
+  String label;                     ///< Button label text
+  color bgColor, hoverColor, textColor; ///< Color scheme
+  boolean hovered = false;          ///< True while mouse is over the button
+  boolean enabled = true;           ///< Disabled buttons are grayed out and unclickable
+  boolean rounded = false;          ///< Use pill-shaped corners
 
+  /**
+   * @param x     X position
+   * @param y     Y position
+   * @param w     Width
+   * @param h     Height
+   * @param label Button text
+   */
   Button(float x, float y, float w, float h, String label) {
     this.x = x; this.y = y; this.w = w; this.h = h;
     this.label = label;
@@ -367,125 +434,139 @@ class Button {
     this.textColor = COL_TEXT;
   }
 
+  /** Draw the button with shadow, body, highlight, and label. */
   void draw() {
     hovered = enabled && mouseX >= x && mouseX <= x+w && mouseY >= y && mouseY <= y+h;
-    // Shadow
     fill(0, 25);
     noStroke();
     rect(x+1, y+1, w, h, rounded ? h/2 : 4);
-    // Body
     fill(enabled ? (hovered ? hoverColor : bgColor) : #2A2A35);
     stroke(enabled ? COL_BORDER : #333340);
     strokeWeight(1);
     rect(x, y, w, h, rounded ? h/2 : 4);
-    // Highlight edge
     if (enabled && hovered) {
       stroke(COL_ACCENT_LITE, 40);
       line(x+2, y+1, x+w-2, y+1);
     }
-    // Label
     fill(enabled ? textColor : #555560);
     textAlign(CENTER, CENTER);
     textSize(constrain(h * 0.42, 9, 14));
     text(label, x + w/2, y + h/2);
   }
 
+  /** @return True if the button is enabled and the mouse is over it. */
   boolean clicked() {
     return enabled && mouseX >= x && mouseX <= x+w && mouseY >= y && mouseY <= y+h;
   }
 }
 
 // ============================================================
-// TOGGLE BUTTON — large ON/OFF with LED indicator
+/**
+ * @class ToggleButton
+ * @brief Large ON/OFF toggle button with LED glow indicator.
+ *
+ * Used for the main output enable/disable control.
+ */
 // ============================================================
 class ToggleButton {
-  float x, y, w, h;
-  boolean state = false;
-  boolean hovered = false;
+  float x, y, w, h;       ///< Position and size
+  boolean state = false;   ///< Current ON/OFF state
+  boolean hovered = false; ///< Mouse hover state
 
+  /**
+   * @param x X position
+   * @param y Y position
+   * @param w Width
+   * @param h Height
+   */
   ToggleButton(float x, float y, float w, float h) {
     this.x = x; this.y = y; this.w = w; this.h = h;
   }
 
+  /** Draw the toggle button with LED indicator and label. */
   void draw() {
     hovered = mouseX >= x && mouseX <= x+w && mouseY >= y && mouseY <= y+h;
 
-    // Outer glow when ON
     if (state) {
       fill(COL_ON, 15);
       noStroke();
       rect(x-4, y-4, w+8, h+8, 12);
     }
 
-    // Button body
     fill(state ? #1B4332 : #3E1A1A);
     stroke(state ? COL_ON : COL_OFF);
     strokeWeight(2);
     rect(x, y, w, h, 8);
 
-    // LED indicator
     float ledX = x + w/2;
     float ledY = y + 14;
     fill(state ? COL_ON : #441111);
     noStroke();
     ellipse(ledX, ledY, 10, 10);
-    // LED glow
     if (state) {
       fill(COL_ON, 40);
       ellipse(ledX, ledY, 20, 20);
     }
 
-    // Label
     fill(state ? COL_ON : COL_OFF);
     textAlign(CENTER, CENTER);
     textSize(18);
     text(state ? "OUTPUT ON" : "OUTPUT OFF", x + w/2, y + h/2 + 4);
   }
 
+  /** @return True if the mouse is over this button. */
   boolean clicked() {
     return mouseX >= x && mouseX <= x+w && mouseY >= y && mouseY <= y+h;
   }
 }
 
 // ============================================================
-// TEXT FIELD — enhanced editable input
+/**
+ * @class TextField
+ * @brief Numeric text input field with label, suffix, and blinking cursor.
+ */
 // ============================================================
 class TextField {
-  float x, y, w, h;
-  String value = "";
-  String label = "";
-  String suffix = "";
-  boolean focused = false;
-  boolean hovered = false;
-  float minVal = 0;
-  float maxVal = 100;
+  float x, y, w, h;        ///< Position and size
+  String value = "";        ///< Current text value
+  String label = "";        ///< Label displayed above the field
+  String suffix = "";       ///< Unit suffix displayed after the value
+  boolean focused = false;  ///< True when the field has keyboard focus
+  boolean hovered = false;  ///< Mouse hover state
+  float minVal = 0;         ///< Minimum allowed float value
+  float maxVal = 100;       ///< Maximum allowed float value
 
+  /**
+   * @param x      X position
+   * @param y      Y position
+   * @param w      Width
+   * @param h      Height
+   * @param label  Label text
+   * @param suffix Unit suffix ("V", "A", etc.)
+   */
   TextField(float x, float y, float w, float h, String label, String suffix) {
     this.x = x; this.y = y; this.w = w; this.h = h;
     this.label = label;
     this.suffix = suffix;
   }
 
+  /** Draw the text field with label, input box, cursor, and value. */
   void draw() {
     hovered = mouseX >= x && mouseX <= x+w && mouseY >= y && mouseY <= y+h;
-    // Label
     fill(COL_TEXT_DIM);
     textAlign(LEFT, BOTTOM);
     textSize(10);
     text(label, x, y - 3);
-    // Input box
     fill(COL_INPUT_BG);
     stroke(focused ? COL_ACCENT : COL_INPUT_BORDER);
     strokeWeight(focused ? 1.5 : 1);
     rect(x, y, w, h, 3);
-    // Focused highlight
     if (focused) {
       noFill();
       stroke(COL_ACCENT, 30);
       strokeWeight(3);
       rect(x-1, y-1, w+2, h+2, 4);
     }
-    // Value
     fill(COL_TEXT);
     textAlign(LEFT, CENTER);
     textSize(14);
@@ -493,10 +574,17 @@ class TextField {
     text(display, x + 6, y + h/2);
   }
 
+  /** @return True if the mouse is over this field. */
   boolean clicked() {
     return mouseX >= x && mouseX <= x+w && mouseY >= y && mouseY <= y+h;
   }
 
+  /**
+   * Process a key press while this field is focused.
+   * Accepts digits and one decimal point.
+   * @param k     Character typed
+   * @param kCode Key code
+   */
   void handleKey(char k, int kCode) {
     if (!focused) return;
     if (k == BACKSPACE || k == DELETE) {
@@ -507,55 +595,69 @@ class TextField {
     }
   }
 
+  /** @return Parsed float value, or 0 on parse error. */
   float getFloat() {
     try { return Float.parseFloat(value); }
     catch (Exception e) { return 0; }
   }
 
+  /**
+   * Set the field text from a float value (3 decimal places).
+   * @param v Value to display
+   */
   void setFloat(float v) {
     value = nf(v, 0, 3);
   }
 }
 
 // ============================================================
-// SLIDER — enhanced with value display
+/**
+ * @class Slider
+ * @brief Horizontal slider with label, value readout, and draggable knob.
+ */
 // ============================================================
 class Slider {
-  float x, y, w, h;
-  float minVal = 0, maxVal = 20;
-  float value = 10;
-  String label = "";
-  boolean dragging = false;
-  boolean hovered = false;
+  float x, y, w, h;        ///< Position and size
+  float minVal = 0;         ///< Minimum value
+  float maxVal = 20;        ///< Maximum value
+  float value = 10;         ///< Current value
+  String label = "";        ///< Label text
+  boolean dragging = false; ///< True while the user is dragging the knob
+  boolean hovered = false;  ///< Mouse hover state
 
+  /**
+   * @param x      X position
+   * @param y      Y position
+   * @param w      Width
+   * @param h      Height
+   * @param label  Label text
+   * @param minVal Minimum value
+   * @param maxVal Maximum value
+   */
   Slider(float x, float y, float w, float h, String label, float minVal, float maxVal) {
     this.x = x; this.y = y; this.w = w; this.h = h;
     this.label = label;
     this.minVal = minVal; this.maxVal = maxVal;
   }
 
+  /** Draw the slider track, filled portion, knob, label, and value. */
   void draw() {
     float knobX = map(value, minVal, maxVal, x, x + w);
     hovered = mouseX >= x-5 && mouseX <= x+w+5 && mouseY >= y-10 && mouseY <= y+h+10;
-    // Label
     fill(COL_TEXT_DIM);
     textAlign(LEFT, BOTTOM);
     textSize(10);
     text(label, x, y - 6);
-    // Value
     fill(COL_TEXT);
     textAlign(RIGHT, BOTTOM);
     text(nf(value, 0, 0), x + w, y - 6);
-    // Track background
     fill(#1A1A25);
     stroke(COL_BORDER);
     strokeWeight(1);
     rect(x, y + h/2 - 4, w, 8, 4);
-    // Filled portion
     noStroke();
     fill(COL_ACCENT);
     rect(x+1, y + h/2 - 3, knobX - x, 6, 3);
-    // Knob
     fill(COL_TEXT);
     stroke(COL_ACCENT);
     strokeWeight(2);
@@ -567,28 +669,42 @@ class Slider {
     }
   }
 
+  /** @return True if the mouse is over the slider area. */
   boolean pressedOn() {
     return mouseX >= x-5 && mouseX <= x+w+5 && mouseY >= y-10 && mouseY <= y+h+10;
   }
 }
 
 // ============================================================
-// STATUS BADGE — mode indicator
+/**
+ * @class StatusBadge
+ * @brief Small mode indicator badge (e.g. "CV", "CC").
+ *
+ * When active, displays a glow effect and the active color.
+ */
 // ============================================================
 class StatusBadge {
-  float x, y, w, h;
-  String label;
-  color activeColor;
-  boolean active = false;
+  float x, y, w, h;       ///< Position and size
+  String label;            ///< Badge text
+  color activeColor;       ///< Color when active
+  boolean active = false;  ///< Active state
 
+  /**
+   * @param x           X position
+   * @param y           Y position
+   * @param w           Width
+   * @param h           Height
+   * @param label       Badge text
+   * @param activeColor Color when active
+   */
   StatusBadge(float x, float y, float w, float h, String label, color activeColor) {
     this.x = x; this.y = y; this.w = w; this.h = h;
     this.label = label;
     this.activeColor = activeColor;
   }
 
+  /** Draw the badge with optional glow. */
   void draw() {
-    // Glow
     if (active) {
       fill(activeColor, 20);
       noStroke();
@@ -606,47 +722,64 @@ class StatusBadge {
 }
 
 // ============================================================
-// SEVEN-SEGMENT STYLE DISPLAY
+/**
+ * @class DigitalReadout
+ * @brief Seven-segment style recessed numeric display.
+ *
+ * Displays a value with a unit suffix and a label, styled to
+ * resemble a backlit LCD panel on lab equipment.
+ */
 // ============================================================
 class DigitalReadout {
-  float x, y, w, h;
-  String value = "0.000";
-  String unit = "V";
-  String label = "";
-  color displayColor;
+  float x, y, w, h;        ///< Position and size
+  String value = "0.000";  ///< Display string
+  String unit = "V";       ///< Unit suffix
+  String label = "";       ///< Left-side label
+  color displayColor;      ///< Text and accent color
 
+  /**
+   * @param x X position
+   * @param y Y position
+   * @param w Width
+   * @param h Height
+   * @param unit  Unit suffix ("V", "A", "W")
+   * @param label Left label text
+   * @param c     Display color
+   */
   DigitalReadout(float x, float y, float w, float h, String unit, String label, color c) {
     this.x = x; this.y = y; this.w = w; this.h = h;
     this.unit = unit; this.label = label; this.displayColor = c;
   }
 
+  /** Draw the recessed display panel with label, value, and unit. */
   void draw() {
-    // Recessed display
     fill(#08080F);
     stroke(COL_BORDER, 80);
     strokeWeight(1);
     rect(x, y, w, h, 3);
-    // Inner shadow
     fill(#050510);
     noStroke();
     rect(x+2, y+2, w-4, h-4, 2);
-    // Label
     fill(displayColor, 120);
     textAlign(LEFT, CENTER);
     textSize(10);
     text(label, x + 6, y + h/2);
-    // Value
     fill(displayColor);
     textAlign(RIGHT, CENTER);
     textSize(h * 0.55);
     text(value, x + w - 30, y + h/2);
-    // Unit
     fill(displayColor, 160);
     textSize(h * 0.35);
     textAlign(LEFT, CENTER);
     text(unit, x + w - 26, y + h/2);
   }
 
+  /**
+   * Update the displayed value.
+   * @param v    Float value
+   * @param intD Integer digits
+   * @param decD Decimal digits
+   */
   void setValue(float v, int intD, int decD) {
     value = nf(v, intD, decD);
   }
