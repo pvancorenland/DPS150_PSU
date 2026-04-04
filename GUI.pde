@@ -132,7 +132,8 @@ void initGUI() {
   // --- Output toggle ---
   float rx = LEFT_W + 15;
   cOutput = (Toggle) cp5.addToggle("btnOutput").setPosition(rx, 50).setSize((int)(RIGHT_W - 30), 52)
-    .setMode(ControlP5.SWITCH).setValue(false).setGroup(grpConnected);
+    .setValue(false);
+  cOutput.hide(); // managed separately, not in grpConnected
   cOutput.setColorBackground(color(0x3E, 0x1A, 0x1A));
   cOutput.setColorForeground(color(0x00, 0xE6, 0x76));
   cOutput.setColorActive(color(0x1B, 0x43, 0x32));
@@ -279,26 +280,29 @@ void drawGUI() {
     text((availablePorts.length > 0) ? availablePorts[selectedPortIndex] : "(no ports found)", 381, 20);
   }
 
-  // Top bar visibility (cached refs — no string lookups)
+  // Top bar visibility — only update when connection state changes
   boolean conn = psu.connected;
-  cPortPrev.setVisible(!conn);
-  cPortNext.setVisible(!conn);
-  cConnToggle.setLock(!conn && availablePorts.length == 0);
   if (conn != prevConnState) {
     prevConnState = conn;
+    cPortPrev.setVisible(!conn);
+    cPortNext.setVisible(!conn);
+    cRefreshPorts.setVisible(!conn);
+    cOpenAdvanced.setVisible(conn);
     if (conn) {
       cConnToggle.setLabel("Disconnect");
       applyRedTheme(cConnToggle);
+      grpConnected.show();
+      cBrightness.show();
+      cOutput.show();
     } else {
       cConnToggle.setLabel("Connect");
       applyGreenTheme(cConnToggle);
+      grpConnected.hide();
+      cBrightness.hide();
+      cOutput.hide();
     }
   }
-  cRefreshPorts.setVisible(!conn);
-  cOpenAdvanced.setVisible(conn);
-
-  if (conn && !grpConnected.isVisible()) { grpConnected.show(); cBrightness.show(); }
-  else if (!conn && grpConnected.isVisible()) { grpConnected.hide(); cBrightness.hide(); }
+  cConnToggle.setLock(!conn && availablePorts.length == 0);
 
   if (!conn) {
     fill(COL_TEXT_DIM);
@@ -387,8 +391,8 @@ void drawConnectedGUI() {
   }
 
   // ---- RIGHT SIDE ----
-  // Sync output toggle (cached ref, no string lookup)
-  if (cOutput.getState() != psu.outputOn) {
+  // Sync output toggle — skip for 2s after user click to avoid fighting
+  if ((millis() - outputToggleTime) > 2000 && cOutput.getState() != psu.outputOn) {
     cOutput.setBroadcast(false);
     cOutput.setState(psu.outputOn);
     cOutput.setBroadcast(true);

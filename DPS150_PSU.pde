@@ -72,5 +72,6 @@ void mouseWheel(MouseEvent event) {
  */
 void controlEvent(ControlEvent e) {
   if (advancedOpen) return;
+  if (!e.isController()) return;
   handleCp5Event(e);
 }
