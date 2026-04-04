@@ -17,7 +17,9 @@
       "Bash(ls:*)",
       "Bash(/Users/pvc/Documents/Processing/DPS150_PSU/test_set_current:*)",
       "Bash(gcc:*)",
-      "Bash(gcc -o test_read_regs test_read_regs.c -Wall && ./test_read_regs /dev/cu.usbmodem14798A3C25651 2>&1)"
+      "Bash(gcc -o test_read_regs test_read_regs.c -Wall && ./test_read_regs /dev/cu.usbmodem14798A3C25651 2>&1)",
+      "Bash(gcc -o test_live_stream test_live_stream.c -Wall && ./test_live_stream /dev/cu.usbmodem14798A3C25651 2>&1)",
+      "Bash(./test_live_stream:*)"
     ]
   }
 }

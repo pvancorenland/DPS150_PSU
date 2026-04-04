@@ -387,13 +387,11 @@ void drawGUI() {
   fill(COL_TEXT_DIM);
   textAlign(LEFT, TOP);
   textSize(10);
-  text("Temperature:", ix, iy);
-  fill(COL_TEXT); text(nf(temperature, 0, 1) + " C", ix + 75, iy);
+  text("Input V:", ix, iy);
+  fill(COL_TEXT); text(nf(inputVoltage, 0, 2) + " V", ix + 75, iy);
   iy += 16;
-  fill(COL_TEXT_DIM); text("Capacity:", ix, iy);
-  fill(COL_TEXT); text(nf(capacityAh, 0, 3) + " Ah", ix + 75, iy);
-  iy += 14;
-  fill(COL_TEXT); text(nf(capacityWh, 0, 3) + " Wh", ix + 75, iy);
+  fill(COL_TEXT_DIM); text("Temperature:", ix, iy);
+  fill(COL_TEXT); text(nf(temperature, 0, 1) + " C", ix + 75, iy);
   iy += 16;
   fill(COL_TEXT_DIM); text("Max Voltage:", ix, iy);
   fill(COL_TEXT); text(nf(maxVoltage, 0, 1) + " V", ix + 75, iy);
@@ -401,8 +399,8 @@ void drawGUI() {
   fill(COL_TEXT_DIM); text("Max Current:", ix, iy);
   fill(COL_TEXT); text(nf(maxCurrent, 0, 1) + " A", ix + 75, iy);
   iy += 14;
-  fill(COL_TEXT_DIM); text("Firmware:", ix, iy);
-  fill(COL_TEXT); text(firmwareVersion.length() > 0 ? firmwareVersion : "--", ix + 75, iy);
+  fill(COL_TEXT_DIM); text("Device:", ix, iy);
+  fill(COL_TEXT); text(deviceId.length() > 0 ? deviceId : "--", ix + 75, iy);
   iy += 14;
   fill(COL_TEXT_DIM); text("Mode:", ix, iy);
   fill(outputMode == MODE_CV ? COL_VOLT : COL_CURR);

@@ -72,8 +72,10 @@ int   outputMode  = 0;
 boolean outputOn  = false;
 float setVoltage  = 0;
 float setCurrent  = 0;
+float inputVoltage = 0;
 float maxVoltage  = 30.0;
 float maxCurrent  = 5.0;
+String deviceId   = "";
 int   brightness  = 10;
 String firmwareVersion = "";
 
@@ -237,10 +239,6 @@ void sendReadRegister(int register_) {
   sendPacket(CMD_READ, register_, data);
 }
 
-// NOTE: DPS-150 does NOT support reading individual registers.
-// ALL read requests return the same live values frame (F0 A1 C3 0C + 3 floats).
-// Set values, temperature, protection limits, presets, etc. must be tracked locally.
-
 void sendReadLive() {
   sendReadRegister(REG_LIVE_VALUES);
 }
@@ -306,17 +304,50 @@ void processSerialByte(int b) {
 }
 
 // --- Process a validated response packet ---
-// DPS-150 always responds with reg=0xC3, dataLen=12 (live V/A/W)
-// regardless of which register was requested.
+// DPS-150 continuously streams these packets (no read requests needed):
+//   0xC3 (12 bytes): live V, A, W
+//   0xC0 (4 bytes):  input voltage
+//   0xE2 (4 bytes):  max voltage (derived from input)
+//   0xE3 (4 bytes):  max current
+//   0xC4 (4 bytes):  temperature
+//   0xDE (7 bytes):  device ID string ("DPS-150")
 void processResponsePacket(int[] buf, int len) {
   int reg = buf[2];
   int dataLen = buf[3];
 
   if (reg == REG_LIVE_VALUES && dataLen >= 12) {
+    // Live output: V, A, W
     liveVoltage = leToFloat(buf[4], buf[5], buf[6], buf[7]);
     liveCurrent = leToFloat(buf[8], buf[9], buf[10], buf[11]);
     livePower   = leToFloat(buf[12], buf[13], buf[14], buf[15]);
     addHistorySample();
+  }
+  else if (reg == REG_SET_VOLTAGE && dataLen >= 4) {
+    // 0xC0 = input voltage (not set voltage!)
+    inputVoltage = leToFloat(buf[4], buf[5], buf[6], buf[7]);
+  }
+  else if (reg == REG_MAX_VOLT && dataLen >= 4) {
+    // 0xE2 = max voltage (derived from input voltage)
+    maxVoltage = leToFloat(buf[4], buf[5], buf[6], buf[7]);
+  }
+  else if (reg == REG_MAX_CURR && dataLen >= 4) {
+    // 0xE3 = max current
+    maxCurrent = leToFloat(buf[4], buf[5], buf[6], buf[7]);
+  }
+  else if (reg == REG_TEMPERATURE && dataLen >= 4) {
+    // 0xC4 = temperature in °C
+    temperature = leToFloat(buf[4], buf[5], buf[6], buf[7]);
+  }
+  else if (reg == REG_SET_CURRENT && dataLen >= 4) {
+    // 0xDE with 7 bytes = device ID string, not a float
+    // (handled below)
+  }
+
+  // 0xDE with 7 bytes = device ID "DPS-150"
+  if (reg == REG_SET_CURRENT && dataLen == 7) {
+    StringBuilder sb = new StringBuilder();
+    for (int i = 0; i < dataLen; i++) sb.append((char)buf[4+i]);
+    deviceId = sb.toString();
   }
 }
 
@@ -360,12 +391,14 @@ void disconnectFromPSU() {
 }
 
 // --- Polling ---
+// DPS-150 streams data continuously after connect — no polling needed.
+// We just send a periodic read request as a keepalive.
 void pollPSU() {
   if (!connected || serialPort == null) return;
   long now = millis();
   if (now - lastPollTime >= pollInterval) {
     lastPollTime = now;
-    sendReadLive();  // Only live V/A/W is readable on DPS-150
+    sendReadLive();
   }
 }
 
