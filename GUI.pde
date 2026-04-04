@@ -551,6 +551,7 @@ void handleCp5Event(ControlEvent e) {
   else if (name.equals("btnConnToggle")) {
     if (psu.connected) {
       psu.disconnectFromPSU();
+      setpointsPopulated = false;
       setStatus("Disconnected.");
     } else if (availablePorts.length > 0) {
       setStatus("Connecting to " + availablePorts[selectedPortIndex] + "...");
@@ -613,6 +614,7 @@ void handleCp5Event(ControlEvent e) {
   else if (name.equals("btnRefreshAll")) {
     if (psu.connected) {
       psu.gotFirstSetpoint = false;
+      setpointsPopulated = false;
       psu.sendReadRegister(REG_ALL);
       setStatus("Refreshing all parameters...");
     }
@@ -706,13 +708,20 @@ void applyProtection() {
   setStatus("Protection limits applied.");
 }
 
+boolean setpointsPopulated = false;
+
 void onSetpointsReceived() {
-  cTfSetV.setText(nf(psu.setVoltage, 0, 3));
-  cTfSetA.setText(nf(psu.setCurrent, 0, 3));
-  cTfOVP.setText(nf(psu.ovpLimit, 0, 3));
-  cTfOCP.setText(nf(psu.ocpLimit, 0, 3));
-  cTfOPP.setText(nf(psu.oppLimit, 0, 3));
-  cTfOTP.setText(nf(psu.otpLimit, 0, 3));
+  // Only populate textfields on first receive or explicit refresh —
+  // otherwise the user can't type without values being overwritten.
+  if (!setpointsPopulated) {
+    setpointsPopulated = true;
+    cTfSetV.setText(nf(psu.setVoltage, 0, 3));
+    cTfSetA.setText(nf(psu.setCurrent, 0, 3));
+    cTfOVP.setText(nf(psu.ovpLimit, 0, 3));
+    cTfOCP.setText(nf(psu.ocpLimit, 0, 3));
+    cTfOPP.setText(nf(psu.oppLimit, 0, 3));
+    cTfOTP.setText(nf(psu.otpLimit, 0, 3));
+  }
   cBrightness.setBroadcast(false);
   cBrightness.setValue(psu.brightness);
   cBrightness.setBroadcast(true);
