@@ -219,11 +219,11 @@ void drawAdvanced() {
   }
 
   // Control buttons
-  btnAdvStart.enabled = (advState == ADV_IDLE) && connected;
+  btnAdvStart.enabled = (advState == ADV_IDLE) && psu.connected;
   btnAdvPause.enabled = (advState == ADV_RUNNING);
   btnAdvContinue.enabled = (advState == ADV_PAUSED);
   btnAdvStop.enabled = (advState != ADV_IDLE);
-  btnAdvSingleStep.enabled = (advState == ADV_IDLE || advState == ADV_PAUSED) && connected && advMode == 0;
+  btnAdvSingleStep.enabled = (advState == ADV_IDLE || advState == ADV_PAUSED) && psu.connected && advMode == 0;
   btnAdvClearTable.enabled = (advState == ADV_IDLE);
 
   btnAdvStart.draw();
@@ -519,7 +519,7 @@ void drawSweepPreview(float x, float y, float w, float h, float startVal, float 
 long advLastStepTime = 0;
 
 void updateAdvanced() {
-  if (advState != ADV_RUNNING || !connected) return;
+  if (advState != ADV_RUNNING || !psu.connected) return;
 
   long now = millis();
 
@@ -569,11 +569,11 @@ void updateSequentialOutput(long now) {
 void applySequentialStep(int step) {
   seqStatus[step] = 1; // Running
   seqStepStartTime = millis();
-  sendSetVoltage(seqVoltage[step]);
-  sendSetCurrent(seqCurrent[step]);
-  if (!outputOn) {
-    sendOutputOn();
-    outputOn = true;
+  psu.sendSetVoltage(seqVoltage[step]);
+  psu.sendSetCurrent(seqCurrent[step]);
+  if (!psu.outputOn) {
+    psu.sendOutputOn();
+    psu.outputOn = true;
   }
   setStatus("Seq step " + (step+1) + ": " + nf(seqVoltage[step],0,3) + "V / " + nf(seqCurrent[step],0,3) + "A");
 }
@@ -602,9 +602,9 @@ void updateVoltageSweep(long now) {
     advLastStepTime = now;
 
     // Apply current value
-    sendSetVoltage(vsCurrentValue);
-    sendSetCurrent(vsFixedCurrent);
-    if (!outputOn) { sendOutputOn(); outputOn = true; }
+    psu.sendSetVoltage(vsCurrentValue);
+    psu.sendSetCurrent(vsFixedCurrent);
+    if (!psu.outputOn) { psu.sendOutputOn(); psu.outputOn = true; }
     setStatus("V Sweep: " + nf(vsCurrentValue, 0, 3) + "V");
 
     // Advance
@@ -628,9 +628,9 @@ void updateCurrentSweep(long now) {
   if ((now - advLastStepTime) >= (long)(csDelay * 1000)) {
     advLastStepTime = now;
 
-    sendSetVoltage(csFixedVoltage);
-    sendSetCurrent(csCurrentValue);
-    if (!outputOn) { sendOutputOn(); outputOn = true; }
+    psu.sendSetVoltage(csFixedVoltage);
+    psu.sendSetCurrent(csCurrentValue);
+    if (!psu.outputOn) { psu.sendOutputOn(); psu.outputOn = true; }
     setStatus("I Sweep: " + nf(csCurrentValue, 0, 3) + "A");
 
     if (csStartCurrent <= csEndCurrent) {
@@ -653,7 +653,7 @@ void updateCurrentSweep(long now) {
 // START / PAUSE / CONTINUE / STOP
 // ============================================================
 void advStart() {
-  if (!connected) return;
+  if (!psu.connected) return;
   advState = ADV_RUNNING;
 
   switch (advMode) {

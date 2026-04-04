@@ -227,11 +227,11 @@ void drawGUI() {
   line(0, TOP_BAR_H, WIN_W, TOP_BAR_H);
 
   // Connection LED
-  float ledPulse = connected ? (sin(millis() * 0.005) * 0.3 + 0.7) : 0.3;
-  fill(connected ? color(COL_ON, (int)(255*ledPulse)) : #661111);
+  float ledPulse = psu.connected ? (sin(millis() * 0.005) * 0.3 + 0.7) : 0.3;
+  fill(psu.connected ? color(COL_ON, (int)(255*ledPulse)) : #661111);
   noStroke();
   ellipse(14, 20, 10, 10);
-  if (connected) {
+  if (psu.connected) {
     fill(COL_ON, 30);
     ellipse(14, 20, 20, 20);
   }
@@ -240,8 +240,8 @@ void drawGUI() {
   fill(COL_TEXT);
   textAlign(LEFT, CENTER);
   textSize(11);
-  if (connected) {
-    text("Connected: " + connectedPortName, 26, 20);
+  if (psu.connected) {
+    text("Connected: " + psu.connectedPortName, 26, 20);
   } else {
     text("Port:", 26, 20);
     fill(COL_INPUT_BG);
@@ -256,15 +256,15 @@ void drawGUI() {
     btnPortPrev.draw();
     btnPortNext.draw();
   }
-  btnConnect.enabled = !connected && availablePorts.length > 0;
-  btnDisconnect.enabled = connected;
+  btnConnect.enabled = !psu.connected && availablePorts.length > 0;
+  btnDisconnect.enabled = psu.connected;
   btnConnect.draw();
   btnDisconnect.draw();
-  if (!connected) btnRefreshPorts.draw();
-  if (connected) btnOpenAdvanced.draw();
+  if (!psu.connected) btnRefreshPorts.draw();
+  if (psu.connected) btnOpenAdvanced.draw();
 
   // ---- DISCONNECTED STATE ----
-  if (!connected) {
+  if (!psu.connected) {
     fill(COL_TEXT_DIM);
     textAlign(CENTER, CENTER);
     textSize(18);
@@ -274,7 +274,7 @@ void drawGUI() {
   }
 
   // ---- CONNECTED: full GUI ----
-  if (connected) {
+  if (psu.connected) {
 
   // ---- LEFT SIDE: Gauges ----
   // Subtle divider
@@ -287,15 +287,15 @@ void drawGUI() {
   noStroke();
   rect(10, TOP_BAR_H + 8, LEFT_W - 15, 255, 6);
 
-  gaugeVoltage.value = liveVoltage;
-  gaugeCurrent.value = liveCurrent;
+  gaugeVoltage.value = psu.liveVoltage;
+  gaugeCurrent.value = psu.liveCurrent;
   gaugeVoltage.draw();
   gaugeCurrent.draw();
 
   // Digital readouts
-  readoutPower.setValue(livePower, 3, 2);
-  readoutSetV.setValue(setVoltage, 2, 3);
-  readoutSetA.setValue(setCurrent, 1, 3);
+  readoutPower.setValue(psu.livePower, 3, 2);
+  readoutSetV.setValue(psu.setVoltage, 2, 3);
+  readoutSetA.setValue(psu.setCurrent, 1, 3);
   readoutPower.draw();
   readoutSetV.draw();
   readoutSetA.draw();
@@ -312,13 +312,13 @@ void drawGUI() {
   btnGraphW.draw();
 
   // Logging buttons
-  btnStartLog.enabled = !logging;
-  btnStopLog.enabled = logging;
+  btnStartLog.enabled = !psu.logging;
+  btnStopLog.enabled = psu.logging;
   btnStartLog.draw();
   btnStopLog.draw();
 
   // Logging status
-  if (logging) {
+  if (psu.logging) {
     fill(COL_OFF);
     float blink = sin(millis() * 0.008) > 0 ? 255 : 100;
     fill(color(255, 50, 50, (int)blink));
@@ -327,28 +327,28 @@ void drawGUI() {
     fill(COL_TEXT_DIM);
     textAlign(LEFT, CENTER);
     textSize(9);
-    text("REC " + logSampleCount + " samples", 542, 595);
+    text("REC " + psu.logSampleCount + " samples", 542, 595);
   }
 
   // ---- RIGHT SIDE ----
   float rx = LEFT_W + 15;
 
   // Output toggle
-  btnOutput.state = outputOn;
+  btnOutput.state = psu.outputOn;
   btnOutput.draw();
 
   // CV/CC badges
-  badgeCV.active = (outputMode == MODE_CV);
-  badgeCC.active = (outputMode == MODE_CC);
+  badgeCV.active = (psu.outputMode == MODE_CV);
+  badgeCC.active = (psu.outputMode == MODE_CC);
   badgeCV.draw();
   badgeCC.draw();
 
   // Protection status
-  if (protectionStatus != PROT_OK) {
+  if (psu.protectionStatus != PROT_OK) {
     fill(COL_OFF);
     textAlign(LEFT, CENTER);
     textSize(12);
-    text(protectionStatusText(), rx + 120, 119);
+    text(psu.protectionStatusText(), rx + 120, 119);
   } else {
     fill(COL_ON, 150);
     textAlign(LEFT, CENTER);
@@ -386,9 +386,9 @@ void drawGUI() {
     // Values
     fill(COL_VOLT);
     textSize(13);
-    text(nf(presetV[i], 0, 2) + " V", ppx + 5, ppy + 20);
+    text(nf(psu.presetV[i], 0, 2) + " V", ppx + 5, ppy + 20);
     fill(COL_CURR);
-    text(nf(presetA[i], 0, 2) + " A", ppx + 5, ppy + 40);
+    text(nf(psu.presetA[i], 0, 2) + " A", ppx + 5, ppy + 40);
 
     btnPresetLoad[i].draw();
     btnPresetSave[i].draw();
@@ -402,34 +402,34 @@ void drawGUI() {
   textAlign(LEFT, TOP);
   textSize(10);
   text("Input V:", ix, iy);
-  fill(COL_TEXT); text(nf(inputVoltage, 0, 2) + " V", ix + 75, iy);
+  fill(COL_TEXT); text(nf(psu.inputVoltage, 0, 2) + " V", ix + 75, iy);
   iy += 16;
   fill(COL_TEXT_DIM); text("Temperature:", ix, iy);
-  fill(COL_TEXT); text(nf(temperature, 0, 1) + " C", ix + 75, iy);
+  fill(COL_TEXT); text(nf(psu.temperature, 0, 1) + " C", ix + 75, iy);
   iy += 16;
   fill(COL_TEXT_DIM); text("Max Voltage:", ix, iy);
-  fill(COL_TEXT); text(nf(maxVoltage, 0, 1) + " V", ix + 75, iy);
+  fill(COL_TEXT); text(nf(psu.maxVoltage, 0, 1) + " V", ix + 75, iy);
   iy += 14;
   fill(COL_TEXT_DIM); text("Max Current:", ix, iy);
-  fill(COL_TEXT); text(nf(maxCurrent, 0, 1) + " A", ix + 75, iy);
+  fill(COL_TEXT); text(nf(psu.maxCurrent, 0, 1) + " A", ix + 75, iy);
   iy += 14;
   fill(COL_TEXT_DIM); text("Device:", ix, iy);
-  fill(COL_TEXT); text(deviceId.length() > 0 ? deviceId : "--", ix + 75, iy);
+  fill(COL_TEXT); text(psu.deviceId.length() > 0 ? psu.deviceId : "--", ix + 75, iy);
   iy += 14;
   fill(COL_TEXT_DIM); text("Mode:", ix, iy);
-  fill(outputMode == MODE_CV ? COL_VOLT : COL_CURR);
-  text(outputMode == MODE_CV ? "CV" : "CC", ix + 75, iy);
+  fill(psu.outputMode == MODE_CV ? COL_VOLT : COL_CURR);
+  text(psu.outputMode == MODE_CV ? "CV" : "CC", ix + 75, iy);
   btnRefreshAll.draw();
 
   // --- Protection panel ---
   panelProtection.draw();
   tfOVP.draw(); tfOCP.draw(); tfOPP.draw(); tfOTP.draw();
   btnApplyProtection.draw();
-  sliderBrightness.value = brightness;
+  sliderBrightness.value = psu.brightness;
   sliderBrightness.draw();
   btnApplyBrightness.draw();
 
-  } // end if (connected)
+  } // end if (psu.connected)
 
   // ---- STATUS BAR ----
   fill(COL_PANEL);
@@ -469,7 +469,7 @@ void handleGUIClick() {
   }
 
   // --- Top bar ---
-  if (!connected) {
+  if (!psu.connected) {
     if (btnPortPrev.clicked() && selectedPortIndex > 0) {
       selectedPortIndex--;
       selectedPortName = availablePorts[selectedPortIndex];
@@ -486,22 +486,22 @@ void handleGUIClick() {
 
   if (btnConnect.clicked() && availablePorts.length > 0) {
     setStatus("Connecting to " + availablePorts[selectedPortIndex] + "...");
-    if (connectToPort(availablePorts[selectedPortIndex])) {
-      setStatus("Connected to " + connectedPortName + " — Set V/A values and click Apply.");
+    if (psu.connectToPort(availablePorts[selectedPortIndex])) {
+      setStatus("Connected to " + psu.connectedPortName + " — Set V/A values and click Apply.");
     } else {
       setStatus("Connection failed!");
     }
   }
   if (btnDisconnect.clicked()) {
-    disconnectFromPSU();
+    psu.disconnectFromPSU();
     setStatus("Disconnected.");
   }
 
   // --- Output toggle ---
-  if (connected && btnOutput.clicked()) {
-    println("OUTPUT CLICK: outputOn=" + outputOn + " -> " + !outputOn);
-    if (outputOn) { sendOutputOff(); outputOn = false; setStatus("Output OFF"); }
-    else { sendOutputOn(); outputOn = true; setStatus("Output ON"); }
+  if (psu.connected && btnOutput.clicked()) {
+    println("OUTPUT CLICK: outputOn=" + psu.outputOn + " -> " + !psu.outputOn);
+    if (psu.outputOn) { psu.sendOutputOff(); psu.outputOn = false; setStatus("Output OFF"); }
+    else { psu.sendOutputOn(); psu.outputOn = true; setStatus("Output ON"); }
     outputToggleTime = millis();
   }
 
@@ -521,20 +521,20 @@ void handleGUIClick() {
   if (btnCurrDownFine.clicked()) adjustField(tfSetCurrent, -0.01);
 
   // --- Apply ---
-  if (btnApply.clicked() && connected) {
-    float v = constrain(tfSetVoltage.getFloat(), 0, maxVoltage);
+  if (btnApply.clicked() && psu.connected) {
+    float v = constrain(tfSetVoltage.getFloat(), 0, psu.maxVoltage);
     float a = tfSetCurrent.getFloat();
     // Don't send 0A — use existing setCurrent if field is empty
     if (a < 0.001 && tfSetCurrent.value.length() == 0) {
-      a = setCurrent;
+      a = psu.setCurrent;
     }
-    a = constrain(a, 0, maxCurrent);
-    sendSetVoltage(v);
+    a = constrain(a, 0, psu.maxCurrent);
+    psu.sendSetVoltage(v);
     delay(100);  // PSU needs time between commands
-    sendSetCurrent(a);
+    psu.sendSetCurrent(a);
     // Update local state immediately so displays reflect the change
-    setVoltage = v;
-    setCurrent = a;
+    psu.setVoltage = v;
+    psu.setCurrent = a;
     tfSetVoltage.setFloat(v);
     tfSetCurrent.setFloat(a);
     println("APPLY: V=" + nf(v,0,3) + " A=" + nf(a,0,3));
@@ -543,26 +543,26 @@ void handleGUIClick() {
 
   // --- Presets ---
   for (int i = 0; i < 6; i++) {
-    if (btnPresetLoad[i].clicked() && connected) {
-      sendLoadPreset(i);
-      tfSetVoltage.setFloat(presetV[i]);
-      tfSetCurrent.setFloat(presetA[i]);
+    if (btnPresetLoad[i].clicked() && psu.connected) {
+      psu.sendLoadPreset(i);
+      tfSetVoltage.setFloat(psu.presetV[i]);
+      tfSetCurrent.setFloat(psu.presetA[i]);
       setStatus("Loaded preset " + (i+1));
     }
-    if (btnPresetSave[i].clicked() && connected) {
+    if (btnPresetSave[i].clicked() && psu.connected) {
       float v = tfSetVoltage.getFloat();
       float a = tfSetCurrent.getFloat();
-      sendSavePreset(i, v, a);
-      presetV[i] = v;
-      presetA[i] = a;
+      psu.sendSavePreset(i, v, a);
+      psu.presetV[i] = v;
+      psu.presetA[i] = a;
       setStatus("Saved preset " + (i+1) + ": " + nf(v,0,2) + "V / " + nf(a,0,2) + "A");
     }
   }
 
   // --- Info refresh ---
-  if (btnRefreshAll.clicked() && connected) {
-    gotFirstSetpoint = false;
-    sendReadRegister(REG_ALL);
+  if (btnRefreshAll.clicked() && psu.connected) {
+    psu.gotFirstSetpoint = false;
+    psu.sendReadRegister(REG_ALL);
     setStatus("Refreshing all parameters...");
   }
 
@@ -576,20 +576,20 @@ void handleGUIClick() {
     tfSetCurrent.focused = false;
   }
 
-  if (btnApplyProtection.clicked() && connected) {
-    sendSetOVP(tfOVP.getFloat());
-    sendSetOCP(tfOCP.getFloat());
-    sendSetOPP(tfOPP.getFloat());
-    sendSetOTP(tfOTP.getFloat());
+  if (btnApplyProtection.clicked() && psu.connected) {
+    psu.sendSetOVP(tfOVP.getFloat());
+    psu.sendSetOCP(tfOCP.getFloat());
+    psu.sendSetOPP(tfOPP.getFloat());
+    psu.sendSetOTP(tfOTP.getFloat());
     setStatus("Protection limits applied.");
   }
 
   // --- Brightness ---
   if (sliderBrightness.pressedOn()) sliderBrightness.dragging = true;
-  if (btnApplyBrightness.clicked() && connected) {
-    brightness = (int) sliderBrightness.value;
-    sendSetBrightness(brightness);
-    setStatus("Brightness set to " + brightness);
+  if (btnApplyBrightness.clicked() && psu.connected) {
+    psu.brightness = (int) sliderBrightness.value;
+    psu.sendSetBrightness(psu.brightness);
+    setStatus("Brightness set to " + psu.brightness);
   }
 
   // --- Graph toggles ---
@@ -598,13 +598,13 @@ void handleGUIClick() {
   if (btnGraphW.clicked()) graph.showPower   = !graph.showPower;
 
   // --- Logging ---
-  if (btnStartLog.clicked() && connected && !logging) {
-    startLogging();
-    setStatus("Logging started: " + logFileName);
+  if (btnStartLog.clicked() && psu.connected && !psu.logging) {
+    psu.startLogging();
+    setStatus("Logging started: " + psu.logFileName);
   }
-  if (btnStopLog.clicked() && logging) {
-    stopLogging();
-    setStatus("Logging stopped. " + logSampleCount + " samples saved.");
+  if (btnStopLog.clicked() && psu.logging) {
+    psu.stopLogging();
+    setStatus("Logging stopped. " + psu.logSampleCount + " samples saved.");
   }
 }
 
@@ -628,16 +628,16 @@ void handleGUIKey(char k, int kCode) {
 
   // Enter to apply
   if (k == ENTER || k == RETURN) {
-    if ((tfSetVoltage.focused || tfSetCurrent.focused) && connected) {
-      float v = constrain(tfSetVoltage.getFloat(), 0, maxVoltage);
+    if ((tfSetVoltage.focused || tfSetCurrent.focused) && psu.connected) {
+      float v = constrain(tfSetVoltage.getFloat(), 0, psu.maxVoltage);
       float a = tfSetCurrent.getFloat();
-      if (a < 0.001 && tfSetCurrent.value.length() == 0) a = setCurrent;
-      a = constrain(a, 0, maxCurrent);
-      sendSetVoltage(v);
+      if (a < 0.001 && tfSetCurrent.value.length() == 0) a = psu.setCurrent;
+      a = constrain(a, 0, psu.maxCurrent);
+      psu.sendSetVoltage(v);
       delay(100);  // PSU needs time between commands
-      sendSetCurrent(a);
-      setVoltage = v;
-      setCurrent = a;
+      psu.sendSetCurrent(a);
+      psu.setVoltage = v;
+      psu.setCurrent = a;
       tfSetVoltage.setFloat(v);
       tfSetCurrent.setFloat(a);
       println("APPLY (Enter): V=" + nf(v,0,3) + " A=" + nf(a,0,3));
@@ -648,14 +648,14 @@ void handleGUIKey(char k, int kCode) {
 
 // Called when setpoints are received from PSU (after connect or ALL dump)
 void onSetpointsReceived() {
-  tfSetVoltage.setFloat(setVoltage);
-  tfSetCurrent.setFloat(setCurrent);
-  tfOVP.setFloat(ovpLimit);
-  tfOCP.setFloat(ocpLimit);
-  tfOPP.setFloat(oppLimit);
-  tfOTP.setFloat(otpLimit);
-  println("Setpoints received: V=" + nf(setVoltage, 0, 3) + " A=" + nf(setCurrent, 0, 3));
-  setStatus("Set: " + nf(setVoltage, 0, 3) + "V / " + nf(setCurrent, 0, 3) + "A");
+  tfSetVoltage.setFloat(psu.setVoltage);
+  tfSetCurrent.setFloat(psu.setCurrent);
+  tfOVP.setFloat(psu.ovpLimit);
+  tfOCP.setFloat(psu.ocpLimit);
+  tfOPP.setFloat(psu.oppLimit);
+  tfOTP.setFloat(psu.otpLimit);
+  println("Setpoints received: V=" + nf(psu.setVoltage, 0, 3) + " A=" + nf(psu.setCurrent, 0, 3));
+  setStatus("Set: " + nf(psu.setVoltage, 0, 3) + "V / " + nf(psu.setCurrent, 0, 3) + "A");
 }
 
 void adjustField(TextField tf, float delta) {

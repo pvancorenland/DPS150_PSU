@@ -5,19 +5,19 @@ void setup() {
   size(1100, 720);
   surface.setTitle("FNIRSI DPS-150 Power Supply Control");
   smooth(4);
-  initHistory();
+  psu.initHistory();
   initGUI();
 }
 
 void draw() {
   drawGUI();
-  pollPSU();
+  psu.pollPSU();
 }
 
 void serialEvent(Serial port) {
   while (port.available() > 0) {
     int b = port.read();
-    processSerialByte(b);
+    psu.processSerialByte(b);
   }
 }
 

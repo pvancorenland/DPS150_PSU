@@ -249,7 +249,7 @@ class ScrollingGraph {
 
     // X-axis time labels
     textAlign(CENTER, TOP);
-    float totalTimeSec = historyCount * pollInterval / 1000.0;
+    float totalTimeSec = psu.historyCount * psu.pollInterval / 1000.0;
     for (int i = 0; i <= 4; i++) {
       float xx = gx + gw * i / 4.0;
       float tLabel = -totalTimeSec + totalTimeSec * ((float)i / 4.0);
@@ -257,18 +257,18 @@ class ScrollingGraph {
     }
 
     // Plot data
-    if (historyCount > 1) {
+    if (psu.historyCount > 1) {
       noFill();
-      int start = (historyIndex - historyCount + GRAPH_HISTORY) % GRAPH_HISTORY;
+      int start = (psu.historyIndex - psu.historyCount + psu.GRAPH_HISTORY) % psu.GRAPH_HISTORY;
 
       if (showVoltage) {
         stroke(COL_VOLT);
         strokeWeight(1.5);
         beginShape();
-        for (int i = 0; i < historyCount; i++) {
-          int idx = (start + i) % GRAPH_HISTORY;
-          float px = gx + gw * ((float)i / (GRAPH_HISTORY - 1));
-          float py = gy + gh * (1.0 - historyV[idx] / voltScale);
+        for (int i = 0; i < psu.historyCount; i++) {
+          int idx = (start + i) % psu.GRAPH_HISTORY;
+          float px = gx + gw * ((float)i / (psu.GRAPH_HISTORY - 1));
+          float py = gy + gh * (1.0 - psu.historyV[idx] / voltScale);
           vertex(px, constrain(py, gy, gy+gh));
         }
         endShape();
@@ -278,10 +278,10 @@ class ScrollingGraph {
         stroke(COL_CURR);
         strokeWeight(1.5);
         beginShape();
-        for (int i = 0; i < historyCount; i++) {
-          int idx = (start + i) % GRAPH_HISTORY;
-          float px = gx + gw * ((float)i / (GRAPH_HISTORY - 1));
-          float py = gy + gh * (1.0 - historyA[idx] / currScale);
+        for (int i = 0; i < psu.historyCount; i++) {
+          int idx = (start + i) % psu.GRAPH_HISTORY;
+          float px = gx + gw * ((float)i / (psu.GRAPH_HISTORY - 1));
+          float py = gy + gh * (1.0 - psu.historyA[idx] / currScale);
           vertex(px, constrain(py, gy, gy+gh));
         }
         endShape();
@@ -291,10 +291,10 @@ class ScrollingGraph {
         stroke(COL_POWER);
         strokeWeight(1.0);
         beginShape();
-        for (int i = 0; i < historyCount; i++) {
-          int idx = (start + i) % GRAPH_HISTORY;
-          float px = gx + gw * ((float)i / (GRAPH_HISTORY - 1));
-          float py = gy + gh * (1.0 - historyW[idx] / powerScale);
+        for (int i = 0; i < psu.historyCount; i++) {
+          int idx = (start + i) % psu.GRAPH_HISTORY;
+          float px = gx + gw * ((float)i / (psu.GRAPH_HISTORY - 1));
+          float py = gy + gh * (1.0 - psu.historyW[idx] / powerScale);
           vertex(px, constrain(py, gy, gy+gh));
         }
         endShape();
