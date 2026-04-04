@@ -260,7 +260,20 @@ void drawGUI() {
   btnConnect.draw();
   btnDisconnect.draw();
   if (!connected) btnRefreshPorts.draw();
-  btnOpenAdvanced.draw();
+  if (connected) btnOpenAdvanced.draw();
+
+  // ---- DISCONNECTED STATE ----
+  if (!connected) {
+    fill(COL_TEXT_DIM);
+    textAlign(CENTER, CENTER);
+    textSize(18);
+    text("FNIRSI DPS-150 Power Supply Control", WIN_W / 2, WIN_H / 2 - 30);
+    textSize(12);
+    text("Select a serial port and click Connect", WIN_W / 2, WIN_H / 2 + 10);
+  }
+
+  // ---- CONNECTED: full GUI ----
+  if (connected) {
 
   // ---- LEFT SIDE: Gauges ----
   // Subtle divider
@@ -298,7 +311,7 @@ void drawGUI() {
   btnGraphW.draw();
 
   // Logging buttons
-  btnStartLog.enabled = !logging && connected;
+  btnStartLog.enabled = !logging;
   btnStopLog.enabled = logging;
   btnStartLog.draw();
   btnStopLog.draw();
@@ -414,6 +427,8 @@ void drawGUI() {
   sliderBrightness.value = brightness;
   sliderBrightness.draw();
   btnApplyBrightness.draw();
+
+  } // end if (connected)
 
   // ---- STATUS BAR ----
   fill(COL_PANEL);
