@@ -96,8 +96,7 @@ int rxExpectedLen = 0;
 long lastPollTime = 0;
 int pollInterval = 200;
 // (full reads now happen as part of the rotating poll cycle)
-boolean gotFirstFullRead = false;
-int fullReadFlags = 0;  // bitmask: 1=voltage, 2=current
+// (full register reads not supported on DPS-150 — all reads return live V/A/W)
 
 // --- Data logging ---
 boolean logging = false;
@@ -238,24 +237,9 @@ void sendReadRegister(int register_) {
   sendPacket(CMD_READ, register_, data);
 }
 
-void sendReadAll() {
-  fullReadFlags = 0;
-  // DPS-150 does NOT support the bulk REG_ALL (0xFF) read properly.
-  // It returns only 12 bytes instead of 109+. So we read individual registers.
-  sendReadRegister(REG_SET_VOLTAGE); // set voltage (0xC0)
-  sendReadRegister(REG_SET_CURRENT); // set current (0xDE)
-  sendReadRegister(REG_TEMPERATURE); // temperature (0xC4)
-  sendReadRegister(REG_OUTPUT);      // output on/off (0xDB)
-  sendReadRegister(REG_MODE);        // CV/CC mode (0xDD)
-  sendReadRegister(REG_PROTECTION);  // protection status (0xDC)
-  sendReadRegister(REG_OVP);         // protection limits
-  sendReadRegister(REG_OCP);
-  sendReadRegister(REG_OPP);
-  sendReadRegister(REG_OTP);
-  sendReadRegister(REG_BRIGHTNESS);  // brightness (0xD6)
-  sendReadRegister(REG_CAP_AH);     // capacity Ah
-  sendReadRegister(REG_CAP_WH);     // capacity Wh
-}
+// NOTE: DPS-150 does NOT support reading individual registers.
+// ALL read requests return the same live values frame (F0 A1 C3 0C + 3 floats).
+// Set values, temperature, protection limits, presets, etc. must be tracked locally.
 
 void sendReadLive() {
   sendReadRegister(REG_LIVE_VALUES);
@@ -322,8 +306,9 @@ void processSerialByte(int b) {
 }
 
 // --- Process a validated response packet ---
+// DPS-150 always responds with reg=0xC3, dataLen=12 (live V/A/W)
+// regardless of which register was requested.
 void processResponsePacket(int[] buf, int len) {
-  int cmd = buf[1];
   int reg = buf[2];
   int dataLen = buf[3];
 
@@ -332,68 +317,6 @@ void processResponsePacket(int[] buf, int len) {
     liveCurrent = leToFloat(buf[8], buf[9], buf[10], buf[11]);
     livePower   = leToFloat(buf[12], buf[13], buf[14], buf[15]);
     addHistorySample();
-  }
-  else if (reg == REG_TEMPERATURE && dataLen >= 4) {
-    temperature = leToFloat(buf[4], buf[5], buf[6], buf[7]);
-  }
-  else if (reg == REG_OUTPUT && dataLen >= 1) {
-    outputOn = (buf[4] == 1);
-  }
-  else if (reg == REG_MODE && dataLen >= 1) {
-    outputMode = buf[4];
-  }
-  else if (reg == REG_PROTECTION && dataLen >= 1) {
-    protectionStatus = buf[4];
-  }
-  else if (reg == REG_CAP_AH && dataLen >= 4) {
-    capacityAh = leToFloat(buf[4], buf[5], buf[6], buf[7]);
-  }
-  else if (reg == REG_CAP_WH && dataLen >= 4) {
-    capacityWh = leToFloat(buf[4], buf[5], buf[6], buf[7]);
-  }
-  else if (reg == REG_BRIGHTNESS && dataLen >= 1) {
-    brightness = buf[4];
-  }
-  else if (reg == REG_MAX_VOLT && dataLen >= 4) {
-    maxVoltage = leToFloat(buf[4], buf[5], buf[6], buf[7]);
-  }
-  else if (reg == REG_MAX_CURR && dataLen >= 4) {
-    maxCurrent = leToFloat(buf[4], buf[5], buf[6], buf[7]);
-  }
-  else if ((reg == REG_SET_VOLTAGE || reg == REG_WRITE_VOLT) && dataLen >= 4) {
-    setVoltage = leToFloat(buf[4], buf[5], buf[6], buf[7]);
-    fullReadFlags |= 1;
-    checkFullRead();
-  }
-  else if ((reg == REG_SET_CURRENT || reg == REG_WRITE_CURR) && dataLen >= 4) {
-    setCurrent = leToFloat(buf[4], buf[5], buf[6], buf[7]);
-    fullReadFlags |= 2;
-    checkFullRead();
-  }
-  else if (reg == REG_OVP && dataLen >= 4) {
-    ovpLimit = leToFloat(buf[4], buf[5], buf[6], buf[7]);
-  }
-  else if (reg == REG_OCP && dataLen >= 4) {
-    ocpLimit = leToFloat(buf[4], buf[5], buf[6], buf[7]);
-  }
-  else if (reg == REG_OPP && dataLen >= 4) {
-    oppLimit = leToFloat(buf[4], buf[5], buf[6], buf[7]);
-  }
-  else if (reg == REG_OTP && dataLen >= 4) {
-    otpLimit = leToFloat(buf[4], buf[5], buf[6], buf[7]);
-  }
-  // REG_ALL (0xFF) — DPS-150 returns only 12 bytes; just ignore it gracefully
-  else if (reg == REG_ALL) {
-    // Not supported properly on DPS-150, individual register reads are used instead
-  }
-
-  for (int i = 0; i < 6; i++) {
-    if (reg == REG_PRESET_V[i] && dataLen >= 4) {
-      presetV[i] = leToFloat(buf[4], buf[5], buf[6], buf[7]);
-    }
-    if (reg == REG_PRESET_A[i] && dataLen >= 4) {
-      presetA[i] = leToFloat(buf[4], buf[5], buf[6], buf[7]);
-    }
   }
 }
 
@@ -414,7 +337,6 @@ boolean connectToPort(String portName) {
     delay(100);
     sendConnect();
     delay(500);
-    sendReadAll();
     connected = true;
     return true;
   } catch (Exception e) {
@@ -435,55 +357,15 @@ void disconnectFromPSU() {
   }
   connected = false;
   connectedPortName = "";
-  gotFirstFullRead = false;
-  fullReadFlags = 0;
 }
 
 // --- Polling ---
-int pollCycle = 0;
-
 void pollPSU() {
   if (!connected || serialPort == null) return;
   long now = millis();
   if (now - lastPollTime >= pollInterval) {
     lastPollTime = now;
-    sendReadLive();
-
-    // Every 5th cycle (~1s), read a group of extra registers (rotating)
-    pollCycle++;
-    if (pollCycle % 5 == 0) {
-      int group = (pollCycle / 5) % 4;
-      switch (group) {
-        case 0:
-          sendReadRegister(REG_WRITE_VOLT);
-          sendReadRegister(REG_WRITE_CURR);
-          sendReadRegister(REG_OUTPUT);
-          break;
-        case 1:
-          sendReadRegister(REG_TEMPERATURE);
-          sendReadRegister(REG_MODE);
-          sendReadRegister(REG_PROTECTION);
-          break;
-        case 2:
-          sendReadRegister(REG_OVP);
-          sendReadRegister(REG_OCP);
-          sendReadRegister(REG_OPP);
-          sendReadRegister(REG_OTP);
-          break;
-        case 3:
-          sendReadRegister(REG_BRIGHTNESS);
-          sendReadRegister(REG_CAP_AH);
-          sendReadRegister(REG_CAP_WH);
-          break;
-      }
-    }
-  }
-}
-
-void checkFullRead() {
-  // Once we've received both set voltage and set current, trigger the callback
-  if ((fullReadFlags & 3) == 3) {
-    onFullReadReceived();
+    sendReadLive();  // Only live V/A/W is readable on DPS-150
   }
 }
 

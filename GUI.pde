@@ -473,8 +473,7 @@ void handleGUIClick() {
   if (btnConnect.clicked() && availablePorts.length > 0) {
     setStatus("Connecting to " + availablePorts[selectedPortIndex] + "...");
     if (connectToPort(availablePorts[selectedPortIndex])) {
-      setStatus("Connected to " + connectedPortName);
-      gotFirstFullRead = false;  // wait for async ReadAll response
+      setStatus("Connected to " + connectedPortName + " — Set V/A values and click Apply.");
     } else {
       setStatus("Connection failed!");
     }
@@ -528,10 +527,10 @@ void handleGUIClick() {
   // --- Presets ---
   for (int i = 0; i < 6; i++) {
     if (btnPresetLoad[i].clicked() && connected) {
-      sendLoadPreset(i);
+      // DPS-150 can't read presets — use locally stored values
       tfSetVoltage.setFloat(presetV[i]);
       tfSetCurrent.setFloat(presetA[i]);
-      setStatus("Loaded preset " + (i+1));
+      setStatus("Loaded preset " + (i+1) + ": " + nf(presetV[i],0,2) + "V / " + nf(presetA[i],0,2) + "A");
     }
     if (btnPresetSave[i].clicked() && connected) {
       float v = tfSetVoltage.getFloat();
@@ -543,10 +542,9 @@ void handleGUIClick() {
     }
   }
 
-  // --- Info refresh ---
+  // --- Info refresh (DPS-150 only supports live V/A/W reads) ---
   if (btnRefreshAll.clicked() && connected) {
-    sendReadAll();
-    setStatus("Refreshing all parameters...");
+    setStatus("Note: DPS-150 only supports live V/A/W readings.");
   }
 
   // --- Protection ---
@@ -628,20 +626,7 @@ void handleGUIKey(char k, int kCode) {
   }
 }
 
-// Called when set voltage + set current have been received from the PSU
-void onFullReadReceived() {
-  if (!gotFirstFullRead) {
-    gotFirstFullRead = true;
-    tfSetVoltage.setFloat(setVoltage);
-    tfSetCurrent.setFloat(setCurrent);
-    tfOVP.setFloat(ovpLimit);
-    tfOCP.setFloat(ocpLimit);
-    tfOPP.setFloat(oppLimit);
-    tfOTP.setFloat(otpLimit);
-    println("Initial read: V=" + nf(setVoltage,0,3) + " A=" + nf(setCurrent,0,3));
-    setStatus("Connected — Set: " + nf(setVoltage,0,3) + "V / " + nf(setCurrent,0,3) + "A");
-  }
-}
+// DPS-150 doesn't support reading back setpoints/config — values are tracked locally
 
 void adjustField(TextField tf, float delta) {
   float val = constrain(tf.getFloat() + delta, tf.minVal, tf.maxVal);
