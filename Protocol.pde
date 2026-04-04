@@ -98,7 +98,7 @@ int rxExpectedLen = 0;
 long lastPollTime = 0;
 int pollInterval = 200;
 // (full reads now happen as part of the rotating poll cycle)
-// (full register reads not supported on DPS-150 — all reads return live V/A/W)
+boolean gotFirstLive = false;
 
 // --- Data logging ---
 boolean logging = false;
@@ -317,9 +317,18 @@ void processResponsePacket(int[] buf, int len) {
 
   if (reg == REG_LIVE_VALUES && dataLen >= 12) {
     // Live output: V, A, W
+    // Note: first float is set/output voltage (matches PSU Vset even with output OFF)
+    // Second float is measured output current (0 with no load — NOT the Iset limit)
     liveVoltage = leToFloat(buf[4], buf[5], buf[6], buf[7]);
     liveCurrent = leToFloat(buf[8], buf[9], buf[10], buf[11]);
     livePower   = leToFloat(buf[12], buf[13], buf[14], buf[15]);
+
+    // On first live frame, sync setVoltage from the live reading
+    if (!gotFirstLive) {
+      gotFirstLive = true;
+      setVoltage = liveVoltage;
+      onFirstLiveReceived();
+    }
     addHistorySample();
   }
   else if (reg == REG_SET_VOLTAGE && dataLen >= 4) {
@@ -388,6 +397,7 @@ void disconnectFromPSU() {
   }
   connected = false;
   connectedPortName = "";
+  gotFirstLive = false;
 }
 
 // --- Polling ---

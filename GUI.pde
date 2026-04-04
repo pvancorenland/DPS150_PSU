@@ -624,7 +624,13 @@ void handleGUIKey(char k, int kCode) {
   }
 }
 
-// DPS-150 doesn't support reading back setpoints/config — values are tracked locally
+// Called on first live frame after connect — sync voltage text field
+void onFirstLiveReceived() {
+  tfSetVoltage.setFloat(setVoltage);
+  // setCurrent can't be read from DPS-150, so leave the text field as-is
+  // User must enter/confirm the current limit manually
+  println("First live: Vset=" + nf(setVoltage, 0, 3) + " (Iset unknown — set manually)");
+}
 
 void adjustField(TextField tf, float delta) {
   float val = constrain(tf.getFloat() + delta, tf.minVal, tf.maxVal);
