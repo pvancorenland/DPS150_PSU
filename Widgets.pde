@@ -794,3 +794,88 @@ class DigitalReadout extends Widget {
     value = nf(v, intD, decD);
   }
 }
+
+// ============================================================
+/**
+ * @class VerticalBar
+ * @brief Read-only vertical bar indicator with label and value readout.
+ *
+ * Displays a filled bar from bottom to top, proportional to value/maxVal.
+ * Used for showing PSU-derived limits like Vmax and Imax next to gauges.
+ */
+// ============================================================
+class VerticalBar extends Widget {
+  float minVal = 0;        ///< Minimum value
+  float maxVal = 30;       ///< Maximum value
+  float value = 0;         ///< Current value
+  String label = "";       ///< Label text (shown below bar)
+  String unit = "";        ///< Unit suffix
+  color barColor;          ///< Fill color
+
+  /**
+   * @param x        X position
+   * @param y        Y position (top of track)
+   * @param w        Width
+   * @param h        Height
+   * @param label    Label text
+   * @param unit     Unit suffix ("V", "A")
+   * @param minVal   Minimum value
+   * @param maxVal   Maximum value
+   * @param barColor Fill color
+   */
+  VerticalBar(float x, float y, float w, float h, String label, String unit,
+              float minVal, float maxVal, color barColor) {
+    super(x, y, w, h);
+    this.label = label;
+    this.unit = unit;
+    this.minVal = minVal;
+    this.maxVal = maxVal;
+    this.barColor = barColor;
+  }
+
+  void draw() {
+    float trackX = x + w/2 - 4;
+    float trackW = 8;
+    float trackY = y + 14;
+    float trackH = h - 38;
+
+    // Value at top
+    fill(barColor);
+    noStroke();
+    textAlign(CENTER, BOTTOM);
+    textSize(10);
+    text(nf(value, 0, 1) + unit, x + w/2, y + 12);
+
+    // Track background
+    fill(#1A1A25);
+    stroke(COL_BORDER);
+    strokeWeight(1);
+    rect(trackX, trackY, trackW, trackH, 4);
+
+    // Filled portion (bottom to top)
+    float fraction = constrain((value - minVal) / (maxVal - minVal), 0, 1);
+    float fillH = trackH * fraction;
+    noStroke();
+    fill(barColor, 180);
+    rect(trackX + 1, trackY + trackH - fillH, trackW - 2, fillH, 3);
+
+    // Glow
+    fill(barColor, 40);
+    rect(trackX - 2, trackY + trackH - fillH - 2, trackW + 4, fillH + 4, 4);
+
+    // Tick marks
+    stroke(COL_DIM, 120);
+    strokeWeight(0.5);
+    for (int i = 0; i <= 4; i++) {
+      float ty = trackY + trackH * (1.0 - (float)i / 4.0);
+      line(trackX - 3, ty, trackX, ty);
+    }
+
+    // Label at bottom
+    fill(COL_TEXT_DIM);
+    noStroke();
+    textAlign(CENTER, TOP);
+    textSize(8);
+    text(label, x + w/2, y + h - 20);
+  }
+}

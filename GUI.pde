@@ -24,12 +24,13 @@ Button btnConnect, btnDisconnect, btnRefreshPorts;
 
 /// @name Gauge Widgets
 /// @{
-CircularGauge gaugeVoltage, gaugeCurrent, gaugeSetV, gaugeSetI;
+CircularGauge gaugeVoltage, gaugeCurrent;
+VerticalBar barVmax, barImax;
 /// @}
 
 /// @name Digital Readout Widgets
 /// @{
-DigitalReadout readoutPower;
+DigitalReadout readoutPower, readoutSetV, readoutSetA;
 /// @}
 
 /// @name Graph Widgets
@@ -140,27 +141,28 @@ void initGUI() {
   gaugeCurrent = new CircularGauge(430, 175, 120, "OUTPUT CURRENT", "A", 0, 5, COL_CURR, COL_CURR_DIM);
   gaugeCurrent.majorTicks = 5;
 
-  // --- Set-point gauges (smaller, below main gauges) ---
-  gaugeSetV = new CircularGauge(155, 350, 50, "SET VOLTAGE", "V", 0, 30, COL_VOLT, COL_VOLT_DIM);
-  gaugeSetI = new CircularGauge(430, 350, 50, "SET CURRENT", "A", 0, 5, COL_CURR, COL_CURR_DIM);
-  gaugeSetI.majorTicks = 5;
+  // --- Vmax / Imax vertical bars (right of each gauge) ---
+  barVmax = new VerticalBar(278, 70, 24, 220, "Vmax", "V", 0, 30, COL_VOLT);
+  barImax = new VerticalBar(553, 70, 24, 220, "Imax", "A", 0, 5.1, COL_CURR);
 
-  // --- Digital readout (power, centered between set gauges) ---
-  readoutPower = new DigitalReadout(240, 338, 100, 28, "W", "POWER", COL_POWER);
+  // --- Digital readouts (below gauges) ---
+  readoutPower = new DigitalReadout(180, 305, 200, 32, "W", "POWER", COL_POWER);
+  readoutSetV  = new DigitalReadout(30, 305, 140, 32, "V", "SET", COL_VOLT);
+  readoutSetA  = new DigitalReadout(400, 305, 140, 32, "A", "SET", COL_CURR);
 
   // --- Graph ---
-  graph = new ScrollingGraph(15, 410, LEFT_W - 20, 200);
-  btnGraphV = new Button(20, 615, 55, 20, "Voltage");
+  graph = new ScrollingGraph(15, 350, LEFT_W - 20, 230);
+  btnGraphV = new Button(20, 585, 55, 20, "Voltage");
   btnGraphV.bgColor = COL_VOLT_DIM;
-  btnGraphA = new Button(80, 615, 55, 20, "Current");
+  btnGraphA = new Button(80, 585, 55, 20, "Current");
   btnGraphA.bgColor = COL_CURR_DIM;
-  btnGraphW = new Button(140, 615, 50, 20, "Power");
+  btnGraphW = new Button(140, 585, 50, 20, "Power");
   btnGraphW.bgColor = COL_POWER_DIM;
 
   // Logging buttons
-  btnStartLog = new Button(350, 615, 80, 20, "Start Log");
+  btnStartLog = new Button(350, 585, 80, 20, "Start Log");
   btnStartLog.bgColor = #1B5E20;
-  btnStopLog  = new Button(440, 615, 75, 20, "Stop Log");
+  btnStopLog  = new Button(440, 585, 75, 20, "Stop Log");
   btnStopLog.bgColor = #7F1D1D;
 
   // --- Right side: Output toggle ---
@@ -333,22 +335,26 @@ void drawGUI() {
 
   fill(COL_PANEL, 80);
   noStroke();
-  rect(10, TOP_BAR_H + 8, LEFT_W - 15, 355, 6);
+  rect(10, TOP_BAR_H + 8, LEFT_W - 15, 255, 6);
 
   gaugeVoltage.value = psu.liveVoltage;
   gaugeCurrent.value = psu.liveCurrent;
   gaugeVoltage.draw();
   gaugeCurrent.draw();
 
-  // Set-point gauges
-  gaugeSetV.value = psu.setVoltage;
-  gaugeSetI.value = psu.setCurrent;
-  gaugeSetV.draw();
-  gaugeSetI.draw();
+  // Vmax / Imax bars
+  barVmax.value = psu.maxVoltage;
+  barImax.value = psu.maxCurrent;
+  barVmax.draw();
+  barImax.draw();
 
-  // Power readout
+  // Digital readouts
   readoutPower.setValue(psu.livePower, 3, 2);
+  readoutSetV.setValue(psu.setVoltage, 2, 3);
+  readoutSetA.setValue(psu.setCurrent, 1, 3);
   readoutPower.draw();
+  readoutSetV.draw();
+  readoutSetA.draw();
 
   // ---- Graph ----
   graph.draw();
