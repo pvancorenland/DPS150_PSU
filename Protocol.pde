@@ -344,10 +344,7 @@ void processResponsePacket(int[] buf, int len) {
     deviceId = sb.toString();
   }
   else if (reg == REG_OUTPUT && dataLen >= 1) {
-    // Don't override local state right after user toggled output
-    if (millis() - outputToggleTime > 2000) {
-      outputOn = (buf[4] == 1);
-    }
+    outputOn = (buf[4] == 1);
   }
   else if (reg == REG_MODE && dataLen >= 1) {
     outputMode = buf[4];
@@ -464,10 +461,9 @@ void pollPSU() {
   if (now - lastPollTime >= pollInterval) {
     lastPollTime = now;
     sendReadLive();
-    // Every 5th cycle (~1s), also request output state and mode
+    // Every 5th cycle (~1s), request mode and protection (not output — tracked locally)
     pollCycle++;
     if (pollCycle % 5 == 0) {
-      sendReadRegister(REG_OUTPUT);
       sendReadRegister(REG_MODE);
       sendReadRegister(REG_PROTECTION);
     }

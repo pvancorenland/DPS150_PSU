@@ -498,10 +498,11 @@ void handleGUIClick() {
   }
 
   // --- Output toggle ---
-  if (btnOutput.clicked() && connected) {
+  if (connected && btnOutput.clicked()) {
+    println("OUTPUT CLICK: outputOn=" + outputOn + " -> " + !outputOn);
     if (outputOn) { sendOutputOff(); outputOn = false; setStatus("Output OFF"); }
     else { sendOutputOn(); outputOn = true; setStatus("Output ON"); }
-    outputToggleTime = millis();  // suppress poll override briefly
+    outputToggleTime = millis();
   }
 
   // --- Text field focus ---

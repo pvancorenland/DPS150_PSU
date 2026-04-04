@@ -29,7 +29,13 @@
       "Bash(gcc -o test_read_setpoints test_read_setpoints.c -Wall && ./test_read_setpoints /dev/cu.usbmodem14798A3C25651 2>&1)",
       "Bash(gcc -o test_set_iset test_set_iset.c -Wall && ./test_set_iset /dev/cu.usbmodem14798A3C25651 2>&1)",
       "Bash(gcc -o test_dump_all test_dump_all.c -Wall && ./test_dump_all /dev/cu.usbmodem14798A3C25651 2>&1)",
-      "Bash(gcc -o test_read_output test_read_output.c -Wall && ./test_read_output /dev/cu.usbmodem14798A3C25651 2>&1)"
+      "Bash(gcc -o test_read_output test_read_output.c -Wall && ./test_read_output /dev/cu.usbmodem14798A3C25651 2>&1)",
+      "Bash(gcc -o test_toggle test_toggle.c -Wall && ./test_toggle /dev/cu.usbmodem14798A3C25651 2>&1)",
+      "Bash(./test_toggle:*)",
+      "Bash(./test_read_output:*)",
+      "Bash(head:*)",
+      "Bash(timeout 10 processing-java:*)",
+      "Bash(gtimeout 10:*)"
     ]
   }
 }
