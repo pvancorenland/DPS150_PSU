@@ -14,7 +14,7 @@ int selectedPortIndex = 0;
 String selectedPortName = "";
 
 CircularGauge gaugeVoltage, gaugeCurrent;
-VerticalBar barVmax, barImax;
+Slider sliderVset, sliderIset;
 DigitalReadout readoutPower, readoutSetV, readoutSetA;
 ScrollingGraph graph;
 StatusBadge badgeCV, badgeCC;
@@ -106,8 +106,16 @@ void initGUI() {
   gaugeVoltage = new CircularGauge(155, 175, 120, "OUTPUT VOLTAGE", "V", 0, 30, COL_VOLT, COL_VOLT_DIM);
   gaugeCurrent = new CircularGauge(430, 175, 120, "OUTPUT CURRENT", "A", 0, 5, COL_CURR, COL_CURR_DIM);
   gaugeCurrent.majorTicks = 5;
-  barVmax = new VerticalBar(278, 70, 24, 220, "Vmax", "V", 0, 30, COL_VOLT);
-  barImax = new VerticalBar(553, 70, 24, 220, "Imax", "A", 0, 5.1, COL_CURR);
+  sliderVset = cp5.addSlider("sliderVset").setPosition(278, 70).setSize(24, 220)
+    .setRange(0, 30).setValue(0).setLabel("Vset").setGroup(grpConnected);
+  sliderVset.setColorBackground(color(0x1A, 0x1A, 0x25));
+  sliderVset.setColorForeground(COL_VOLT);
+  sliderVset.setColorActive(COL_VOLT);
+  sliderIset = cp5.addSlider("sliderIset").setPosition(553, 70).setSize(24, 220)
+    .setRange(0, 5).setValue(0).setLabel("Iset").setGroup(grpConnected);
+  sliderIset.setColorBackground(color(0x1A, 0x1A, 0x25));
+  sliderIset.setColorForeground(COL_CURR);
+  sliderIset.setColorActive(COL_CURR);
 
   // --- Readouts ---
   readoutPower = new DigitalReadout(180, 305, 200, 32, "W", "POWER", COL_POWER);
@@ -337,10 +345,17 @@ void drawConnectedGUI() {
   gaugeVoltage.draw();
   gaugeCurrent.draw();
 
-  barVmax.value = psu.maxVoltage;
-  barImax.value = psu.maxCurrent;
-  barVmax.draw();
-  barImax.draw();
+  // Sync Vset/Iset sliders from PSU (only when not being dragged)
+  if (!sliderVset.isMouseOver()) {
+    sliderVset.setBroadcast(false);
+    sliderVset.setValue(psu.setVoltage);
+    sliderVset.setBroadcast(true);
+  }
+  if (!sliderIset.isMouseOver()) {
+    sliderIset.setBroadcast(false);
+    sliderIset.setValue(psu.setCurrent);
+    sliderIset.setBroadcast(true);
+  }
 
   readoutPower.setValue(psu.livePower, 3, 2);
   readoutSetV.setValue(psu.setVoltage, 2, 3);
@@ -562,6 +577,26 @@ void handleCp5Event(ControlEvent e) {
     }
   }
 
+  // --- Vset / Iset sliders ---
+  else if (name.equals("sliderVset")) {
+    if (psu.connected) {
+      float v = sliderVset.getValue();
+      psu.sendSetVoltage(v);
+      psu.setVoltage = v;
+      cTfSetV.setText(nf(v, 0, 3));
+      setStatus("Voltage set to " + nf(v, 0, 3) + "V");
+    }
+  }
+  else if (name.equals("sliderIset")) {
+    if (psu.connected) {
+      float a = sliderIset.getValue();
+      psu.sendSetCurrent(a);
+      psu.setCurrent = a;
+      cTfSetA.setText(nf(a, 0, 3));
+      setStatus("Current set to " + nf(a, 0, 3) + "A");
+    }
+  }
+
   // --- Graph toggles ---
   else if (name.equals("btnGraphV")) { graph.showVoltage = !graph.showVoltage; }
   else if (name.equals("btnGraphA")) { graph.showCurrent = !graph.showCurrent; }
@@ -624,6 +659,12 @@ void onSetpointsReceived() {
   cBrightness.setBroadcast(false);
   cBrightness.setValue(psu.brightness);
   cBrightness.setBroadcast(true);
+  sliderVset.setBroadcast(false);
+  sliderVset.setValue(psu.setVoltage);
+  sliderVset.setBroadcast(true);
+  sliderIset.setBroadcast(false);
+  sliderIset.setValue(psu.setCurrent);
+  sliderIset.setBroadcast(true);
   setStatus("Set: " + nf(psu.setVoltage, 0, 3) + "V / " + nf(psu.setCurrent, 0, 3) + "A");
 }
 
