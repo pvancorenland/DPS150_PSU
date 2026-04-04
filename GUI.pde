@@ -383,6 +383,16 @@ void drawConnectedGUI() {
   gaugeVoltage.draw();
   gaugeCurrent.draw();
 
+  // Sync slider ranges from streamed max values
+  if (psu.maxVoltage > 0 && sliderVset.getMax() != psu.maxVoltage) {
+    sliderVset.setRange(0, psu.maxVoltage);
+    gaugeVoltage.maxVal = psu.maxVoltage;
+  }
+  if (psu.maxCurrent > 0 && sliderIset.getMax() != psu.maxCurrent) {
+    sliderIset.setRange(0, psu.maxCurrent);
+    gaugeCurrent.maxVal = psu.maxCurrent;
+  }
+
   // Sync Vset/Iset sliders from PSU (only when not being dragged)
   if (!sliderVset.isMouseOver()) {
     sliderVset.setBroadcast(false);
