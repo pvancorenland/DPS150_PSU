@@ -654,6 +654,11 @@ class Slider extends Widget {
 
   /** Draw the slider track, filled portion, knob, label, and value. */
   void draw() {
+    if (dragging) {
+      value = constrain(map(mouseX, x, x + w, minVal, maxVal), minVal, maxVal);
+      value = round(value);
+    }
+
     float knobX = map(value, minVal, maxVal, x, x + w);
     hovered = mouseX >= x-5 && mouseX <= x+w+5 && mouseY >= y-10 && mouseY <= y+h+10;
     fill(COL_TEXT_DIM);
@@ -674,16 +679,20 @@ class Slider extends Widget {
     stroke(COL_ACCENT);
     strokeWeight(2);
     ellipse(knobX, y + h/2, 16, 16);
-
-    if (dragging) {
-      value = constrain(map(mouseX, x, x + w, minVal, maxVal), minVal, maxVal);
-      value = round(value);
-    }
   }
 
-  /** @return True if the mouse is over the slider area. */
+  /**
+   * Call from mousePressed. Sets value from click position and starts dragging.
+   * @return True if the mouse is over the slider area.
+   */
   boolean pressedOn() {
-    return mouseX >= x-5 && mouseX <= x+w+5 && mouseY >= y-10 && mouseY <= y+h+10;
+    if (mouseX >= x-5 && mouseX <= x+w+5 && mouseY >= y-10 && mouseY <= y+h+10) {
+      value = constrain(map(mouseX, x, x + w, minVal, maxVal), minVal, maxVal);
+      value = round(value);
+      dragging = true;
+      return true;
+    }
+    return false;
   }
 }
 

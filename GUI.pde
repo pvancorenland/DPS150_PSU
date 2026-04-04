@@ -478,7 +478,7 @@ void drawGUI() {
   panelProtection.draw();
   tfOVP.draw(); tfOCP.draw(); tfOPP.draw(); tfOTP.draw();
   btnApplyProtection.draw();
-  sliderBrightness.value = psu.brightness;
+  if (!sliderBrightness.dragging) sliderBrightness.value = psu.brightness;
   sliderBrightness.draw();
   btnApplyBrightness.draw();
 
@@ -644,7 +644,7 @@ void handleGUIClick() {
   }
 
   // --- Brightness ---
-  if (sliderBrightness.pressedOn()) sliderBrightness.dragging = true;
+  sliderBrightness.pressedOn();
   if (btnApplyBrightness.clicked() && psu.connected) {
     psu.brightness = (int) sliderBrightness.value;
     psu.sendSetBrightness(psu.brightness);
