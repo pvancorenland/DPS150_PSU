@@ -418,12 +418,17 @@ boolean connectToPort(String portName) {
     sendConnect();
     delay(500);
     connected = true;
-    // Request setpoints and state
+    // Request setpoints and state (staggered so PSU can process each)
     sendReadRegister(REG_SET_VOLT);
+    delay(50);
     sendReadRegister(REG_SET_CURR);
+    delay(50);
     sendReadRegister(REG_OUTPUT);
+    delay(50);
     sendReadRegister(REG_MODE);
+    delay(50);
     sendReadRegister(REG_PROTECTION);
+    delay(50);
     sendReadRegister(REG_ALL);
     return true;
   } catch (Exception e) {
@@ -448,14 +453,21 @@ void disconnectFromPSU() {
 }
 
 // --- Polling ---
-// DPS-150 streams data continuously after connect — no polling needed.
-// We just send a periodic read request as a keepalive.
+int pollCycle = 0;
+
 void pollPSU() {
   if (!connected || serialPort == null) return;
   long now = millis();
   if (now - lastPollTime >= pollInterval) {
     lastPollTime = now;
     sendReadLive();
+    // Every 5th cycle (~1s), also request output state and mode
+    pollCycle++;
+    if (pollCycle % 5 == 0) {
+      sendReadRegister(REG_OUTPUT);
+      sendReadRegister(REG_MODE);
+      sendReadRegister(REG_PROTECTION);
+    }
   }
 }
 
