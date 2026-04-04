@@ -35,7 +35,11 @@
       "Bash(./test_read_output:*)",
       "Bash(head:*)",
       "Bash(timeout 10 processing-java:*)",
-      "Bash(gtimeout 10:*)"
+      "Bash(gtimeout 10:*)",
+      "WebFetch(domain:sojamo.de)",
+      "WebFetch(domain:www.kasperkamperman.com)",
+      "WebFetch(domain:thenewstack.io)",
+      "WebFetch(domain:diyusthad.com)"
     ]
   }
 }

@@ -95,12 +95,12 @@ String csEditBuffer = "";      ///< Text buffer for sweep field editing
 float advX, advY, advW, advH;
 /// @}
 
-Button btnAdvClose;
-Button btnAdvModeSeq, btnAdvModeVS, btnAdvModeCS;
-Button btnAdvStart, btnAdvPause, btnAdvContinue, btnAdvStop;
-Button btnAdvSingleStep;
-Button btnAdvClearTable;
-Button btnLoopUp, btnLoopDown;
+AdvButton btnAdvClose;
+AdvButton btnAdvModeSeq, btnAdvModeVS, btnAdvModeCS;
+AdvButton btnAdvStart, btnAdvPause, btnAdvContinue, btnAdvStop;
+AdvButton btnAdvSingleStep;
+AdvButton btnAdvClearTable;
+AdvButton btnLoopUp, btnLoopDown;
 
 /** Initialise the advanced window widgets and default sequence data. */
 void initAdvanced() {
@@ -111,33 +111,33 @@ void initAdvanced() {
   advY = (WIN_H - advH) / 2;
 
   float bx = advX + advW - 30;
-  btnAdvClose = new Button(bx, advY + 5, 24, 20, "X");
+  btnAdvClose = new AdvButton(bx, advY + 5, 24, 20, "X");
   btnAdvClose.bgColor = #7F1D1D;
   btnAdvClose.hoverColor = #B71C1C;
 
   // Mode tabs
   float tabY = advY + 32;
-  btnAdvModeSeq = new Button(advX + 8, tabY, 120, 26, "Sequential");
-  btnAdvModeVS  = new Button(advX + 134, tabY, 120, 26, "V Sweep");
-  btnAdvModeCS  = new Button(advX + 260, tabY, 120, 26, "I Sweep");
+  btnAdvModeSeq = new AdvButton(advX + 8, tabY, 120, 26, "Sequential");
+  btnAdvModeVS  = new AdvButton(advX + 134, tabY, 120, 26, "V Sweep");
+  btnAdvModeCS  = new AdvButton(advX + 260, tabY, 120, 26, "I Sweep");
 
   // Control buttons
   float ctrlY = advY + advH - 45;
-  btnAdvStart    = new Button(advX + 10,  ctrlY, 90, 30, "Start");
+  btnAdvStart    = new AdvButton(advX + 10,  ctrlY, 90, 30, "Start");
   btnAdvStart.bgColor = #1B5E20; btnAdvStart.hoverColor = #2E7D32;
-  btnAdvPause    = new Button(advX + 108, ctrlY, 90, 30, "Pause");
+  btnAdvPause    = new AdvButton(advX + 108, ctrlY, 90, 30, "Pause");
   btnAdvPause.bgColor = #E65100; btnAdvPause.hoverColor = #FF8F00;
-  btnAdvContinue = new Button(advX + 206, ctrlY, 90, 30, "Continue");
+  btnAdvContinue = new AdvButton(advX + 206, ctrlY, 90, 30, "Continue");
   btnAdvContinue.bgColor = #1565C0; btnAdvContinue.hoverColor = #1E88E5;
-  btnAdvStop     = new Button(advX + 304, ctrlY, 90, 30, "Stop");
+  btnAdvStop     = new AdvButton(advX + 304, ctrlY, 90, 30, "Stop");
   btnAdvStop.bgColor = #7F1D1D; btnAdvStop.hoverColor = #B71C1C;
-  btnAdvSingleStep = new Button(advX + 402, ctrlY, 100, 30, "Single Step");
+  btnAdvSingleStep = new AdvButton(advX + 402, ctrlY, 100, 30, "Single Step");
   btnAdvSingleStep.bgColor = #4A148C; btnAdvSingleStep.hoverColor = #7B1FA2;
-  btnAdvClearTable = new Button(advX + 510, ctrlY, 90, 30, "Clear");
+  btnAdvClearTable = new AdvButton(advX + 510, ctrlY, 90, 30, "Clear");
 
   // Loop controls
-  btnLoopUp   = new Button(advX + advW - 80, tabY, 24, 12, "+");
-  btnLoopDown = new Button(advX + advW - 80, tabY + 14, 24, 12, "-");
+  btnLoopUp   = new AdvButton(advX + advW - 80, tabY, 24, 12, "+");
+  btnLoopDown = new AdvButton(advX + advW - 80, tabY + 14, 24, 12, "-");
 
   // Initialize sequence rows
   for (int i = 0; i < SEQ_MAX_ROWS; i++) {

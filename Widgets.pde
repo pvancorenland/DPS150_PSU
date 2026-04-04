@@ -6,10 +6,7 @@
  * - CircularGauge — analog-style meter with needle and arc
  * - ScrollingGraph — real-time V/A/W strip chart
  * - Panel — titled container with header bar
- * - Button — click-able button with hover state
- * - ToggleButton — large ON/OFF button with LED indicator
- * - TextField — numeric input field with cursor
- * - Slider — draggable slider with value display
+ * - AdvButton — click-able button with hover state (used in Advanced.pde)
  * - StatusBadge — small mode indicator (CV/CC)
  * - DigitalReadout — seven-segment style numeric display
  */
@@ -423,11 +420,11 @@ class Panel extends Widget {
 
 // ============================================================
 /**
- * @class Button
- * @brief Clickable button with hover highlight and optional rounding.
+ * @class AdvButton
+ * @brief Clickable button with hover highlight and optional rounding (used in Advanced.pde).
  */
 // ============================================================
-class Button extends Widget {
+class AdvButton extends Widget {
   String label;                     ///< Button label text
   color bgColor, hoverColor, textColor; ///< Color scheme
   boolean hovered = false;          ///< True while mouse is over the button
@@ -441,7 +438,7 @@ class Button extends Widget {
    * @param h     Height
    * @param label Button text
    */
-  Button(float x, float y, float w, float h, String label) {
+  AdvButton(float x, float y, float w, float h, String label) {
     super(x, y, w, h);
     this.label = label;
     this.bgColor = COL_BTN;
@@ -475,226 +472,7 @@ class Button extends Widget {
   }
 }
 
-// ============================================================
-/**
- * @class ToggleButton
- * @brief Large ON/OFF toggle button with LED glow indicator.
- *
- * Used for the main output enable/disable control.
- */
-// ============================================================
-class ToggleButton extends Widget {
-  boolean state = false;   ///< Current ON/OFF state
-  boolean hovered = false; ///< Mouse hover state
-
-  /**
-   * @param x X position
-   * @param y Y position
-   * @param w Width
-   * @param h Height
-   */
-  ToggleButton(float x, float y, float w, float h) {
-    super(x, y, w, h);
-  }
-
-  /** Draw the toggle button with LED indicator and label. */
-  void draw() {
-    hovered = hitTest();
-
-    if (state) {
-      fill(COL_ON, 15);
-      noStroke();
-      rect(x-4, y-4, w+8, h+8, 12);
-    }
-
-    fill(state ? #1B4332 : #3E1A1A);
-    stroke(state ? COL_ON : COL_OFF);
-    strokeWeight(2);
-    rect(x, y, w, h, 8);
-
-    float ledX = x + w/2;
-    float ledY = y + 14;
-    fill(state ? COL_ON : #441111);
-    noStroke();
-    ellipse(ledX, ledY, 10, 10);
-    if (state) {
-      fill(COL_ON, 40);
-      ellipse(ledX, ledY, 20, 20);
-    }
-
-    fill(state ? COL_ON : COL_OFF);
-    textAlign(CENTER, CENTER);
-    textSize(18);
-    text(state ? "OUTPUT ON" : "OUTPUT OFF", x + w/2, y + h/2 + 4);
-  }
-
-  /** @return True if the mouse is over this button. */
-  boolean clicked() {
-    return hitTest();
-  }
-}
-
-// ============================================================
-/**
- * @class TextField
- * @brief Numeric text input field with label, suffix, and blinking cursor.
- */
-// ============================================================
-class TextField extends Widget {
-  String value = "";        ///< Current text value
-  String label = "";        ///< Label displayed above the field
-  String suffix = "";       ///< Unit suffix displayed after the value
-  boolean focused = false;  ///< True when the field has keyboard focus
-  boolean hovered = false;  ///< Mouse hover state
-  float minVal = 0;         ///< Minimum allowed float value
-  float maxVal = 100;       ///< Maximum allowed float value
-
-  /**
-   * @param x      X position
-   * @param y      Y position
-   * @param w      Width
-   * @param h      Height
-   * @param label  Label text
-   * @param suffix Unit suffix ("V", "A", etc.)
-   */
-  TextField(float x, float y, float w, float h, String label, String suffix) {
-    super(x, y, w, h);
-    this.label = label;
-    this.suffix = suffix;
-  }
-
-  /** Draw the text field with label, input box, cursor, and value. */
-  void draw() {
-    hovered = hitTest();
-    fill(COL_TEXT_DIM);
-    textAlign(LEFT, BOTTOM);
-    textSize(10);
-    text(label, x, y - 3);
-    fill(COL_INPUT_BG);
-    stroke(focused ? COL_ACCENT : COL_INPUT_BORDER);
-    strokeWeight(focused ? 1.5 : 1);
-    rect(x, y, w, h, 3);
-    if (focused) {
-      noFill();
-      stroke(COL_ACCENT, 30);
-      strokeWeight(3);
-      rect(x-1, y-1, w+2, h+2, 4);
-    }
-    fill(COL_TEXT);
-    textAlign(LEFT, CENTER);
-    textSize(14);
-    String display = value + (focused && (frameCount % 40 < 20) ? "|" : "") + " " + suffix;
-    text(display, x + 6, y + h/2);
-  }
-
-  /** @return True if the mouse is over this field. */
-  boolean clicked() {
-    return hitTest();
-  }
-
-  /**
-   * Process a key press while this field is focused.
-   * Accepts digits and one decimal point.
-   * @param k     Character typed
-   * @param kCode Key code
-   */
-  void handleKey(char k, int kCode) {
-    if (!focused) return;
-    if (k == BACKSPACE || k == DELETE) {
-      if (value.length() > 0) value = value.substring(0, value.length()-1);
-    } else if ((k >= '0' && k <= '9') || k == '.') {
-      if (k == '.' && value.indexOf('.') >= 0) return;
-      if (value.length() < 8) value += k;
-    }
-  }
-
-  /** @return Parsed float value, or 0 on parse error. */
-  float getFloat() {
-    try { return Float.parseFloat(value); }
-    catch (Exception e) { return 0; }
-  }
-
-  /**
-   * Set the field text from a float value (3 decimal places).
-   * @param v Value to display
-   */
-  void setFloat(float v) {
-    value = nf(v, 0, 3);
-  }
-}
-
-// ============================================================
-/**
- * @class Slider
- * @brief Horizontal slider with label, value readout, and draggable knob.
- */
-// ============================================================
-class Slider extends Widget {
-  float minVal = 0;         ///< Minimum value
-  float maxVal = 20;        ///< Maximum value
-  float value = 10;         ///< Current value
-  String label = "";        ///< Label text
-  boolean dragging = false; ///< True while the user is dragging the knob
-  boolean hovered = false;  ///< Mouse hover state
-
-  /**
-   * @param x      X position
-   * @param y      Y position
-   * @param w      Width
-   * @param h      Height
-   * @param label  Label text
-   * @param minVal Minimum value
-   * @param maxVal Maximum value
-   */
-  Slider(float x, float y, float w, float h, String label, float minVal, float maxVal) {
-    super(x, y, w, h);
-    this.label = label;
-    this.minVal = minVal; this.maxVal = maxVal;
-  }
-
-  /** Draw the slider track, filled portion, knob, label, and value. */
-  void draw() {
-    if (dragging) {
-      value = constrain(map(mouseX, x, x + w, minVal, maxVal), minVal, maxVal);
-      value = round(value);
-    }
-
-    float knobX = map(value, minVal, maxVal, x, x + w);
-    hovered = mouseX >= x-5 && mouseX <= x+w+5 && mouseY >= y-10 && mouseY <= y+h+10;
-    fill(COL_TEXT_DIM);
-    textAlign(LEFT, BOTTOM);
-    textSize(10);
-    text(label, x, y - 6);
-    fill(COL_TEXT);
-    textAlign(RIGHT, BOTTOM);
-    text(nf(value, 0, 0), x + w, y - 6);
-    fill(#1A1A25);
-    stroke(COL_BORDER);
-    strokeWeight(1);
-    rect(x, y + h/2 - 4, w, 8, 4);
-    noStroke();
-    fill(COL_ACCENT);
-    rect(x+1, y + h/2 - 3, knobX - x, 6, 3);
-    fill(COL_TEXT);
-    stroke(COL_ACCENT);
-    strokeWeight(2);
-    ellipse(knobX, y + h/2, 16, 16);
-  }
-
-  /**
-   * Call from mousePressed. Sets value from click position and starts dragging.
-   * @return True if the mouse is over the slider area.
-   */
-  boolean pressedOn() {
-    if (mouseX >= x-5 && mouseX <= x+w+5 && mouseY >= y-10 && mouseY <= y+h+10) {
-      value = constrain(map(mouseX, x, x + w, minVal, maxVal), minVal, maxVal);
-      value = round(value);
-      dragging = true;
-      return true;
-    }
-    return false;
-  }
-}
+// (ToggleButton, TextField, Slider removed — now using ControlP5 equivalents)
 
 // ============================================================
 /**

@@ -6,20 +6,18 @@
  * Right side: output toggle, set-point controls, presets, device info,
  * protection settings, brightness slider, and logging controls.
  *
- * All protocol state is accessed through the global @c psu instance.
+ * Interactive widgets use ControlP5; display-only widgets are custom.
  */
 
 // ============================================================
-// GUI WIDGETS
+// GUI WIDGETS — Display-only (custom)
 // ============================================================
 
-/// @name Connection Bar Widgets
+/// @name Connection Bar
 /// @{
 String[] availablePorts;
 int selectedPortIndex = 0;
 String selectedPortName = "";
-Button btnPortPrev, btnPortNext;
-Button btnConnect, btnDisconnect, btnRefreshPorts;
 /// @}
 
 /// @name Gauge Widgets
@@ -33,15 +31,9 @@ VerticalBar barVmax, barImax;
 DigitalReadout readoutPower, readoutSetV, readoutSetA;
 /// @}
 
-/// @name Graph Widgets
+/// @name Graph Widget
 /// @{
 ScrollingGraph graph;
-Button btnGraphV, btnGraphA, btnGraphW;
-/// @}
-
-/// @name Output Toggle
-/// @{
-ToggleButton btnOutput;
 /// @}
 
 /// @name Mode Badges
@@ -49,65 +41,33 @@ ToggleButton btnOutput;
 StatusBadge badgeCV, badgeCC;
 /// @}
 
-/// @name Set-Point Controls
-/// @{
-TextField tfSetVoltage, tfSetCurrent;
-Button btnApply;
-Button btnVoltUp, btnVoltDown, btnVoltUpFine, btnVoltDownFine;
-Button btnCurrUp, btnCurrDown, btnCurrUpFine, btnCurrDownFine;
-/// @}
-
-/// @name Preset Panel
+/// @name Panels
 /// @{
 Panel panelPresets;
-Button[] btnPresetLoad = new Button[6];
-Button[] btnPresetSave = new Button[6];
-/// @}
-
-/// @name Info Panel
-/// @{
 Panel panelInfo;
-Button btnRefreshAll;
-/// @}
-
-/// @name Protection Panel
-/// @{
 Panel panelProtection;
-TextField tfOVP, tfOCP, tfOPP, tfOTP;
-Button btnApplyProtection;
-/// @}
-
-/// @name Brightness Controls
-/// @{
-Slider sliderBrightness;
-Button btnApplyBrightness;
-/// @}
-
-/// @name Logging Controls
-/// @{
-Button btnStartLog, btnStopLog;
-/// @}
-
-/// @name Advanced Window
-/// @{
-Button btnOpenAdvanced;
 /// @}
 
 /// @name Status Bar
 /// @{
-String statusMessage = "Ready";         ///< Current status bar message
-long statusTime = 0;                    ///< millis() when status was last set
-long outputToggleTime = 0;              ///< Suppresses poll-override of outputOn after toggle
+String statusMessage = "Ready";
+long statusTime = 0;
+long outputToggleTime = 0;
 /// @}
 
 // ============================================================
 // LAYOUT CONSTANTS
 // ============================================================
-static final int WIN_W = 1100;   ///< Window width
-static final int WIN_H = 720;    ///< Window height
-static final int TOP_BAR_H = 40; ///< Top connection bar height
-static final int LEFT_W = 620;   ///< Left panel width (gauges + graph)
-static final int RIGHT_W = 470;  ///< Right panel width (controls)
+static final int WIN_W = 1100;
+static final int WIN_H = 720;
+static final int TOP_BAR_H = 40;
+static final int LEFT_W = 620;
+static final int RIGHT_W = 470;
+
+// ============================================================
+// CP5 Group for connected-only widgets
+// ============================================================
+Group grpConnected;
 
 /**
  * Update the status bar message.
@@ -119,6 +79,40 @@ void setStatus(String msg) {
 }
 
 // ============================================================
+// THEME HELPERS
+// ============================================================
+
+void applyDarkTheme(Controller c) {
+  c.setColorBackground(color(0x2E, 0x3B, 0x55));   // COL_BTN
+  c.setColorForeground(color(0x3D, 0x50, 0x70));   // COL_BTN_HOVER
+  c.setColorActive(color(0x4A, 0x65, 0x90));        // COL_BTN_ACTIVE
+  c.setColorCaptionLabel(color(0xE0, 0xE0, 0xE8));
+}
+
+void applyGreenTheme(Controller c) {
+  c.setColorBackground(color(0x1B, 0x5E, 0x20));
+  c.setColorForeground(color(0x2E, 0x7D, 0x32));
+  c.setColorActive(color(0x43, 0xA0, 0x47));
+  c.setColorCaptionLabel(color(0xE0, 0xE0, 0xE8));
+}
+
+void applyRedTheme(Controller c) {
+  c.setColorBackground(color(0x7F, 0x1D, 0x1D));
+  c.setColorForeground(color(0xB7, 0x1C, 0x1C));
+  c.setColorActive(color(0xD3, 0x2F, 0x2F));
+  c.setColorCaptionLabel(color(0xE0, 0xE0, 0xE8));
+}
+
+void styleCp5Textfield(Textfield tf) {
+  tf.setColorBackground(color(0x17, 0x17, 0x22));   // COL_INPUT_BG
+  tf.setColorForeground(color(0x4A, 0x90, 0xD9));   // COL_ACCENT (focus border)
+  tf.setColorActive(color(0x4A, 0x90, 0xD9));
+  tf.setColorCaptionLabel(color(0x88, 0x88, 0x99)); // COL_TEXT_DIM
+  tf.setColorValueLabel(color(0xE0, 0xE0, 0xE8));   // COL_TEXT
+  tf.setAutoClear(false);
+}
+
+// ============================================================
 // INIT
 // ============================================================
 
@@ -127,47 +121,86 @@ void initGUI() {
   // Scan ports
   refreshPorts();
 
-  // --- Top bar ---
-  btnPortPrev    = new Button(180, 8, 22, 24, "<");
-  btnPortNext    = new Button(560, 8, 22, 24, ">");
-  btnConnect     = new Button(600, 6, 90, 28, "Connect");
-  btnConnect.bgColor = #1B5E20; btnConnect.hoverColor = #2E7D32;
-  btnDisconnect  = new Button(698, 6, 90, 28, "Disconnect");
-  btnDisconnect.bgColor = #7F1D1D; btnDisconnect.hoverColor = #B71C1C;
-  btnRefreshPorts = new Button(796, 6, 70, 28, "Refresh");
+  // --- Top bar buttons (always visible) ---
+  Controller c;
+
+  c = cp5.addButton("btnPortPrev").setPosition(180, 8).setSize(22, 24).setLabel("<");
+  applyDarkTheme(c);
+
+  c = cp5.addButton("btnPortNext").setPosition(560, 8).setSize(22, 24).setLabel(">");
+  applyDarkTheme(c);
+
+  c = cp5.addButton("btnConnect").setPosition(600, 6).setSize(90, 28).setLabel("Connect");
+  applyGreenTheme(c);
+
+  c = cp5.addButton("btnDisconnect").setPosition(698, 6).setSize(90, 28).setLabel("Disconnect");
+  applyRedTheme(c);
+
+  c = cp5.addButton("btnRefreshPorts").setPosition(796, 6).setSize(70, 28).setLabel("Refresh");
+  applyDarkTheme(c);
+
+  c = cp5.addButton("btnOpenAdvanced").setPosition(WIN_W - 100, 6).setSize(90, 28).setLabel("Advanced");
+  c.setColorBackground(color(0x4A, 0x14, 0x8C));
+  c.setColorForeground(color(0x7B, 0x1F, 0xA2));
+  c.setColorActive(color(0x9C, 0x27, 0xB0));
+  c.setColorCaptionLabel(color(0xE0, 0xE0, 0xE8));
+
+  // --- Connected-only group ---
+  grpConnected = cp5.addGroup("grpConnected").setPosition(0, 0).setSize(WIN_W, WIN_H).hideBar().hide();
 
   // --- Circular gauges ---
   gaugeVoltage = new CircularGauge(155, 175, 120, "OUTPUT VOLTAGE", "V", 0, 30, COL_VOLT, COL_VOLT_DIM);
   gaugeCurrent = new CircularGauge(430, 175, 120, "OUTPUT CURRENT", "A", 0, 5, COL_CURR, COL_CURR_DIM);
   gaugeCurrent.majorTicks = 5;
 
-  // --- Vmax / Imax vertical bars (right of each gauge) ---
+  // --- Vmax / Imax vertical bars ---
   barVmax = new VerticalBar(278, 70, 24, 220, "Vmax", "V", 0, 30, COL_VOLT);
   barImax = new VerticalBar(553, 70, 24, 220, "Imax", "A", 0, 5.1, COL_CURR);
 
-  // --- Digital readouts (below gauges) ---
+  // --- Digital readouts ---
   readoutPower = new DigitalReadout(180, 305, 200, 32, "W", "POWER", COL_POWER);
   readoutSetV  = new DigitalReadout(30, 305, 140, 32, "V", "SET", COL_VOLT);
   readoutSetA  = new DigitalReadout(400, 305, 140, 32, "A", "SET", COL_CURR);
 
   // --- Graph ---
   graph = new ScrollingGraph(15, 350, LEFT_W - 20, 230);
-  btnGraphV = new Button(20, 585, 55, 20, "Voltage");
-  btnGraphV.bgColor = COL_VOLT_DIM;
-  btnGraphA = new Button(80, 585, 55, 20, "Current");
-  btnGraphA.bgColor = COL_CURR_DIM;
-  btnGraphW = new Button(140, 585, 50, 20, "Power");
-  btnGraphW.bgColor = COL_POWER_DIM;
+
+  // Graph toggle buttons
+  c = cp5.addButton("btnGraphV").setPosition(20, 585).setSize(55, 20).setLabel("Voltage").setGroup(grpConnected);
+  c.setColorBackground(color(0x66, 0x4D, 0x00));  // COL_VOLT_DIM
+  c.setColorForeground(color(0x80, 0x60, 0x00));
+  c.setColorActive(color(0x99, 0x73, 0x00));
+  c.setColorCaptionLabel(color(0xE0, 0xE0, 0xE8));
+
+  c = cp5.addButton("btnGraphA").setPosition(80, 585).setSize(55, 20).setLabel("Current").setGroup(grpConnected);
+  c.setColorBackground(color(0x00, 0x56, 0x62));  // COL_CURR_DIM
+  c.setColorForeground(color(0x00, 0x70, 0x7D));
+  c.setColorActive(color(0x00, 0x8A, 0x98));
+  c.setColorCaptionLabel(color(0xE0, 0xE0, 0xE8));
+
+  c = cp5.addButton("btnGraphW").setPosition(140, 585).setSize(50, 20).setLabel("Power").setGroup(grpConnected);
+  c.setColorBackground(color(0x1B, 0x5E, 0x20));  // COL_POWER_DIM
+  c.setColorForeground(color(0x2E, 0x7D, 0x32));
+  c.setColorActive(color(0x43, 0xA0, 0x47));
+  c.setColorCaptionLabel(color(0xE0, 0xE0, 0xE8));
 
   // Logging buttons
-  btnStartLog = new Button(350, 585, 80, 20, "Start Log");
-  btnStartLog.bgColor = #1B5E20;
-  btnStopLog  = new Button(440, 585, 75, 20, "Stop Log");
-  btnStopLog.bgColor = #7F1D1D;
+  c = cp5.addButton("btnStartLog").setPosition(350, 585).setSize(80, 20).setLabel("Start Log").setGroup(grpConnected);
+  applyGreenTheme(c);
+
+  c = cp5.addButton("btnStopLog").setPosition(440, 585).setSize(75, 20).setLabel("Stop Log").setGroup(grpConnected);
+  applyRedTheme(c);
 
   // --- Right side: Output toggle ---
   float rx = LEFT_W + 15;
-  btnOutput = new ToggleButton(rx, 50, RIGHT_W - 30, 52);
+
+  c = cp5.addToggle("btnOutput").setPosition(rx, 50).setSize((int)(RIGHT_W - 30), 52)
+    .setMode(ControlP5.SWITCH).setValue(false).setGroup(grpConnected);
+  c.setColorBackground(color(0x3E, 0x1A, 0x1A));  // OFF bg
+  c.setColorForeground(color(0x00, 0xE6, 0x76));   // ON indicator
+  c.setColorActive(color(0x1B, 0x43, 0x32));        // ON bg
+  c.setColorCaptionLabel(color(0xE0, 0xE0, 0xE8));
+  c.getCaptionLabel().setText("OUTPUT").align(ControlP5.CENTER, ControlP5.CENTER);
 
   // Mode badges
   badgeCV = new StatusBadge(rx, 108, 50, 22, "CV", COL_VOLT);
@@ -175,23 +208,39 @@ void initGUI() {
 
   // --- Set controls ---
   float setY = 145;
-  tfSetVoltage = new TextField(rx, setY + 18, 150, 30, "Set Voltage (0-30V)", "V");
-  tfSetVoltage.maxVal = 30.0;
-  tfSetCurrent = new TextField(rx + 230, setY + 18, 150, 30, "Set Current (0-5A)", "A");
-  tfSetCurrent.maxVal = 5.0;
 
-  btnVoltUp       = new Button(rx + 155, setY + 18, 30, 14, "+.1");
-  btnVoltDown     = new Button(rx + 155, setY + 34, 30, 14, "-.1");
-  btnVoltUpFine   = new Button(rx + 190, setY + 18, 30, 14, "+.01");
-  btnVoltDownFine = new Button(rx + 190, setY + 34, 30, 14, "-.01");
+  Textfield tf;
+  tf = cp5.addTextfield("tfSetVoltage").setPosition(rx, setY + 18).setSize(150, 30)
+    .setLabel("Set Voltage (0-30V)").setGroup(grpConnected);
+  styleCp5Textfield(tf);
 
-  btnCurrUp       = new Button(rx + 385, setY + 18, 30, 14, "+.1");
-  btnCurrDown     = new Button(rx + 385, setY + 34, 30, 14, "-.1");
-  btnCurrUpFine   = new Button(rx + 420, setY + 18, 30, 14, "+.01");
-  btnCurrDownFine = new Button(rx + 420, setY + 34, 30, 14, "-.01");
+  tf = cp5.addTextfield("tfSetCurrent").setPosition(rx + 230, setY + 18).setSize(150, 30)
+    .setLabel("Set Current (0-5A)").setGroup(grpConnected);
+  styleCp5Textfield(tf);
 
-  btnApply = new Button(rx, setY + 55, RIGHT_W - 30, 30, "APPLY SETTINGS");
-  btnApply.bgColor = #1B5E20; btnApply.hoverColor = #2E7D32;
+  // Voltage adjust buttons
+  c = cp5.addButton("btnVoltUp").setPosition(rx + 155, setY + 18).setSize(30, 14).setLabel("+.1").setGroup(grpConnected);
+  applyDarkTheme(c);
+  c = cp5.addButton("btnVoltDown").setPosition(rx + 155, setY + 34).setSize(30, 14).setLabel("-.1").setGroup(grpConnected);
+  applyDarkTheme(c);
+  c = cp5.addButton("btnVoltUpFine").setPosition(rx + 190, setY + 18).setSize(30, 14).setLabel("+.01").setGroup(grpConnected);
+  applyDarkTheme(c);
+  c = cp5.addButton("btnVoltDownFine").setPosition(rx + 190, setY + 34).setSize(30, 14).setLabel("-.01").setGroup(grpConnected);
+  applyDarkTheme(c);
+
+  // Current adjust buttons
+  c = cp5.addButton("btnCurrUp").setPosition(rx + 385, setY + 18).setSize(30, 14).setLabel("+.1").setGroup(grpConnected);
+  applyDarkTheme(c);
+  c = cp5.addButton("btnCurrDown").setPosition(rx + 385, setY + 34).setSize(30, 14).setLabel("-.1").setGroup(grpConnected);
+  applyDarkTheme(c);
+  c = cp5.addButton("btnCurrUpFine").setPosition(rx + 420, setY + 18).setSize(30, 14).setLabel("+.01").setGroup(grpConnected);
+  applyDarkTheme(c);
+  c = cp5.addButton("btnCurrDownFine").setPosition(rx + 420, setY + 34).setSize(30, 14).setLabel("-.01").setGroup(grpConnected);
+  applyDarkTheme(c);
+
+  // Apply button
+  c = cp5.addButton("btnApply").setPosition(rx, setY + 55).setSize((int)(RIGHT_W - 30), 30).setLabel("APPLY SETTINGS").setGroup(grpConnected);
+  applyGreenTheme(c);
 
   // --- Presets panel ---
   float presetY = setY + 95;
@@ -199,41 +248,59 @@ void initGUI() {
   for (int i = 0; i < 6; i++) {
     float px = panelPresets.contentX() + (i % 3) * 148;
     float py = panelPresets.contentY() + (i / 3) * 72;
-    btnPresetLoad[i] = new Button(px + 85, py + 2, 45, 18, "Load");
-    btnPresetLoad[i].bgColor = #1A3A5C;
-    btnPresetSave[i] = new Button(px + 85, py + 24, 45, 18, "Save");
-    btnPresetSave[i].bgColor = #3A2A1A;
+
+    c = cp5.addButton("btnPresetLoad" + i).setPosition(px + 85, py + 2).setSize(45, 18).setLabel("Load").setGroup(grpConnected);
+    c.setColorBackground(color(0x1A, 0x3A, 0x5C));
+    c.setColorForeground(color(0x25, 0x50, 0x78));
+    c.setColorActive(color(0x30, 0x66, 0x94));
+    c.setColorCaptionLabel(color(0xE0, 0xE0, 0xE8));
+
+    c = cp5.addButton("btnPresetSave" + i).setPosition(px + 85, py + 24).setSize(45, 18).setLabel("Save").setGroup(grpConnected);
+    c.setColorBackground(color(0x3A, 0x2A, 0x1A));
+    c.setColorForeground(color(0x50, 0x3A, 0x25));
+    c.setColorActive(color(0x66, 0x4A, 0x30));
+    c.setColorCaptionLabel(color(0xE0, 0xE0, 0xE8));
   }
 
   // --- Info panel ---
   float infoY = presetY + 185;
   panelInfo = new Panel(rx, infoY, (RIGHT_W - 40)/2, 175, "Device Info");
-  btnRefreshAll = new Button(rx + 5, infoY + 150, 80, 20, "Refresh All");
+
+  c = cp5.addButton("btnRefreshAll").setPosition(rx + 5, infoY + 150).setSize(80, 20).setLabel("Refresh All").setGroup(grpConnected);
+  applyDarkTheme(c);
 
   // --- Protection panel ---
   panelProtection = new Panel(rx + (RIGHT_W - 40)/2 + 10, infoY, (RIGHT_W - 40)/2, 175, "Protection");
   float px2 = panelProtection.contentX();
   float py2 = panelProtection.contentY();
-  tfOVP = new TextField(px2, py2 + 14, 90, 22, "OVP (V)", "V");
-  tfOVP.maxVal = 33;
-  tfOCP = new TextField(px2, py2 + 56, 90, 22, "OCP (A)", "A");
-  tfOCP.maxVal = 5.5;
-  tfOPP = new TextField(px2, py2 + 98, 90, 22, "OPP (W)", "W");
-  tfOPP.maxVal = 160;
-  tfOTP = new TextField(px2 + 110, py2 + 14, 80, 22, "OTP (C)", "C");
-  tfOTP.maxVal = 80;
-  btnApplyProtection = new Button(px2 + 110, py2 + 56, 80, 22, "Apply");
-  btnApplyProtection.bgColor = #1B5E20;
+
+  tf = cp5.addTextfield("tfOVP").setPosition(px2, py2 + 14).setSize(90, 22).setLabel("OVP (V)").setGroup(grpConnected);
+  styleCp5Textfield(tf);
+  tf = cp5.addTextfield("tfOCP").setPosition(px2, py2 + 56).setSize(90, 22).setLabel("OCP (A)").setGroup(grpConnected);
+  styleCp5Textfield(tf);
+  tf = cp5.addTextfield("tfOPP").setPosition(px2, py2 + 98).setSize(90, 22).setLabel("OPP (W)").setGroup(grpConnected);
+  styleCp5Textfield(tf);
+  tf = cp5.addTextfield("tfOTP").setPosition(px2 + 110, py2 + 14).setSize(80, 22).setLabel("OTP (C)").setGroup(grpConnected);
+  styleCp5Textfield(tf);
+
+  c = cp5.addButton("btnApplyProtection").setPosition(px2 + 110, py2 + 56).setSize(80, 22).setLabel("Apply").setGroup(grpConnected);
+  applyGreenTheme(c);
 
   // Brightness slider
-  sliderBrightness = new Slider(px2 + 110, py2 + 108, 80, 16, "Brightness", 0, 20);
-  btnApplyBrightness = new Button(px2 + 110, py2 + 130, 80, 18, "Set");
-  btnApplyBrightness.bgColor = #1B5E20;
+  c = cp5.addSlider("sliderBrightness").setPosition(px2 + 110, py2 + 100).setSize(80, 16)
+    .setRange(0, 20).setValue(10).setNumberOfTickMarks(21).snapToTickMarks(true)
+    .setLabel("Brightness").setGroup(grpConnected);
+  c.setColorBackground(color(0x1A, 0x1A, 0x25));
+  c.setColorForeground(color(0x4A, 0x90, 0xD9));
+  c.setColorActive(color(0x6B, 0xB0, 0xFF));
+  c.setColorCaptionLabel(color(0x88, 0x88, 0x99));
+  c.setColorValueLabel(color(0xE0, 0xE0, 0xE8));
 
-  // Advanced button (top bar, far right)
-  btnOpenAdvanced = new Button(WIN_W - 100, 6, 90, 28, "Advanced");
-  btnOpenAdvanced.bgColor = #4A148C;
-  btnOpenAdvanced.hoverColor = #7B1FA2;
+  c = cp5.addButton("btnApplyBrightness").setPosition(px2 + 110, py2 + 125).setSize(80, 18).setLabel("Set").setGroup(grpConnected);
+  applyGreenTheme(c);
+
+  // Advanced button visible only when connected — but it's in top bar, handle via draw visibility
+  // btnOpenAdvanced is not in grpConnected since we control it manually
 
   // Init advanced window
   initAdvanced();
@@ -261,11 +328,7 @@ void refreshPorts() {
 // ============================================================
 
 /**
- * Draw the entire GUI.
- *
- * When disconnected, shows a splash message with port selection.
- * When connected, renders gauges, graph, set-point controls,
- * presets, device info, protection settings, and the status bar.
+ * Draw the entire GUI (custom widgets only — cp5 draws itself after this).
  */
 void drawGUI() {
   background(COL_BG);
@@ -305,15 +368,19 @@ void drawGUI() {
     textSize(10);
     String pName = (availablePorts.length > 0) ? availablePorts[selectedPortIndex] : "(no ports found)";
     text(pName, 381, 20);
-    btnPortPrev.draw();
-    btnPortNext.draw();
   }
-  btnConnect.enabled = !psu.connected && availablePorts.length > 0;
-  btnDisconnect.enabled = psu.connected;
-  btnConnect.draw();
-  btnDisconnect.draw();
-  if (!psu.connected) btnRefreshPorts.draw();
-  if (psu.connected) btnOpenAdvanced.draw();
+
+  // Top bar button visibility
+  cp5.getController("btnPortPrev").setVisible(!psu.connected);
+  cp5.getController("btnPortNext").setVisible(!psu.connected);
+  cp5.getController("btnConnect").setLock(psu.connected || availablePorts.length == 0);
+  cp5.getController("btnDisconnect").setLock(!psu.connected);
+  cp5.getController("btnRefreshPorts").setVisible(!psu.connected);
+  cp5.getController("btnOpenAdvanced").setVisible(psu.connected);
+
+  // Show/hide connected group
+  if (psu.connected && !grpConnected.isVisible()) grpConnected.show();
+  if (!psu.connected && grpConnected.isVisible()) grpConnected.hide();
 
   // ---- DISCONNECTED STATE ----
   if (!psu.connected) {
@@ -325,162 +392,150 @@ void drawGUI() {
     text("Select a serial port and click Connect", WIN_W / 2, WIN_H / 2 + 10);
   }
 
-  // ---- CONNECTED: full GUI ----
+  // ---- CONNECTED: custom widgets ----
   if (psu.connected) {
 
-  // ---- LEFT SIDE: Gauges ----
-  stroke(COL_BORDER);
-  strokeWeight(1);
-  line(LEFT_W + 5, TOP_BAR_H + 5, LEFT_W + 5, WIN_H - 5);
-
-  fill(COL_PANEL, 80);
-  noStroke();
-  rect(10, TOP_BAR_H + 8, LEFT_W - 15, 255, 6);
-
-  gaugeVoltage.value = psu.liveVoltage;
-  gaugeCurrent.value = psu.liveCurrent;
-  gaugeVoltage.draw();
-  gaugeCurrent.draw();
-
-  // Vmax / Imax bars
-  barVmax.value = psu.maxVoltage;
-  barImax.value = psu.maxCurrent;
-  barVmax.draw();
-  barImax.draw();
-
-  // Digital readouts
-  readoutPower.setValue(psu.livePower, 3, 2);
-  readoutSetV.setValue(psu.setVoltage, 2, 3);
-  readoutSetA.setValue(psu.setCurrent, 1, 3);
-  readoutPower.draw();
-  readoutSetV.draw();
-  readoutSetA.draw();
-
-  // ---- Graph ----
-  graph.draw();
-
-  // Graph toggle buttons
-  btnGraphV.bgColor = graph.showVoltage ? COL_VOLT_DIM : #2A2A35;
-  btnGraphA.bgColor = graph.showCurrent ? COL_CURR_DIM : #2A2A35;
-  btnGraphW.bgColor = graph.showPower   ? COL_POWER_DIM : #2A2A35;
-  btnGraphV.draw();
-  btnGraphA.draw();
-  btnGraphW.draw();
-
-  // Logging buttons
-  btnStartLog.enabled = !psu.logging;
-  btnStopLog.enabled = psu.logging;
-  btnStartLog.draw();
-  btnStopLog.draw();
-
-  // Logging status indicator
-  if (psu.logging) {
-    fill(COL_OFF);
-    float blink = sin(millis() * 0.008) > 0 ? 255 : 100;
-    fill(color(255, 50, 50, (int)blink));
-    noStroke();
-    ellipse(535, 595, 8, 8);
-    fill(COL_TEXT_DIM);
-    textAlign(LEFT, CENTER);
-    textSize(9);
-    text("REC " + psu.logSampleCount + " samples", 542, 595);
-  }
-
-  // ---- RIGHT SIDE ----
-  float rx = LEFT_W + 15;
-
-  // Output toggle
-  btnOutput.state = psu.outputOn;
-  btnOutput.draw();
-
-  // CV/CC badges
-  badgeCV.active = (psu.outputMode == MODE_CV);
-  badgeCC.active = (psu.outputMode == MODE_CC);
-  badgeCV.draw();
-  badgeCC.draw();
-
-  // Protection status
-  if (psu.protectionStatus != PROT_OK) {
-    fill(COL_OFF);
-    textAlign(LEFT, CENTER);
-    textSize(12);
-    text(psu.protectionStatusText(), rx + 120, 119);
-  } else {
-    fill(COL_ON, 150);
-    textAlign(LEFT, CENTER);
-    textSize(10);
-    text("Normal", rx + 120, 119);
-  }
-
-  // --- Set controls ---
-  tfSetVoltage.draw();
-  tfSetCurrent.draw();
-  btnVoltUp.draw(); btnVoltDown.draw();
-  btnVoltUpFine.draw(); btnVoltDownFine.draw();
-  btnCurrUp.draw(); btnCurrDown.draw();
-  btnCurrUpFine.draw(); btnCurrDownFine.draw();
-  btnApply.draw();
-
-  // --- Presets ---
-  panelPresets.draw();
-  for (int i = 0; i < 6; i++) {
-    float ppx = panelPresets.contentX() + (i % 3) * 148;
-    float ppy = panelPresets.contentY() + (i / 3) * 72;
-
-    fill(COL_PANEL_LITE);
+    // ---- LEFT SIDE: Gauges ----
     stroke(COL_BORDER);
-    strokeWeight(0.5);
-    rect(ppx, ppy, 140, 65, 3);
+    strokeWeight(1);
+    line(LEFT_W + 5, TOP_BAR_H + 5, LEFT_W + 5, WIN_H - 5);
 
-    fill(COL_ACCENT);
+    fill(COL_PANEL, 80);
+    noStroke();
+    rect(10, TOP_BAR_H + 8, LEFT_W - 15, 255, 6);
+
+    gaugeVoltage.value = psu.liveVoltage;
+    gaugeCurrent.value = psu.liveCurrent;
+    gaugeVoltage.draw();
+    gaugeCurrent.draw();
+
+    // Vmax / Imax bars
+    barVmax.value = psu.maxVoltage;
+    barImax.value = psu.maxCurrent;
+    barVmax.draw();
+    barImax.draw();
+
+    // Digital readouts
+    readoutPower.setValue(psu.livePower, 3, 2);
+    readoutSetV.setValue(psu.setVoltage, 2, 3);
+    readoutSetA.setValue(psu.setCurrent, 1, 3);
+    readoutPower.draw();
+    readoutSetV.draw();
+    readoutSetA.draw();
+
+    // ---- Graph ----
+    graph.draw();
+
+    // Update graph toggle button colors
+    cp5.getController("btnGraphV").setColorBackground(graph.showVoltage ? color(0x66, 0x4D, 0x00) : color(0x2A, 0x2A, 0x35));
+    cp5.getController("btnGraphA").setColorBackground(graph.showCurrent ? color(0x00, 0x56, 0x62) : color(0x2A, 0x2A, 0x35));
+    cp5.getController("btnGraphW").setColorBackground(graph.showPower   ? color(0x1B, 0x5E, 0x20) : color(0x2A, 0x2A, 0x35));
+
+    // Logging status
+    cp5.getController("btnStartLog").setLock(psu.logging);
+    cp5.getController("btnStopLog").setLock(!psu.logging);
+
+    if (psu.logging) {
+      fill(COL_OFF);
+      float blink = sin(millis() * 0.008) > 0 ? 255 : 100;
+      fill(color(255, 50, 50, (int)blink));
+      noStroke();
+      ellipse(535, 595, 8, 8);
+      fill(COL_TEXT_DIM);
+      textAlign(LEFT, CENTER);
+      textSize(9);
+      text("REC " + psu.logSampleCount + " samples", 542, 595);
+    }
+
+    // ---- RIGHT SIDE ----
+    float rx = LEFT_W + 15;
+
+    // Sync output toggle from PSU (avoid feedback loop)
+    Toggle outToggle = (Toggle) cp5.getController("btnOutput");
+    if (outToggle.getState() != psu.outputOn) {
+      outToggle.setBroadcast(false);
+      outToggle.setState(psu.outputOn);
+      outToggle.setBroadcast(true);
+    }
+
+    // CV/CC badges
+    badgeCV.active = (psu.outputMode == MODE_CV);
+    badgeCC.active = (psu.outputMode == MODE_CC);
+    badgeCV.draw();
+    badgeCC.draw();
+
+    // Protection status
+    if (psu.protectionStatus != PROT_OK) {
+      fill(COL_OFF);
+      textAlign(LEFT, CENTER);
+      textSize(12);
+      text(psu.protectionStatusText(), rx + 120, 119);
+    } else {
+      fill(COL_ON, 150);
+      textAlign(LEFT, CENTER);
+      textSize(10);
+      text("Normal", rx + 120, 119);
+    }
+
+    // --- Presets ---
+    panelPresets.draw();
+    for (int i = 0; i < 6; i++) {
+      float ppx = panelPresets.contentX() + (i % 3) * 148;
+      float ppy = panelPresets.contentY() + (i / 3) * 72;
+
+      fill(COL_PANEL_LITE);
+      stroke(COL_BORDER);
+      strokeWeight(0.5);
+      rect(ppx, ppy, 140, 65, 3);
+
+      fill(COL_ACCENT);
+      textAlign(LEFT, TOP);
+      textSize(10);
+      text("P" + (i+1), ppx + 5, ppy + 4);
+
+      fill(COL_VOLT);
+      textSize(13);
+      text(nf(psu.presetV[i], 0, 2) + " V", ppx + 5, ppy + 20);
+      fill(COL_CURR);
+      text(nf(psu.presetA[i], 0, 2) + " A", ppx + 5, ppy + 40);
+    }
+
+    // --- Info panel ---
+    panelInfo.draw();
+    float ix = panelInfo.contentX();
+    float iy = panelInfo.contentY();
+    fill(COL_TEXT_DIM);
     textAlign(LEFT, TOP);
     textSize(10);
-    text("P" + (i+1), ppx + 5, ppy + 4);
+    text("Input V:", ix, iy);
+    fill(COL_TEXT); text(nf(psu.inputVoltage, 0, 2) + " V", ix + 75, iy);
+    iy += 16;
+    fill(COL_TEXT_DIM); text("Temperature:", ix, iy);
+    fill(COL_TEXT); text(nf(psu.temperature, 0, 1) + " C", ix + 75, iy);
+    iy += 16;
+    fill(COL_TEXT_DIM); text("Max Voltage:", ix, iy);
+    fill(COL_TEXT); text(nf(psu.maxVoltage, 0, 1) + " V", ix + 75, iy);
+    iy += 14;
+    fill(COL_TEXT_DIM); text("Max Current:", ix, iy);
+    fill(COL_TEXT); text(nf(psu.maxCurrent, 0, 1) + " A", ix + 75, iy);
+    iy += 14;
+    fill(COL_TEXT_DIM); text("Device:", ix, iy);
+    fill(COL_TEXT); text(psu.deviceId.length() > 0 ? psu.deviceId : "--", ix + 75, iy);
+    iy += 14;
+    fill(COL_TEXT_DIM); text("Mode:", ix, iy);
+    fill(psu.outputMode == MODE_CV ? COL_VOLT : COL_CURR);
+    text(psu.outputMode == MODE_CV ? "CV" : "CC", ix + 75, iy);
 
-    fill(COL_VOLT);
-    textSize(13);
-    text(nf(psu.presetV[i], 0, 2) + " V", ppx + 5, ppy + 20);
-    fill(COL_CURR);
-    text(nf(psu.presetA[i], 0, 2) + " A", ppx + 5, ppy + 40);
+    // --- Protection panel ---
+    panelProtection.draw();
 
-    btnPresetLoad[i].draw();
-    btnPresetSave[i].draw();
-  }
-
-  // --- Info panel ---
-  panelInfo.draw();
-  float ix = panelInfo.contentX();
-  float iy = panelInfo.contentY();
-  fill(COL_TEXT_DIM);
-  textAlign(LEFT, TOP);
-  textSize(10);
-  text("Input V:", ix, iy);
-  fill(COL_TEXT); text(nf(psu.inputVoltage, 0, 2) + " V", ix + 75, iy);
-  iy += 16;
-  fill(COL_TEXT_DIM); text("Temperature:", ix, iy);
-  fill(COL_TEXT); text(nf(psu.temperature, 0, 1) + " C", ix + 75, iy);
-  iy += 16;
-  fill(COL_TEXT_DIM); text("Max Voltage:", ix, iy);
-  fill(COL_TEXT); text(nf(psu.maxVoltage, 0, 1) + " V", ix + 75, iy);
-  iy += 14;
-  fill(COL_TEXT_DIM); text("Max Current:", ix, iy);
-  fill(COL_TEXT); text(nf(psu.maxCurrent, 0, 1) + " A", ix + 75, iy);
-  iy += 14;
-  fill(COL_TEXT_DIM); text("Device:", ix, iy);
-  fill(COL_TEXT); text(psu.deviceId.length() > 0 ? psu.deviceId : "--", ix + 75, iy);
-  iy += 14;
-  fill(COL_TEXT_DIM); text("Mode:", ix, iy);
-  fill(psu.outputMode == MODE_CV ? COL_VOLT : COL_CURR);
-  text(psu.outputMode == MODE_CV ? "CV" : "CC", ix + 75, iy);
-  btnRefreshAll.draw();
-
-  // --- Protection panel ---
-  panelProtection.draw();
-  tfOVP.draw(); tfOCP.draw(); tfOPP.draw(); tfOTP.draw();
-  btnApplyProtection.draw();
-  if (!sliderBrightness.dragging) sliderBrightness.value = psu.brightness;
-  sliderBrightness.draw();
-  btnApplyBrightness.draw();
+    // Sync brightness slider from PSU (only when not being interacted with)
+    Slider brSlider = (Slider) cp5.getController("sliderBrightness");
+    if (!brSlider.isMouseOver()) {
+      brSlider.setBroadcast(false);
+      brSlider.setValue(psu.brightness);
+      brSlider.setBroadcast(true);
+    }
 
   } // end if (psu.connected)
 
@@ -498,119 +553,100 @@ void drawGUI() {
   fill(COL_TEXT_DIM);
   textAlign(RIGHT, CENTER);
   text("DPS-150 Control  |  " + nf(frameRate, 0, 0) + " fps", WIN_W - 10, WIN_H - 11);
-
-  // ---- ADVANCED OVERLAY (drawn last, on top) ----
-  drawAdvanced();
-  updateAdvanced();
 }
 
 // ============================================================
-// INPUT HANDLING
+// CP5 EVENT HANDLING
 // ============================================================
 
 /**
- * Handle all mouse-click events for the main GUI.
- *
- * Dispatches to the Advanced overlay if it is open, otherwise
- * processes clicks on the connection bar, output toggle,
- * set-point controls, presets, protection settings, brightness,
- * graph toggles, and logging buttons.
+ * Handle all ControlP5 events by controller name.
  */
-void handleGUIClick() {
-  // --- Advanced window (handles its own clicks when open) ---
-  if (advancedOpen) {
-    handleAdvancedClick();
-    return;
-  }
-
-  // --- Advanced button ---
-  if (btnOpenAdvanced.clicked()) {
-    advancedOpen = true;
-    return;
-  }
+void handleCp5Event(ControlEvent e) {
+  String name = e.getController().getName();
 
   // --- Top bar ---
-  if (!psu.connected) {
-    if (btnPortPrev.clicked() && selectedPortIndex > 0) {
+  if (name.equals("btnPortPrev")) {
+    if (!psu.connected && selectedPortIndex > 0) {
       selectedPortIndex--;
       selectedPortName = availablePorts[selectedPortIndex];
     }
-    if (btnPortNext.clicked() && selectedPortIndex < availablePorts.length - 1) {
+  }
+  else if (name.equals("btnPortNext")) {
+    if (!psu.connected && selectedPortIndex < availablePorts.length - 1) {
       selectedPortIndex++;
       selectedPortName = availablePorts[selectedPortIndex];
     }
-    if (btnRefreshPorts.clicked()) {
-      refreshPorts();
-      setStatus("Ports refreshed. Found " + availablePorts.length + " port(s).");
+  }
+  else if (name.equals("btnRefreshPorts")) {
+    refreshPorts();
+    setStatus("Ports refreshed. Found " + availablePorts.length + " port(s).");
+  }
+  else if (name.equals("btnConnect")) {
+    if (!psu.connected && availablePorts.length > 0) {
+      setStatus("Connecting to " + availablePorts[selectedPortIndex] + "...");
+      if (psu.connectToPort(availablePorts[selectedPortIndex])) {
+        setStatus("Connected to " + psu.connectedPortName + " — Set V/A values and click Apply.");
+      } else {
+        setStatus("Connection failed!");
+      }
     }
   }
-
-  if (btnConnect.clicked() && availablePorts.length > 0) {
-    setStatus("Connecting to " + availablePorts[selectedPortIndex] + "...");
-    if (psu.connectToPort(availablePorts[selectedPortIndex])) {
-      setStatus("Connected to " + psu.connectedPortName + " — Set V/A values and click Apply.");
-    } else {
-      setStatus("Connection failed!");
+  else if (name.equals("btnDisconnect")) {
+    if (psu.connected) {
+      psu.disconnectFromPSU();
+      setStatus("Disconnected.");
     }
   }
-  if (btnDisconnect.clicked()) {
-    psu.disconnectFromPSU();
-    setStatus("Disconnected.");
+  else if (name.equals("btnOpenAdvanced")) {
+    advancedOpen = true;
   }
 
   // --- Output toggle ---
-  if (psu.connected && btnOutput.clicked()) {
-    println("OUTPUT CLICK: outputOn=" + psu.outputOn + " -> " + !psu.outputOn);
-    if (psu.outputOn) { psu.sendOutputOff(); psu.outputOn = false; setStatus("Output OFF"); }
-    else { psu.sendOutputOn(); psu.outputOn = true; setStatus("Output ON"); }
-    outputToggleTime = millis();
+  else if (name.equals("btnOutput")) {
+    if (psu.connected) {
+      boolean newState = ((Toggle) e.getController()).getState();
+      println("OUTPUT CLICK: outputOn=" + psu.outputOn + " -> " + newState);
+      if (newState) { psu.sendOutputOn(); psu.outputOn = true; setStatus("Output ON"); }
+      else { psu.sendOutputOff(); psu.outputOn = false; setStatus("Output OFF"); }
+      outputToggleTime = millis();
+    }
   }
 
-  // --- Text field focus ---
-  boolean anyProtFocused = false;
-  tfSetVoltage.focused = tfSetVoltage.clicked();
-  tfSetCurrent.focused = tfSetCurrent.clicked();
-
   // --- Voltage / Current adjust ---
-  if (btnVoltUp.clicked())       adjustField(tfSetVoltage, 0.1);
-  if (btnVoltDown.clicked())     adjustField(tfSetVoltage, -0.1);
-  if (btnVoltUpFine.clicked())   adjustField(tfSetVoltage, 0.01);
-  if (btnVoltDownFine.clicked()) adjustField(tfSetVoltage, -0.01);
-  if (btnCurrUp.clicked())       adjustField(tfSetCurrent, 0.1);
-  if (btnCurrDown.clicked())     adjustField(tfSetCurrent, -0.1);
-  if (btnCurrUpFine.clicked())   adjustField(tfSetCurrent, 0.01);
-  if (btnCurrDownFine.clicked()) adjustField(tfSetCurrent, -0.01);
+  else if (name.equals("btnVoltUp"))       adjustCp5Field("tfSetVoltage", 0.1, 0, 30);
+  else if (name.equals("btnVoltDown"))     adjustCp5Field("tfSetVoltage", -0.1, 0, 30);
+  else if (name.equals("btnVoltUpFine"))   adjustCp5Field("tfSetVoltage", 0.01, 0, 30);
+  else if (name.equals("btnVoltDownFine")) adjustCp5Field("tfSetVoltage", -0.01, 0, 30);
+  else if (name.equals("btnCurrUp"))       adjustCp5Field("tfSetCurrent", 0.1, 0, 5);
+  else if (name.equals("btnCurrDown"))     adjustCp5Field("tfSetCurrent", -0.1, 0, 5);
+  else if (name.equals("btnCurrUpFine"))   adjustCp5Field("tfSetCurrent", 0.01, 0, 5);
+  else if (name.equals("btnCurrDownFine")) adjustCp5Field("tfSetCurrent", -0.01, 0, 5);
 
-  // --- Apply ---
-  if (btnApply.clicked() && psu.connected) {
-    float v = constrain(tfSetVoltage.getFloat(), 0, psu.maxVoltage);
-    float a = tfSetCurrent.getFloat();
-    if (a < 0.001 && tfSetCurrent.value.length() == 0) {
-      a = psu.setCurrent;
-    }
-    a = constrain(a, 0, psu.maxCurrent);
-    psu.sendSetVoltage(v);
-    delay(100);
-    psu.sendSetCurrent(a);
-    psu.setVoltage = v;
-    psu.setCurrent = a;
-    tfSetVoltage.setFloat(v);
-    tfSetCurrent.setFloat(a);
-    println("APPLY: V=" + nf(v,0,3) + " A=" + nf(a,0,3));
-    setStatus("Applied: " + nf(v,0,3) + "V / " + nf(a,0,3) + "A");
+  // --- Apply settings ---
+  else if (name.equals("btnApply")) {
+    applySetpoints();
+  }
+  else if (name.equals("tfSetVoltage") || name.equals("tfSetCurrent")) {
+    // Textfield submit on Enter
+    applySetpoints();
   }
 
   // --- Presets ---
-  for (int i = 0; i < 6; i++) {
-    if (btnPresetLoad[i].clicked() && psu.connected) {
+  else if (name.startsWith("btnPresetLoad")) {
+    int i = Integer.parseInt(name.substring("btnPresetLoad".length()));
+    if (psu.connected) {
       psu.sendLoadPreset(i);
-      tfSetVoltage.setFloat(psu.presetV[i]);
-      tfSetCurrent.setFloat(psu.presetA[i]);
+      ((Textfield) cp5.getController("tfSetVoltage")).setText(nf(psu.presetV[i], 0, 3));
+      ((Textfield) cp5.getController("tfSetCurrent")).setText(nf(psu.presetA[i], 0, 3));
       setStatus("Loaded preset " + (i+1));
     }
-    if (btnPresetSave[i].clicked() && psu.connected) {
-      float v = tfSetVoltage.getFloat();
-      float a = tfSetCurrent.getFloat();
+  }
+  else if (name.startsWith("btnPresetSave")) {
+    int i = Integer.parseInt(name.substring("btnPresetSave".length()));
+    if (psu.connected) {
+      float v = parseCp5Float("tfSetVoltage");
+      float a = parseCp5Float("tfSetCurrent");
       psu.sendSavePreset(i, v, a);
       psu.presetV[i] = v;
       psu.presetA[i] = a;
@@ -619,126 +655,115 @@ void handleGUIClick() {
   }
 
   // --- Info refresh ---
-  if (btnRefreshAll.clicked() && psu.connected) {
-    psu.gotFirstSetpoint = false;
-    psu.sendReadRegister(REG_ALL);
-    setStatus("Refreshing all parameters...");
+  else if (name.equals("btnRefreshAll")) {
+    if (psu.connected) {
+      psu.gotFirstSetpoint = false;
+      psu.sendReadRegister(REG_ALL);
+      setStatus("Refreshing all parameters...");
+    }
   }
 
   // --- Protection ---
-  if (tfOVP.clicked()) { tfOVP.focused = true; anyProtFocused = true; }
-  if (tfOCP.clicked()) { tfOCP.focused = true; anyProtFocused = true; }
-  if (tfOPP.clicked()) { tfOPP.focused = true; anyProtFocused = true; }
-  if (tfOTP.clicked()) { tfOTP.focused = true; anyProtFocused = true; }
-  if (anyProtFocused) {
-    tfSetVoltage.focused = false;
-    tfSetCurrent.focused = false;
+  else if (name.equals("tfOVP") || name.equals("tfOCP") || name.equals("tfOPP") || name.equals("tfOTP")) {
+    // Textfield submit on Enter — apply protection
+    applyProtection();
   }
-
-  if (btnApplyProtection.clicked() && psu.connected) {
-    psu.sendSetOVP(tfOVP.getFloat());
-    psu.sendSetOCP(tfOCP.getFloat());
-    psu.sendSetOPP(tfOPP.getFloat());
-    psu.sendSetOTP(tfOTP.getFloat());
-    setStatus("Protection limits applied.");
+  else if (name.equals("btnApplyProtection")) {
+    applyProtection();
   }
 
   // --- Brightness ---
-  sliderBrightness.pressedOn();
-  if (btnApplyBrightness.clicked() && psu.connected) {
-    psu.brightness = (int) sliderBrightness.value;
-    psu.sendSetBrightness(psu.brightness);
-    setStatus("Brightness set to " + psu.brightness);
+  else if (name.equals("sliderBrightness")) {
+    // Value changed — do nothing until Set is clicked
+  }
+  else if (name.equals("btnApplyBrightness")) {
+    if (psu.connected) {
+      int brt = (int) ((Slider) cp5.getController("sliderBrightness")).getValue();
+      psu.brightness = brt;
+      psu.sendSetBrightness(brt);
+      setStatus("Brightness set to " + brt);
+    }
   }
 
   // --- Graph toggles ---
-  if (btnGraphV.clicked()) graph.showVoltage = !graph.showVoltage;
-  if (btnGraphA.clicked()) graph.showCurrent = !graph.showCurrent;
-  if (btnGraphW.clicked()) graph.showPower   = !graph.showPower;
+  else if (name.equals("btnGraphV")) { graph.showVoltage = !graph.showVoltage; }
+  else if (name.equals("btnGraphA")) { graph.showCurrent = !graph.showCurrent; }
+  else if (name.equals("btnGraphW")) { graph.showPower   = !graph.showPower; }
 
   // --- Logging ---
-  if (btnStartLog.clicked() && psu.connected && !psu.logging) {
-    psu.startLogging();
-    setStatus("Logging started: " + psu.logFileName);
+  else if (name.equals("btnStartLog")) {
+    if (psu.connected && !psu.logging) {
+      psu.startLogging();
+      setStatus("Logging started: " + psu.logFileName);
+    }
   }
-  if (btnStopLog.clicked() && psu.logging) {
-    psu.stopLogging();
-    setStatus("Logging stopped. " + psu.logSampleCount + " samples saved.");
-  }
-}
-
-/** Handle mouse-release events (slider drag release). */
-void handleGUIRelease() {
-  sliderBrightness.dragging = false;
-}
-
-/**
- * Handle keyboard input for set-point text fields and protection fields.
- *
- * Enter/Return in a set-point field triggers an Apply.
- *
- * @param k    The character typed
- * @param kCode The key code
- */
-void handleGUIKey(char k, int kCode) {
-  // Advanced window gets keys first
-  if (advancedOpen) {
-    handleAdvancedKey(k, kCode);
-    return;
-  }
-
-  tfSetVoltage.handleKey(k, kCode);
-  tfSetCurrent.handleKey(k, kCode);
-  tfOVP.handleKey(k, kCode);
-  tfOCP.handleKey(k, kCode);
-  tfOPP.handleKey(k, kCode);
-  tfOTP.handleKey(k, kCode);
-
-  // Enter to apply
-  if (k == ENTER || k == RETURN) {
-    if ((tfSetVoltage.focused || tfSetCurrent.focused) && psu.connected) {
-      float v = constrain(tfSetVoltage.getFloat(), 0, psu.maxVoltage);
-      float a = tfSetCurrent.getFloat();
-      if (a < 0.001 && tfSetCurrent.value.length() == 0) a = psu.setCurrent;
-      a = constrain(a, 0, psu.maxCurrent);
-      psu.sendSetVoltage(v);
-      delay(100);
-      psu.sendSetCurrent(a);
-      psu.setVoltage = v;
-      psu.setCurrent = a;
-      tfSetVoltage.setFloat(v);
-      tfSetCurrent.setFloat(a);
-      println("APPLY (Enter): V=" + nf(v,0,3) + " A=" + nf(a,0,3));
-      setStatus("Applied: " + nf(v,0,3) + "V / " + nf(a,0,3) + "A");
+  else if (name.equals("btnStopLog")) {
+    if (psu.logging) {
+      psu.stopLogging();
+      setStatus("Logging stopped. " + psu.logSampleCount + " samples saved.");
     }
   }
 }
 
-/**
- * Callback invoked when set-point values are received from the PSU.
- *
- * Populates the voltage/current text fields and protection limit fields
- * with the values reported by the hardware.
- */
-void onSetpointsReceived() {
-  tfSetVoltage.setFloat(psu.setVoltage);
-  tfSetCurrent.setFloat(psu.setCurrent);
-  tfOVP.setFloat(psu.ovpLimit);
-  tfOCP.setFloat(psu.ocpLimit);
-  tfOPP.setFloat(psu.oppLimit);
-  tfOTP.setFloat(psu.otpLimit);
-  println("Setpoints received: V=" + nf(psu.setVoltage, 0, 3) + " A=" + nf(psu.setCurrent, 0, 3));
-  setStatus("Set: " + nf(psu.setVoltage, 0, 3) + "V / " + nf(psu.setCurrent, 0, 3) + "A");
+// ============================================================
+// HELPER FUNCTIONS
+// ============================================================
+
+/** Parse a float from a cp5 textfield, return 0 on error. */
+float parseCp5Float(String tfName) {
+  try {
+    return Float.parseFloat(((Textfield) cp5.getController(tfName)).getText().trim());
+  } catch (Exception e) {
+    return 0;
+  }
+}
+
+/** Adjust a cp5 textfield value by delta, clamped to min/max. */
+void adjustCp5Field(String tfName, float delta, float minVal, float maxVal) {
+  float val = constrain(parseCp5Float(tfName) + delta, minVal, maxVal);
+  ((Textfield) cp5.getController(tfName)).setText(nf(val, 0, 3));
+}
+
+/** Apply voltage/current setpoints from text fields. */
+void applySetpoints() {
+  if (!psu.connected) return;
+  float v = constrain(parseCp5Float("tfSetVoltage"), 0, psu.maxVoltage);
+  float a = parseCp5Float("tfSetCurrent");
+  if (a < 0.001) a = psu.setCurrent;
+  a = constrain(a, 0, psu.maxCurrent);
+  psu.sendSetVoltage(v);
+  delay(100);
+  psu.sendSetCurrent(a);
+  psu.setVoltage = v;
+  psu.setCurrent = a;
+  ((Textfield) cp5.getController("tfSetVoltage")).setText(nf(v, 0, 3));
+  ((Textfield) cp5.getController("tfSetCurrent")).setText(nf(a, 0, 3));
+  println("APPLY: V=" + nf(v,0,3) + " A=" + nf(a,0,3));
+  setStatus("Applied: " + nf(v,0,3) + "V / " + nf(a,0,3) + "A");
+}
+
+/** Apply protection limits from text fields. */
+void applyProtection() {
+  if (!psu.connected) return;
+  psu.sendSetOVP(parseCp5Float("tfOVP"));
+  psu.sendSetOCP(parseCp5Float("tfOCP"));
+  psu.sendSetOPP(parseCp5Float("tfOPP"));
+  psu.sendSetOTP(parseCp5Float("tfOTP"));
+  setStatus("Protection limits applied.");
 }
 
 /**
- * Adjust a numeric text field by a delta, clamped to its min/max range.
- * @param tf    Target text field
- * @param delta Amount to add (positive or negative)
+ * Callback invoked when set-point values are received from the PSU.
  */
-void adjustField(TextField tf, float delta) {
-  float val = constrain(tf.getFloat() + delta, tf.minVal, tf.maxVal);
-  tf.setFloat(val);
+void onSetpointsReceived() {
+  ((Textfield) cp5.getController("tfSetVoltage")).setText(nf(psu.setVoltage, 0, 3));
+  ((Textfield) cp5.getController("tfSetCurrent")).setText(nf(psu.setCurrent, 0, 3));
+  ((Textfield) cp5.getController("tfOVP")).setText(nf(psu.ovpLimit, 0, 3));
+  ((Textfield) cp5.getController("tfOCP")).setText(nf(psu.ocpLimit, 0, 3));
+  ((Textfield) cp5.getController("tfOPP")).setText(nf(psu.oppLimit, 0, 3));
+  ((Textfield) cp5.getController("tfOTP")).setText(nf(psu.otpLimit, 0, 3));
+  println("Setpoints received: V=" + nf(psu.setVoltage, 0, 3) + " A=" + nf(psu.setCurrent, 0, 3));
+  setStatus("Set: " + nf(psu.setVoltage, 0, 3) + "V / " + nf(psu.setCurrent, 0, 3) + "A");
 }
 
 // ============================================================

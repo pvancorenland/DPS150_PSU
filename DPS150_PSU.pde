@@ -9,10 +9,16 @@
  * Window size: 1100 x 720 pixels.
  */
 
+import controlP5.*;
+
+ControlP5 cp5;
+
 void setup() {
   size(1100, 720);
   surface.setTitle("FNIRSI DPS-150 Power Supply Control");
   smooth(4);
+  cp5 = new ControlP5(this);
+  cp5.setAutoDraw(false);
   psu.initHistory();
   initGUI();
 }
@@ -22,6 +28,9 @@ void setup() {
  */
 void draw() {
   drawGUI();
+  cp5.draw();
+  drawAdvanced();
+  updateAdvanced();
   psu.pollPSU();
 }
 
@@ -37,22 +46,31 @@ void serialEvent(Serial port) {
   }
 }
 
-/** Route mouse-press events to the GUI handler. */
+/** Route mouse-press events — Advanced overlay gets priority. */
 void mousePressed() {
-  handleGUIClick();
+  if (advancedOpen) {
+    handleAdvancedClick();
+  }
+  // cp5 handles its own mouse events automatically
 }
 
-/** Route mouse-release events to the GUI handler. */
-void mouseReleased() {
-  handleGUIRelease();
-}
-
-/** Route key-press events to the GUI handler. */
+/** Route key-press events — Advanced overlay gets priority. */
 void keyPressed() {
-  handleGUIKey(key, keyCode);
+  if (advancedOpen) {
+    handleAdvancedKey(key, keyCode);
+  }
+  // cp5 handles textfield key events automatically
 }
 
 /** Route mouse-wheel events to the graph zoom handler. */
 void mouseWheel(MouseEvent event) {
   handleMouseWheel(event.getCount());
+}
+
+/**
+ * ControlP5 event handler — dispatches all cp5 widget events.
+ */
+void controlEvent(ControlEvent e) {
+  if (advancedOpen) return;
+  handleCp5Event(e);
 }
