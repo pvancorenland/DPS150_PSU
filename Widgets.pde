@@ -15,6 +15,24 @@
  */
 
 // ============================================================
+// Widget base class — shared position, size, and hit-testing
+// ============================================================
+class Widget {
+  float x, y, w, h;
+  boolean visible = true;
+
+  Widget(float x, float y, float w, float h) {
+    this.x = x; this.y = y; this.w = w; this.h = h;
+  }
+
+  boolean hitTest() {
+    return mouseX >= x && mouseX <= x+w && mouseY >= y && mouseY <= y+h;
+  }
+
+  void draw() {}
+}
+
+// ============================================================
 // COLOR PALETTE — professional instrument look
 // ============================================================
 
@@ -215,8 +233,7 @@ class CircularGauge {
  * Supports mouse-wheel zoom.
  */
 // ============================================================
-class ScrollingGraph {
-  float x, y, w, h;              ///< Position and size
+class ScrollingGraph extends Widget {
   String title;                   ///< Title text shown in header bar
   boolean showVoltage = true;     ///< Show voltage trace
   boolean showCurrent = true;     ///< Show current trace
@@ -232,7 +249,7 @@ class ScrollingGraph {
    * @param h Height
    */
   ScrollingGraph(float x, float y, float w, float h) {
-    this.x = x; this.y = y; this.w = w; this.h = h;
+    super(x, y, w, h);
     this.title = "Waveform";
   }
 
@@ -365,8 +382,7 @@ class ScrollingGraph {
  * @brief Titled panel container with a header bar.
  */
 // ============================================================
-class Panel {
-  float x, y, w, h;   ///< Position and size
+class Panel extends Widget {
   String title;        ///< Header title text
 
   /**
@@ -377,7 +393,7 @@ class Panel {
    * @param title Header text
    */
   Panel(float x, float y, float w, float h, String title) {
-    this.x = x; this.y = y; this.w = w; this.h = h;
+    super(x, y, w, h);
     this.title = title;
   }
 
@@ -411,8 +427,7 @@ class Panel {
  * @brief Clickable button with hover highlight and optional rounding.
  */
 // ============================================================
-class Button {
-  float x, y, w, h;                ///< Position and size
+class Button extends Widget {
   String label;                     ///< Button label text
   color bgColor, hoverColor, textColor; ///< Color scheme
   boolean hovered = false;          ///< True while mouse is over the button
@@ -427,7 +442,7 @@ class Button {
    * @param label Button text
    */
   Button(float x, float y, float w, float h, String label) {
-    this.x = x; this.y = y; this.w = w; this.h = h;
+    super(x, y, w, h);
     this.label = label;
     this.bgColor = COL_BTN;
     this.hoverColor = COL_BTN_HOVER;
@@ -436,7 +451,7 @@ class Button {
 
   /** Draw the button with shadow, body, highlight, and label. */
   void draw() {
-    hovered = enabled && mouseX >= x && mouseX <= x+w && mouseY >= y && mouseY <= y+h;
+    hovered = enabled && hitTest();
     fill(0, 25);
     noStroke();
     rect(x+1, y+1, w, h, rounded ? h/2 : 4);
@@ -456,7 +471,7 @@ class Button {
 
   /** @return True if the button is enabled and the mouse is over it. */
   boolean clicked() {
-    return enabled && mouseX >= x && mouseX <= x+w && mouseY >= y && mouseY <= y+h;
+    return enabled && hitTest();
   }
 }
 
@@ -468,8 +483,7 @@ class Button {
  * Used for the main output enable/disable control.
  */
 // ============================================================
-class ToggleButton {
-  float x, y, w, h;       ///< Position and size
+class ToggleButton extends Widget {
   boolean state = false;   ///< Current ON/OFF state
   boolean hovered = false; ///< Mouse hover state
 
@@ -480,12 +494,12 @@ class ToggleButton {
    * @param h Height
    */
   ToggleButton(float x, float y, float w, float h) {
-    this.x = x; this.y = y; this.w = w; this.h = h;
+    super(x, y, w, h);
   }
 
   /** Draw the toggle button with LED indicator and label. */
   void draw() {
-    hovered = mouseX >= x && mouseX <= x+w && mouseY >= y && mouseY <= y+h;
+    hovered = hitTest();
 
     if (state) {
       fill(COL_ON, 15);
@@ -516,7 +530,7 @@ class ToggleButton {
 
   /** @return True if the mouse is over this button. */
   boolean clicked() {
-    return mouseX >= x && mouseX <= x+w && mouseY >= y && mouseY <= y+h;
+    return hitTest();
   }
 }
 
@@ -526,8 +540,7 @@ class ToggleButton {
  * @brief Numeric text input field with label, suffix, and blinking cursor.
  */
 // ============================================================
-class TextField {
-  float x, y, w, h;        ///< Position and size
+class TextField extends Widget {
   String value = "";        ///< Current text value
   String label = "";        ///< Label displayed above the field
   String suffix = "";       ///< Unit suffix displayed after the value
@@ -545,14 +558,14 @@ class TextField {
    * @param suffix Unit suffix ("V", "A", etc.)
    */
   TextField(float x, float y, float w, float h, String label, String suffix) {
-    this.x = x; this.y = y; this.w = w; this.h = h;
+    super(x, y, w, h);
     this.label = label;
     this.suffix = suffix;
   }
 
   /** Draw the text field with label, input box, cursor, and value. */
   void draw() {
-    hovered = mouseX >= x && mouseX <= x+w && mouseY >= y && mouseY <= y+h;
+    hovered = hitTest();
     fill(COL_TEXT_DIM);
     textAlign(LEFT, BOTTOM);
     textSize(10);
@@ -576,7 +589,7 @@ class TextField {
 
   /** @return True if the mouse is over this field. */
   boolean clicked() {
-    return mouseX >= x && mouseX <= x+w && mouseY >= y && mouseY <= y+h;
+    return hitTest();
   }
 
   /**
@@ -616,8 +629,7 @@ class TextField {
  * @brief Horizontal slider with label, value readout, and draggable knob.
  */
 // ============================================================
-class Slider {
-  float x, y, w, h;        ///< Position and size
+class Slider extends Widget {
   float minVal = 0;         ///< Minimum value
   float maxVal = 20;        ///< Maximum value
   float value = 10;         ///< Current value
@@ -635,7 +647,7 @@ class Slider {
    * @param maxVal Maximum value
    */
   Slider(float x, float y, float w, float h, String label, float minVal, float maxVal) {
-    this.x = x; this.y = y; this.w = w; this.h = h;
+    super(x, y, w, h);
     this.label = label;
     this.minVal = minVal; this.maxVal = maxVal;
   }
@@ -683,8 +695,7 @@ class Slider {
  * When active, displays a glow effect and the active color.
  */
 // ============================================================
-class StatusBadge {
-  float x, y, w, h;       ///< Position and size
+class StatusBadge extends Widget {
   String label;            ///< Badge text
   color activeColor;       ///< Color when active
   boolean active = false;  ///< Active state
@@ -698,7 +709,7 @@ class StatusBadge {
    * @param activeColor Color when active
    */
   StatusBadge(float x, float y, float w, float h, String label, color activeColor) {
-    this.x = x; this.y = y; this.w = w; this.h = h;
+    super(x, y, w, h);
     this.label = label;
     this.activeColor = activeColor;
   }
@@ -730,8 +741,7 @@ class StatusBadge {
  * resemble a backlit LCD panel on lab equipment.
  */
 // ============================================================
-class DigitalReadout {
-  float x, y, w, h;        ///< Position and size
+class DigitalReadout extends Widget {
   String value = "0.000";  ///< Display string
   String unit = "V";       ///< Unit suffix
   String label = "";       ///< Left-side label
@@ -747,7 +757,7 @@ class DigitalReadout {
    * @param c     Display color
    */
   DigitalReadout(float x, float y, float w, float h, String unit, String label, color c) {
-    this.x = x; this.y = y; this.w = w; this.h = h;
+    super(x, y, w, h);
     this.unit = unit; this.label = label; this.displayColor = c;
   }
 
