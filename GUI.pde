@@ -636,9 +636,9 @@ void handleCp5Event(ControlEvent e) {
     }
   }
 
-  // --- Vset / Iset sliders ---
+  // --- Vset / Iset sliders (only when user is actively dragging) ---
   else if (name.equals("sliderVset")) {
-    if (psu.connected) {
+    if (psu.connected && sliderVset.isMouseOver()) {
       float v = sliderVset.getValue();
       psu.sendSetVoltage(v);
       psu.setVoltage = v;
@@ -647,7 +647,7 @@ void handleCp5Event(ControlEvent e) {
     }
   }
   else if (name.equals("sliderIset")) {
-    if (psu.connected) {
+    if (psu.connected && sliderIset.isMouseOver()) {
       float a = sliderIset.getValue();
       psu.sendSetCurrent(a);
       psu.setCurrent = a;
