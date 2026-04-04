@@ -19,7 +19,14 @@
       "Bash(gcc:*)",
       "Bash(gcc -o test_read_regs test_read_regs.c -Wall && ./test_read_regs /dev/cu.usbmodem14798A3C25651 2>&1)",
       "Bash(gcc -o test_live_stream test_live_stream.c -Wall && ./test_live_stream /dev/cu.usbmodem14798A3C25651 2>&1)",
-      "Bash(./test_live_stream:*)"
+      "Bash(./test_live_stream:*)",
+      "WebFetch(domain:deepwiki.com)",
+      "WebFetch(domain:tekkix.com)",
+      "WebFetch(domain:iot-kmutnb.github.io)",
+      "WebFetch(domain:gitlab.com)",
+      "Bash(echo Failed to list repo:*)",
+      "Bash(curl:*)",
+      "Bash(gcc -o test_read_setpoints test_read_setpoints.c -Wall && ./test_read_setpoints /dev/cu.usbmodem14798A3C25651 2>&1)"
     ]
   }
 }

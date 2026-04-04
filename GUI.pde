@@ -525,10 +525,10 @@ void handleGUIClick() {
   // --- Presets ---
   for (int i = 0; i < 6; i++) {
     if (btnPresetLoad[i].clicked() && connected) {
-      // DPS-150 can't read presets — use locally stored values
+      sendLoadPreset(i);
       tfSetVoltage.setFloat(presetV[i]);
       tfSetCurrent.setFloat(presetA[i]);
-      setStatus("Loaded preset " + (i+1) + ": " + nf(presetV[i],0,2) + "V / " + nf(presetA[i],0,2) + "A");
+      setStatus("Loaded preset " + (i+1));
     }
     if (btnPresetSave[i].clicked() && connected) {
       float v = tfSetVoltage.getFloat();
@@ -540,9 +540,11 @@ void handleGUIClick() {
     }
   }
 
-  // --- Info refresh (DPS-150 only supports live V/A/W reads) ---
+  // --- Info refresh ---
   if (btnRefreshAll.clicked() && connected) {
-    setStatus("Note: DPS-150 only supports live V/A/W readings.");
+    gotFirstSetpoint = false;
+    sendReadRegister(REG_ALL);
+    setStatus("Refreshing all parameters...");
   }
 
   // --- Protection ---
@@ -624,12 +626,16 @@ void handleGUIKey(char k, int kCode) {
   }
 }
 
-// Called on first live frame after connect — sync voltage text field
-void onFirstLiveReceived() {
+// Called when setpoints are received from PSU (after connect or ALL dump)
+void onSetpointsReceived() {
   tfSetVoltage.setFloat(setVoltage);
-  // setCurrent can't be read from DPS-150, so leave the text field as-is
-  // User must enter/confirm the current limit manually
-  println("First live: Vset=" + nf(setVoltage, 0, 3) + " (Iset unknown — set manually)");
+  tfSetCurrent.setFloat(setCurrent);
+  tfOVP.setFloat(ovpLimit);
+  tfOCP.setFloat(ocpLimit);
+  tfOPP.setFloat(oppLimit);
+  tfOTP.setFloat(otpLimit);
+  println("Setpoints received: V=" + nf(setVoltage, 0, 3) + " A=" + nf(setCurrent, 0, 3));
+  setStatus("Set: " + nf(setVoltage, 0, 3) + "V / " + nf(setCurrent, 0, 3) + "A");
 }
 
 void adjustField(TextField tf, float delta) {

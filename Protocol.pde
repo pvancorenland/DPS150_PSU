@@ -16,13 +16,13 @@ static final int CMD_WRITE_BYTE  = 0xB1;
 static final int CMD_CONFIG      = 0xC0;
 static final int CMD_CONNECT     = 0xC1;
 
-// Registers
+// Registers — verified against DPS-150 hardware
 static final int REG_BAUD_RATE   = 0x00;
-static final int REG_SET_VOLTAGE = 0xC0;
-static final int REG_WRITE_VOLT  = 0xC1;
-static final int REG_WRITE_CURR  = 0xC2;
-static final int REG_LIVE_VALUES = 0xC3;
-static final int REG_TEMPERATURE = 0xC4;
+static final int REG_INPUT_VOLT  = 0xC0;  // Input voltage (streamed, read-only)
+static final int REG_SET_VOLT    = 0xC1;  // Voltage setpoint (read/write)
+static final int REG_SET_CURR    = 0xC2;  // Current setpoint (read/write)
+static final int REG_LIVE_VALUES = 0xC3;  // Live V/A/W (streamed, 12 bytes)
+static final int REG_TEMPERATURE = 0xC4;  // Temperature (streamed, read-only)
 static final int[] REG_PRESET_V  = {0xC5, 0xC7, 0xC9, 0xCB, 0xCD, 0xCF};
 static final int[] REG_PRESET_A  = {0xC6, 0xC8, 0xCA, 0xCC, 0xCE, 0xD0};
 static final int REG_OVP         = 0xD1;
@@ -35,13 +35,13 @@ static final int REG_CAP_WH      = 0xDA;
 static final int REG_OUTPUT      = 0xDB;
 static final int REG_PROTECTION  = 0xDC;
 static final int REG_MODE        = 0xDD;
-static final int REG_SET_CURRENT = 0xDE;
-static final int REG_SERIAL      = 0xDF;
+static final int REG_MODEL_NAME  = 0xDE;  // Device model string (streamed, 7 bytes)
+static final int REG_HW_VERSION  = 0xDF;
 static final int REG_FIRMWARE    = 0xE0;
 static final int REG_DEVICE_ID   = 0xE1;
-static final int REG_MAX_VOLT    = 0xE2;
-static final int REG_MAX_CURR    = 0xE3;
-static final int REG_ALL         = 0xFF;
+static final int REG_MAX_VOLT    = 0xE2;  // Max voltage (streamed)
+static final int REG_MAX_CURR    = 0xE3;  // Max current (streamed)
+static final int REG_ALL         = 0xFF;  // All params dump (139 bytes)
 
 // Protection status codes
 static final int PROT_OK  = 0;
@@ -90,7 +90,7 @@ float oppLimit = 0;
 float otpLimit = 0;
 
 // Receive buffer & state machine
-int[] rxBuf = new int[256];
+int[] rxBuf = new int[512];
 int rxPos = 0;
 int rxExpectedLen = 0;
 
@@ -98,7 +98,7 @@ int rxExpectedLen = 0;
 long lastPollTime = 0;
 int pollInterval = 200;
 // (full reads now happen as part of the rotating poll cycle)
-boolean gotFirstLive = false;
+boolean gotFirstSetpoint = false;
 
 // --- Data logging ---
 boolean logging = false;
@@ -225,13 +225,13 @@ void sendOutputOff() {
 void sendSetVoltage(float v) {
   byte[] fb = floatToLE(v);
   int[] data = {fb[0] & 0xFF, fb[1] & 0xFF, fb[2] & 0xFF, fb[3] & 0xFF};
-  sendPacket(CMD_WRITE_BYTE, REG_WRITE_VOLT, data);
+  sendPacket(CMD_WRITE_BYTE, REG_SET_VOLT, data);
 }
 
 void sendSetCurrent(float a) {
   byte[] fb = floatToLE(a);
   int[] data = {fb[0] & 0xFF, fb[1] & 0xFF, fb[2] & 0xFF, fb[3] & 0xFF};
-  sendPacket(CMD_WRITE_BYTE, REG_WRITE_CURR, data);
+  sendPacket(CMD_WRITE_BYTE, REG_SET_CURR, data);
 }
 
 void sendReadRegister(int register_) {
@@ -298,65 +298,105 @@ void processSerialByte(int b) {
         }
         rxPos = 0;
       }
-      if (rxPos >= 250) rxPos = 0;
+      if (rxPos >= 500) rxPos = 0;
       return;
   }
 }
 
 // --- Process a validated response packet ---
-// DPS-150 continuously streams these packets (no read requests needed):
-//   0xC3 (12 bytes): live V, A, W
-//   0xC0 (4 bytes):  input voltage
-//   0xE2 (4 bytes):  max voltage (derived from input)
-//   0xE3 (4 bytes):  max current
-//   0xC4 (4 bytes):  temperature
-//   0xDE (7 bytes):  device ID string ("DPS-150")
+// DPS-150 streams: 0xC3 (live V/A/W), 0xC0 (input V), 0xE2 (max V),
+//   0xE3 (max A), 0xC4 (temp), 0xDE (model string)
+// Also responds to explicit reads: 0xC1 (Vset), 0xC2 (Iset), 0xFF (all)
 void processResponsePacket(int[] buf, int len) {
   int reg = buf[2];
   int dataLen = buf[3];
 
   if (reg == REG_LIVE_VALUES && dataLen >= 12) {
-    // Live output: V, A, W
-    // Note: first float is set/output voltage (matches PSU Vset even with output OFF)
-    // Second float is measured output current (0 with no load — NOT the Iset limit)
     liveVoltage = leToFloat(buf[4], buf[5], buf[6], buf[7]);
     liveCurrent = leToFloat(buf[8], buf[9], buf[10], buf[11]);
     livePower   = leToFloat(buf[12], buf[13], buf[14], buf[15]);
-
-    // On first live frame, sync setVoltage from the live reading
-    if (!gotFirstLive) {
-      gotFirstLive = true;
-      setVoltage = liveVoltage;
-      onFirstLiveReceived();
-    }
     addHistorySample();
   }
-  else if (reg == REG_SET_VOLTAGE && dataLen >= 4) {
-    // 0xC0 = input voltage (not set voltage!)
+  else if (reg == REG_INPUT_VOLT && dataLen >= 4) {
     inputVoltage = leToFloat(buf[4], buf[5], buf[6], buf[7]);
   }
+  else if (reg == REG_SET_VOLT && dataLen >= 4) {
+    setVoltage = leToFloat(buf[4], buf[5], buf[6], buf[7]);
+    if (!gotFirstSetpoint) { gotFirstSetpoint = true; onSetpointsReceived(); }
+  }
+  else if (reg == REG_SET_CURR && dataLen >= 4) {
+    setCurrent = leToFloat(buf[4], buf[5], buf[6], buf[7]);
+    if (!gotFirstSetpoint) { gotFirstSetpoint = true; onSetpointsReceived(); }
+  }
+  else if (reg == REG_TEMPERATURE && dataLen >= 4) {
+    temperature = leToFloat(buf[4], buf[5], buf[6], buf[7]);
+  }
   else if (reg == REG_MAX_VOLT && dataLen >= 4) {
-    // 0xE2 = max voltage (derived from input voltage)
     maxVoltage = leToFloat(buf[4], buf[5], buf[6], buf[7]);
   }
   else if (reg == REG_MAX_CURR && dataLen >= 4) {
-    // 0xE3 = max current
     maxCurrent = leToFloat(buf[4], buf[5], buf[6], buf[7]);
   }
-  else if (reg == REG_TEMPERATURE && dataLen >= 4) {
-    // 0xC4 = temperature in °C
-    temperature = leToFloat(buf[4], buf[5], buf[6], buf[7]);
-  }
-  else if (reg == REG_SET_CURRENT && dataLen >= 4) {
-    // 0xDE with 7 bytes = device ID string, not a float
-    // (handled below)
-  }
-
-  // 0xDE with 7 bytes = device ID "DPS-150"
-  if (reg == REG_SET_CURRENT && dataLen == 7) {
+  else if (reg == REG_MODEL_NAME && dataLen >= 4) {
+    // 0xDE: model name string (e.g. "DPS-150")
     StringBuilder sb = new StringBuilder();
     for (int i = 0; i < dataLen; i++) sb.append((char)buf[4+i]);
     deviceId = sb.toString();
+  }
+  else if (reg == REG_OUTPUT && dataLen >= 1) {
+    outputOn = (buf[4] == 1);
+  }
+  else if (reg == REG_MODE && dataLen >= 1) {
+    outputMode = buf[4];
+  }
+  else if (reg == REG_PROTECTION && dataLen >= 1) {
+    protectionStatus = buf[4];
+  }
+  else if (reg == REG_BRIGHTNESS && dataLen >= 1) {
+    brightness = buf[4];
+  }
+  else if (reg == REG_OVP && dataLen >= 4) { ovpLimit = leToFloat(buf[4], buf[5], buf[6], buf[7]); }
+  else if (reg == REG_OCP && dataLen >= 4) { ocpLimit = leToFloat(buf[4], buf[5], buf[6], buf[7]); }
+  else if (reg == REG_OPP && dataLen >= 4) { oppLimit = leToFloat(buf[4], buf[5], buf[6], buf[7]); }
+  else if (reg == REG_OTP && dataLen >= 4) { otpLimit = leToFloat(buf[4], buf[5], buf[6], buf[7]); }
+  else if (reg == REG_CAP_AH && dataLen >= 4) { capacityAh = leToFloat(buf[4], buf[5], buf[6], buf[7]); }
+  else if (reg == REG_CAP_WH && dataLen >= 4) { capacityWh = leToFloat(buf[4], buf[5], buf[6], buf[7]); }
+  else if (reg == REG_ALL && dataLen >= 139) {
+    // Bulk dump: offsets verified from test
+    // 0: input V, 4: set V, 8: set I, 12: live V, 16: live I, 20: live W, 24: temp
+    inputVoltage = leToFloat(buf[4+0], buf[4+1], buf[4+2], buf[4+3]);
+    setVoltage   = leToFloat(buf[4+4], buf[4+5], buf[4+6], buf[4+7]);
+    setCurrent   = leToFloat(buf[4+8], buf[4+9], buf[4+10], buf[4+11]);
+    liveVoltage  = leToFloat(buf[4+12], buf[4+13], buf[4+14], buf[4+15]);
+    liveCurrent  = leToFloat(buf[4+16], buf[4+17], buf[4+18], buf[4+19]);
+    livePower    = leToFloat(buf[4+20], buf[4+21], buf[4+22], buf[4+23]);
+    temperature  = leToFloat(buf[4+24], buf[4+25], buf[4+26], buf[4+27]);
+    // Presets at offset 28 (6 pairs of V+A floats = 48 bytes)
+    for (int i = 0; i < 6; i++) {
+      int off = 4 + 28 + i * 8;
+      presetV[i] = leToFloat(buf[off], buf[off+1], buf[off+2], buf[off+3]);
+      presetA[i] = leToFloat(buf[off+4], buf[off+5], buf[off+6], buf[off+7]);
+    }
+    // offset 76: max V, 80: max A
+    maxVoltage = leToFloat(buf[4+76], buf[4+77], buf[4+78], buf[4+79]);
+    maxCurrent = leToFloat(buf[4+80], buf[4+81], buf[4+82], buf[4+83]);
+    // offset 84: OVP, 88: OCP, 92: OPP, 96: OTP
+    ovpLimit = leToFloat(buf[4+84], buf[4+85], buf[4+86], buf[4+87]);
+    ocpLimit = leToFloat(buf[4+88], buf[4+89], buf[4+90], buf[4+91]);
+    oppLimit = leToFloat(buf[4+92], buf[4+93], buf[4+94], buf[4+95]);
+    otpLimit = leToFloat(buf[4+96], buf[4+97], buf[4+98], buf[4+99]);
+    addHistorySample();
+    onSetpointsReceived();
+  }
+
+  // Preset registers (individual reads)
+  for (int i = 0; i < 6; i++) {
+    if (reg == REG_PRESET_V[i] && dataLen >= 4) {
+      presetV[i] = leToFloat(buf[4], buf[5], buf[6], buf[7]);
+    }
+    if (reg == REG_PRESET_A[i] && dataLen >= 4) {
+      presetA[i] = leToFloat(buf[4], buf[5], buf[6], buf[7]);
+    }
   }
 }
 
@@ -378,6 +418,10 @@ boolean connectToPort(String portName) {
     sendConnect();
     delay(500);
     connected = true;
+    // Request setpoints and full parameter dump
+    sendReadRegister(REG_SET_VOLT);
+    sendReadRegister(REG_SET_CURR);
+    sendReadRegister(REG_ALL);
     return true;
   } catch (Exception e) {
     println("Connection failed: " + e.getMessage());
@@ -397,7 +441,7 @@ void disconnectFromPSU() {
   }
   connected = false;
   connectedPortName = "";
-  gotFirstLive = false;
+  gotFirstSetpoint = false;
 }
 
 // --- Polling ---
