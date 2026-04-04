@@ -34,14 +34,15 @@ static final int TOP_BAR_H = 40, LEFT_W = 620, RIGHT_W = 470;
 // Cached CP5 controller references (avoid per-frame string lookups)
 // ============================================================
 Group grpConnected;
-Controller cPortPrev, cPortNext, cConnect, cDisconnect, cRefreshPorts, cOpenAdvanced;
+Controller cPortPrev, cPortNext, cConnToggle, cRefreshPorts, cOpenAdvanced;
 Controller cGraphV, cGraphA, cGraphW, cStartLog, cStopLog;
 Toggle cOutput;
 Textfield cTfSetV, cTfSetA, cTfOVP, cTfOCP, cTfOPP, cTfOTP;
 Slider cBrightness;
 
-// Previous graph toggle state — avoid redundant setColorBackground every frame
+// Previous state — avoid redundant updates every frame
 boolean prevShowV = true, prevShowA = true, prevShowW = false;
+boolean prevConnState = false;
 
 void setStatus(String msg) {
   statusMessage = msg;
@@ -91,10 +92,8 @@ void initGUI() {
   applyDarkTheme(cPortPrev);
   cPortNext = cp5.addButton("btnPortNext").setPosition(560, 8).setSize(22, 24).setLabel(">");
   applyDarkTheme(cPortNext);
-  cConnect = cp5.addButton("btnConnect").setPosition(600, 6).setSize(90, 28).setLabel("Connect");
-  applyGreenTheme(cConnect);
-  cDisconnect = cp5.addButton("btnDisconnect").setPosition(698, 6).setSize(90, 28).setLabel("Disconnect");
-  applyRedTheme(cDisconnect);
+  cConnToggle = cp5.addButton("btnConnToggle").setPosition(600, 6).setSize(90, 28).setLabel("Connect");
+  applyGreenTheme(cConnToggle);
   cRefreshPorts = cp5.addButton("btnRefreshPorts").setPosition(796, 6).setSize(70, 28).setLabel("Refresh");
   applyDarkTheme(cRefreshPorts);
   cOpenAdvanced = cp5.addButton("btnOpenAdvanced").setPosition(WIN_W - 100, 6).setSize(90, 28).setLabel("Advanced");
@@ -284,8 +283,17 @@ void drawGUI() {
   boolean conn = psu.connected;
   cPortPrev.setVisible(!conn);
   cPortNext.setVisible(!conn);
-  cConnect.setLock(conn || availablePorts.length == 0);
-  cDisconnect.setLock(!conn);
+  cConnToggle.setLock(!conn && availablePorts.length == 0);
+  if (conn != prevConnState) {
+    prevConnState = conn;
+    if (conn) {
+      cConnToggle.setLabel("Disconnect");
+      applyRedTheme(cConnToggle);
+    } else {
+      cConnToggle.setLabel("Connect");
+      applyGreenTheme(cConnToggle);
+    }
+  }
   cRefreshPorts.setVisible(!conn);
   cOpenAdvanced.setVisible(conn);
 
@@ -448,12 +456,7 @@ void drawConnectedGUI() {
   // Protection panel
   panelProtection.draw();
 
-  // Sync brightness slider (cached ref)
-  if (!cBrightness.isMouseOver()) {
-    cBrightness.setBroadcast(false);
-    cBrightness.setValue(psu.brightness);
-    cBrightness.setBroadcast(true);
-  }
+  // Brightness slider is synced once in onSetpointsReceived(), not every frame
 }
 
 // ============================================================
@@ -480,8 +483,11 @@ void handleCp5Event(ControlEvent e) {
     refreshPorts();
     setStatus("Ports refreshed. Found " + availablePorts.length + " port(s).");
   }
-  else if (name.equals("btnConnect")) {
-    if (!psu.connected && availablePorts.length > 0) {
+  else if (name.equals("btnConnToggle")) {
+    if (psu.connected) {
+      psu.disconnectFromPSU();
+      setStatus("Disconnected.");
+    } else if (availablePorts.length > 0) {
       setStatus("Connecting to " + availablePorts[selectedPortIndex] + "...");
       if (psu.connectToPort(availablePorts[selectedPortIndex])) {
         setStatus("Connected to " + psu.connectedPortName + " — Set V/A values and click Apply.");
@@ -489,9 +495,6 @@ void handleCp5Event(ControlEvent e) {
         setStatus("Connection failed!");
       }
     }
-  }
-  else if (name.equals("btnDisconnect")) {
-    if (psu.connected) { psu.disconnectFromPSU(); setStatus("Disconnected."); }
   }
   else if (name.equals("btnOpenAdvanced")) { advancedOpen = true; }
 
@@ -625,6 +628,9 @@ void onSetpointsReceived() {
   cTfOCP.setText(nf(psu.ocpLimit, 0, 3));
   cTfOPP.setText(nf(psu.oppLimit, 0, 3));
   cTfOTP.setText(nf(psu.otpLimit, 0, 3));
+  cBrightness.setBroadcast(false);
+  cBrightness.setValue(psu.brightness);
+  cBrightness.setBroadcast(true);
   setStatus("Set: " + nf(psu.setVoltage, 0, 3) + "V / " + nf(psu.setCurrent, 0, 3) + "A");
 }
 
