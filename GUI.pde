@@ -209,14 +209,14 @@ void initGUI() {
   c = cp5.addButton("btnApplyProtection").setPosition(px2 + 110, py2 + 56).setSize(80, 22).setLabel("Apply").setGroup(grpConnected);
   applyGreenTheme(c);
 
-  cBrightness = (Slider) cp5.addSlider("sliderBrightness").setPosition(px2 + 110, py2 + 100).setSize(80, 16)
-    .setRange(0, 20).setValue(10).setNumberOfTickMarks(21).snapToTickMarks(true)
-    .setLabel("Brightness").setGroup(grpConnected);
+  cBrightness = cp5.addSlider("sliderBrightness").setPosition(px2 + 110, py2 + 98).setSize(80, 20)
+    .setRange(0, 20).setValue(10).setLabel("Brightness");
   cBrightness.setColorBackground(color(0x1A, 0x1A, 0x25));
   cBrightness.setColorForeground(color(0x4A, 0x90, 0xD9));
   cBrightness.setColorActive(color(0x6B, 0xB0, 0xFF));
   cBrightness.setColorCaptionLabel(color(0x88, 0x88, 0x99));
   cBrightness.setColorValueLabel(color(0xE0, 0xE0, 0xE8));
+  cBrightness.hide(); // managed separately, not in grpConnected
 
   c = cp5.addButton("btnApplyBrightness").setPosition(px2 + 110, py2 + 125).setSize(80, 18).setLabel("Set").setGroup(grpConnected);
   applyGreenTheme(c);
@@ -297,8 +297,8 @@ void drawGUI() {
   cRefreshPorts.setVisible(!conn);
   cOpenAdvanced.setVisible(conn);
 
-  if (conn && !grpConnected.isVisible()) grpConnected.show();
-  else if (!conn && grpConnected.isVisible()) grpConnected.hide();
+  if (conn && !grpConnected.isVisible()) { grpConnected.show(); cBrightness.show(); }
+  else if (!conn && grpConnected.isVisible()) { grpConnected.hide(); cBrightness.hide(); }
 
   if (!conn) {
     fill(COL_TEXT_DIM);
