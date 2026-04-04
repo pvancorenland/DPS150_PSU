@@ -512,6 +512,7 @@ void handleGUIClick() {
     }
     a = constrain(a, 0, maxCurrent);
     sendSetVoltage(v);
+    delay(100);  // PSU needs time between commands
     sendSetCurrent(a);
     // Update local state immediately so displays reflect the change
     setVoltage = v;
@@ -615,6 +616,7 @@ void handleGUIKey(char k, int kCode) {
       if (a < 0.001 && tfSetCurrent.value.length() == 0) a = setCurrent;
       a = constrain(a, 0, maxCurrent);
       sendSetVoltage(v);
+      delay(100);  // PSU needs time between commands
       sendSetCurrent(a);
       setVoltage = v;
       setCurrent = a;
