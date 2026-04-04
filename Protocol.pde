@@ -344,7 +344,10 @@ void processResponsePacket(int[] buf, int len) {
     deviceId = sb.toString();
   }
   else if (reg == REG_OUTPUT && dataLen >= 1) {
-    outputOn = (buf[4] == 1);
+    // Don't override local state right after user toggled output
+    if (millis() - outputToggleTime > 2000) {
+      outputOn = (buf[4] == 1);
+    }
   }
   else if (reg == REG_MODE && dataLen >= 1) {
     outputMode = buf[4];

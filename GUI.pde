@@ -61,6 +61,7 @@ Button btnOpenAdvanced;
 // --- Status bar ---
 String statusMessage = "Ready";
 long statusTime = 0;
+long outputToggleTime = 0;  // suppress poll overriding outputOn right after toggle
 
 // ============================================================
 // LAYOUT CONSTANTS
@@ -500,6 +501,7 @@ void handleGUIClick() {
   if (btnOutput.clicked() && connected) {
     if (outputOn) { sendOutputOff(); outputOn = false; setStatus("Output OFF"); }
     else { sendOutputOn(); outputOn = true; setStatus("Output ON"); }
+    outputToggleTime = millis();  // suppress poll override briefly
   }
 
   // --- Text field focus ---
