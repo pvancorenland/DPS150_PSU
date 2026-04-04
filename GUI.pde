@@ -251,6 +251,15 @@ void initGUI() {
   c = cp5.addButton("btnApplyBrightness").setPosition(px2 + 110, py2 + 125).setSize(80, 18).setLabel("Set").setGroup(grpConnected);
   applyGreenTheme(c);
 
+  // --- Auto-connect to preferred port on startup ---
+  if (availablePorts.length > 0 && availablePorts[selectedPortIndex].contains("cu.usbmodem14798A3C")) {
+    if (psu.connectToPort(availablePorts[selectedPortIndex])) {
+      setStatus("Auto-connected to " + psu.connectedPortName);
+    } else {
+      setStatus("Auto-connect failed for " + availablePorts[selectedPortIndex] + " — connect manually.");
+    }
+  }
+
   initAdvanced();
 }
 
