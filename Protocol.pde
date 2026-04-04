@@ -418,9 +418,12 @@ boolean connectToPort(String portName) {
     sendConnect();
     delay(500);
     connected = true;
-    // Request setpoints and full parameter dump
+    // Request setpoints and state
     sendReadRegister(REG_SET_VOLT);
     sendReadRegister(REG_SET_CURR);
+    sendReadRegister(REG_OUTPUT);
+    sendReadRegister(REG_MODE);
+    sendReadRegister(REG_PROTECTION);
     sendReadRegister(REG_ALL);
     return true;
   } catch (Exception e) {
