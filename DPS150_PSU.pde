@@ -18,7 +18,6 @@ void setup() {
   surface.setTitle("FNIRSI DPS-150 Power Supply Control");
   smooth(4);
   cp5 = new ControlP5(this);
-  cp5.setAutoDraw(false);
   psu.initHistory();
   initGUI();
 }
@@ -28,7 +27,7 @@ void setup() {
  */
 void draw() {
   drawGUI();
-  cp5.draw();
+  // cp5 auto-draws after draw() via its registered "draw" callback
   drawAdvanced();
   updateAdvanced();
   psu.pollPSU();

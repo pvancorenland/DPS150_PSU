@@ -87,6 +87,9 @@ void initGUI() {
 
   Controller c;
 
+  // --- TEST SLIDER (remove after debugging) ---
+  cp5.addSlider("testSlider").setPosition(300, 650).setSize(200, 30).setRange(0, 100).setValue(50);
+
   // --- Top bar ---
   cPortPrev = cp5.addButton("btnPortPrev").setPosition(180, 8).setSize(22, 24).setLabel("<");
   applyDarkTheme(cPortPrev);
@@ -132,8 +135,7 @@ void initGUI() {
   // --- Output toggle ---
   float rx = LEFT_W + 15;
   cOutput = (Toggle) cp5.addToggle("btnOutput").setPosition(rx, 50).setSize((int)(RIGHT_W - 30), 52)
-    .setValue(false);
-  cOutput.hide(); // managed separately, not in grpConnected
+    .setValue(false).setGroup(grpConnected);
   cOutput.setColorBackground(color(0x3E, 0x1A, 0x1A));
   cOutput.setColorForeground(color(0x00, 0xE6, 0x76));
   cOutput.setColorActive(color(0x1B, 0x43, 0x32));
@@ -211,13 +213,7 @@ void initGUI() {
   applyGreenTheme(c);
 
   cBrightness = cp5.addSlider("sliderBrightness").setPosition(px2 + 110, py2 + 98).setSize(80, 20)
-    .setRange(0, 20).setValue(10).setLabel("Brightness");
-  cBrightness.setColorBackground(color(0x1A, 0x1A, 0x25));
-  cBrightness.setColorForeground(color(0x4A, 0x90, 0xD9));
-  cBrightness.setColorActive(color(0x6B, 0xB0, 0xFF));
-  cBrightness.setColorCaptionLabel(color(0x88, 0x88, 0x99));
-  cBrightness.setColorValueLabel(color(0xE0, 0xE0, 0xE8));
-  cBrightness.hide(); // managed separately, not in grpConnected
+    .setRange(0, 20).setValue(10).setLabel("Brightness").setGroup(grpConnected);
 
   c = cp5.addButton("btnApplyBrightness").setPosition(px2 + 110, py2 + 125).setSize(80, 18).setLabel("Set").setGroup(grpConnected);
   applyGreenTheme(c);
@@ -292,14 +288,10 @@ void drawGUI() {
       cConnToggle.setLabel("Disconnect");
       applyRedTheme(cConnToggle);
       grpConnected.show();
-      cBrightness.show();
-      cOutput.show();
     } else {
       cConnToggle.setLabel("Connect");
       applyGreenTheme(cConnToggle);
       grpConnected.hide();
-      cBrightness.hide();
-      cOutput.hide();
     }
   }
   cConnToggle.setLock(!conn && availablePorts.length == 0);
