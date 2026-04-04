@@ -87,9 +87,6 @@ void initGUI() {
 
   Controller c;
 
-  // --- TEST SLIDER (remove after debugging) ---
-  cp5.addSlider("testSlider").setPosition(300, 650).setSize(200, 30).setRange(0, 100).setValue(50);
-
   // --- Top bar ---
   cPortPrev = cp5.addButton("btnPortPrev").setPosition(180, 8).setSize(22, 24).setLabel("<");
   applyDarkTheme(cPortPrev);
