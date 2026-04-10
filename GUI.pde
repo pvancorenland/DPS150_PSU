@@ -3,6 +3,12 @@
  * @brief Full GUI layout matching the official Fnirsi PC software style.
  *
  * Interactive widgets use ControlP5; display-only widgets are custom.
+ *
+ * @author  Peter Vancorenland
+ * @copyright 2026 Peter Vancorenland. All rights reserved.
+ *
+ * Redistribution and use of this source code, with or without modification,
+ * is permitted provided that the original author is credited.
  */
 
 // ============================================================

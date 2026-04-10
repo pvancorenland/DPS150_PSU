@@ -7,6 +7,12 @@
  * callbacks (draw, serial, mouse, keyboard) to the appropriate handlers.
  *
  * Window size: 1100 x 720 pixels.
+ *
+ * @author  Peter Vancorenland
+ * @copyright 2026 Peter Vancorenland. All rights reserved.
+ *
+ * Redistribution and use of this source code, with or without modification,
+ * is permitted provided that the original author is credited.
  */
 
 import controlP5.*;

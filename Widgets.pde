@@ -9,6 +9,12 @@
  * - StatusBadge — small mode indicator (CV/CC)
  * - DigitalReadout — seven-segment style numeric display
  * - VerticalBar — vertical bar indicator for Vmax/Imax
+ *
+ * @author  Peter Vancorenland
+ * @copyright 2026 Peter Vancorenland. All rights reserved.
+ *
+ * Redistribution and use of this source code, with or without modification,
+ * is permitted provided that the original author is credited.
  */
 
 // ============================================================

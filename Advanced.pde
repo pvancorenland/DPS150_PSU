@@ -1,6 +1,12 @@
 /**
  * @file Advanced.pde
  * @brief Advanced programmable output — Sequential Output, Voltage Sweep, Current Sweep.
+ *
+ * @author  Peter Vancorenland
+ * @copyright 2026 Peter Vancorenland. All rights reserved.
+ *
+ * Redistribution and use of this source code, with or without modification,
+ * is permitted provided that the original author is credited.
  */
 
 // ============================================================

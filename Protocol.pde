@@ -10,6 +10,12 @@
  * Packet format (response): F0 <cmd> <reg> <len> [data...] <chk>
  *
  * Checksum = sum of bytes from reg through last data byte, AND 0xFF.
+ *
+ * @author  Peter Vancorenland
+ * @copyright 2026 Peter Vancorenland. All rights reserved.
+ *
+ * Redistribution and use of this source code, with or without modification,
+ * is permitted provided that the original author is credited.
  */
 
 import processing.serial.*;
