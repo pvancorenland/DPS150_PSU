@@ -1,0 +1,7 @@
+<map id="drawVoltageSweep" name="drawVoltageSweep">
+<area shape="rect" id="Node000001" title="Draw the voltage sweep configuration panel with input fields and preview graph." alt="" coords="5,31,139,56"/>
+<area shape="rect" id="Node000002" href="$_advanced_8pde.html#af6a780e0d6600ae212c03845bd28102f" title="Draw a labeled input field for sweep parameters." alt="" coords="196,5,314,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="139,32,181,26,182,31,139,37"/>
+<area shape="rect" id="Node000003" href="$_advanced_8pde.html#a0a183403abd4e05a4d43620751e3b4b6" title="Draw the staircase preview graph for a sweep, with optional position marker." alt="" coords="187,55,323,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="139,50,172,54,171,59,139,55"/>
+</map>

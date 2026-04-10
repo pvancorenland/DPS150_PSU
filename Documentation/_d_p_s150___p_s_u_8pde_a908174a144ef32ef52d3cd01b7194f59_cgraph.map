@@ -1,0 +1,17 @@
+<map id="keyPressed" name="keyPressed">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,104,96,130"/>
+<area shape="rect" id="Node000002" href="$_advanced_8pde.html#a6dbddf14619dcfe7757742a88d0d5189" title="Process keyboard input for the Advanced overlay: numeric editing, tab navigation, escape." alt="" coords="144,104,284,130"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="96,114,128,114,128,120,96,120"/>
+<area shape="rect" id="Node000003" href="$_advanced_8pde.html#a4999af9c723e970a2b43eaa892bdc9ef" title="Stop execution and reset state." alt="" coords="361,29,430,55"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="244,101,331,64,346,58,348,63,333,69,246,106"/>
+<area shape="rect" id="Node000006" href="$_advanced_8pde.html#a53141e2945b349010e11e0bae07499ba" title="Commit the current table cell edit buffer to the corresponding data array." alt="" coords="340,79,451,104"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="284,104,325,99,326,104,285,110"/>
+<area shape="rect" id="Node000007" href="$_advanced_8pde.html#a881bfd15573cf1a90504e6efd312ad4c" title="Commit the current sweep field edit to the corresponding variable." alt="" coords="332,128,459,154"/>
+<area shape="poly" id="edge6_Node000002_Node000007" title=" " alt="" coords="285,123,317,128,316,133,284,129"/>
+<area shape="rect" id="Node000008" href="$_advanced_8pde.html#a9823c407f46e0d8f669485ebd39acfae" title=" " alt="" coords="332,177,459,203"/>
+<area shape="poly" id="edge7_Node000002_Node000008" title=" " alt="" coords="247,128,333,164,346,169,344,174,331,169,245,133"/>
+<area shape="rect" id="Node000004" href="$_advanced_8pde.html#ae36ba9a36fd4a3caeadbe27436a126bc" title="Reset all step statuses to &#39;waiting&#39;." alt="" coords="507,5,619,31"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="430,35,492,26,492,31,431,40"/>
+<area shape="rect" id="Node000005" href="$_g_u_i_8pde.html#a59545d202afc6e613dff8e8f118fcc03" title="Update the status bar message and record the timestamp." alt="" coords="524,55,602,80"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="431,45,509,57,509,62,430,50"/>
+</map>

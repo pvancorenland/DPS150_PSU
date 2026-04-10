@@ -1,0 +1,61 @@
+<map id="setStatus" name="setStatus">
+<area shape="rect" id="Node000001" title="Update the status bar message and record the timestamp." alt="" coords="907,307,984,332"/>
+<area shape="rect" id="Node000002" href="$_advanced_8pde.html#ac82f921af0ef9e79582113113636f095" title="Resume execution from a paused state." alt="" coords="739,5,833,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="941,291,936,239,923,173,898,104,880,72,857,44,832,29,835,24,860,40,884,69,903,102,928,172,941,238,946,291"/>
+<area shape="rect" id="Node000005" href="$_advanced_8pde.html#afa348259f8443a095fda7bd2c50d21f7" title="Pause execution." alt="" coords="746,55,826,80"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="938,292,929,251,914,200,890,148,857,101,842,90,825,81,828,76,845,85,861,98,895,145,919,198,934,249,943,291"/>
+<area shape="rect" id="Node000006" href="$_advanced_8pde.html#ae530f54e012ea2b8d0f3f27d7f6cdfec" title="Execute a single step in sequential mode, then pause." alt="" coords="499,156,604,182"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="931,293,903,242,883,216,857,196,827,182,794,171,726,160,660,158,605,163,604,158,660,153,726,154,795,166,829,177,860,192,886,213,908,239,936,291"/>
+<area shape="rect" id="Node000007" href="$_advanced_8pde.html#ae3151e425026a735ef4f4db32d7e1852" title="Start execution in the current mode." alt="" coords="516,107,587,132"/>
+<area shape="poly" id="edge8_Node000001_Node000007" title=" " alt="" coords="935,292,925,260,910,223,887,188,857,159,824,141,789,127,752,119,714,114,644,112,588,117,587,111,643,107,715,108,753,113,790,122,827,136,860,155,891,184,914,221,930,258,940,291"/>
+<area shape="rect" id="Node000008" href="$_advanced_8pde.html#a4999af9c723e970a2b43eaa892bdc9ef" title="Stop execution and reset state." alt="" coords="751,256,821,282"/>
+<area shape="poly" id="edge10_Node000001_Node000008" title=" " alt="" coords="891,305,820,282,822,277,893,300"/>
+<area shape="rect" id="Node000011" href="$_advanced_8pde.html#a0161c4d51da5bf8d395dc9fb858aad40" title="Advance the sequential output state machine by one tick." alt="" coords="472,307,632,332"/>
+<area shape="poly" id="edge34_Node000001_Node000011" title=" " alt="" coords="891,322,632,322,632,317,891,317"/>
+<area shape="rect" id="Node000014" href="$_advanced_8pde.html#a55fe89898ba8c70d4429280135161281" title=" " alt="" coords="502,356,602,382"/>
+<area shape="poly" id="edge35_Node000001_Node000014" title=" " alt="" coords="891,329,603,365,602,360,891,324"/>
+<area shape="rect" id="Node000015" href="$_g_u_i_8pde.html#a86cd6dcdd1488d74903f6b8cbe66bada" title="Send all four protection limits (OVP, OCP, OPP, OTP) to the PSU." alt="" coords="730,508,842,534"/>
+<area shape="poly" id="edge20_Node000001_Node000015" title=" " alt="" coords="940,348,930,382,914,423,891,463,860,499,844,510,841,505,857,495,887,460,909,420,925,381,935,347"/>
+<area shape="rect" id="Node000016" href="$_g_u_i_8pde.html#ad765ea02aa0d8bfd7c5fa4de4ba8ca59" title="Central ControlP5 event dispatcher – routes button, slider, and textfield events to their handlers." alt="" coords="493,459,610,484"/>
+<area shape="poly" id="edge28_Node000001_Node000016" title=" " alt="" coords="898,341,860,357,589,461,587,456,858,352,896,336"/>
+<area shape="rect" id="Node000018" href="$_advanced_8pde.html#acebf5e152c47178bd4f3938e740af06d" title="Apply voltage/current for a sequential step and turn output on." alt="" coords="716,207,856,232"/>
+<area shape="poly" id="edge23_Node000001_Node000018" title=" " alt="" coords="920,297,892,271,857,246,835,235,837,231,860,241,895,266,924,293"/>
+<area shape="rect" id="Node000019" href="$_g_u_i_8pde.html#a584f185a3838f20890ac44dcf4c8c3c7" title="Send the voltage and current values from the textfields to the PSU." alt="" coords="732,459,840,484"/>
+<area shape="poly" id="edge26_Node000001_Node000019" title=" " alt="" coords="933,348,903,395,883,420,860,442,829,460,826,456,857,437,879,416,899,392,928,345"/>
+<area shape="rect" id="Node000020" href="$_g_u_i_8pde.html#a5a1d9af3e77f4b4034abad93f5b610ec" title="Build the entire GUI: top bar, panels, gauges, sliders, buttons, textfields, and attempt auto&#45;connect..." alt="" coords="755,557,817,583"/>
+<area shape="poly" id="edge29_Node000001_Node000020" title=" " alt="" coords="944,349,936,392,921,445,897,500,880,526,860,548,840,561,818,569,817,564,838,557,857,544,876,522,892,498,916,444,931,391,938,348"/>
+<area shape="rect" id="Node000022" href="$_g_u_i_8pde.html#ae5d8aefb89e66c868f88d199aac598cb" title="Callback invoked when set&#45;point data arrives from the PSU. Populates textfields on first connect or r..." alt="" coords="713,608,859,634"/>
+<area shape="poly" id="edge31_Node000001_Node000022" title=" " alt="" coords="946,348,941,400,928,466,902,536,884,568,861,597,844,610,841,605,857,594,879,565,898,534,923,465,936,399,941,347"/>
+<area shape="rect" id="Node000003" href="$_advanced_8pde.html#a6242f6cad9e22b544546ac29257c1e90" title="Process mouse clicks on the Advanced overlay: buttons, mode tabs, table cells, sweep fields." alt="" coords="202,107,350,132"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="724,26,592,41,439,69,371,88,312,109,310,104,369,83,437,64,591,36,723,21"/>
+<area shape="rect" id="Node000004" href="$_d_p_s150___p_s_u_8pde.html#aa4a4c06267a1858937e7f65611bf4fcf" title=" " alt="" coords="5,107,114,132"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="187,122,114,122,114,117,187,117"/>
+<area shape="poly" id="edge5_Node000005_Node000003" title=" " alt="" coords="731,73,598,82,438,97,350,109,349,104,438,92,598,76,731,68"/>
+<area shape="poly" id="edge7_Node000006_Node000003" title=" " alt="" coords="484,159,349,135,350,130,484,154"/>
+<area shape="poly" id="edge9_Node000007_Node000003" title=" " alt="" coords="501,122,350,122,350,117,501,117"/>
+<area shape="poly" id="edge12_Node000008_Node000003" title=" " alt="" coords="736,262,564,226,437,197,361,166,300,135,303,131,364,161,439,192,565,221,737,256"/>
+<area shape="poly" id="edge11_Node000008_Node000006" title=" " alt="" coords="735,258,712,247,697,236,687,224,678,214,664,203,635,190,604,181,606,176,636,185,667,199,682,210,691,221,701,232,715,243,738,253"/>
+<area shape="rect" id="Node000009" href="$_advanced_8pde.html#a6dbddf14619dcfe7757742a88d0d5189" title="Process keyboard input for the Advanced overlay: numeric editing, tab navigation, escape." alt="" coords="482,257,622,283"/>
+<area shape="poly" id="edge13_Node000008_Node000009" title=" " alt="" coords="736,272,622,272,622,267,736,266"/>
+<area shape="poly" id="edge15_Node000008_Node000011" title=" " alt="" coords="736,282,666,298,617,309,616,303,665,293,735,277"/>
+<area shape="poly" id="edge18_Node000008_Node000014" title=" " alt="" coords="758,293,716,322,666,347,603,365,602,360,664,342,713,317,755,289"/>
+<area shape="rect" id="Node000010" href="$_d_p_s150___p_s_u_8pde.html#a908174a144ef32ef52d3cd01b7194f59" title=" " alt="" coords="231,257,321,283"/>
+<area shape="poly" id="edge14_Node000009_Node000010" title=" " alt="" coords="466,273,322,273,322,268,466,268"/>
+<area shape="rect" id="Node000012" href="$_advanced_8pde.html#a72d0e36b406539cfa7d65181ac15a162" title="Per&#45;frame update: advance the active sequence or sweep if running." alt="" coords="217,331,335,356"/>
+<area shape="poly" id="edge16_Node000011_Node000012" title=" " alt="" coords="456,330,336,341,335,336,456,325"/>
+<area shape="rect" id="Node000013" href="$_d_p_s150___p_s_u_8pde.html#a56c5cf8a568cff737ff95520cbe6b405" title=" " alt="" coords="35,331,84,356"/>
+<area shape="poly" id="edge17_Node000012_Node000013" title=" " alt="" coords="201,346,85,346,85,341,201,341"/>
+<area shape="poly" id="edge19_Node000014_Node000012" title=" " alt="" coords="486,366,335,352,336,346,486,360"/>
+<area shape="poly" id="edge21_Node000015_Node000016" title=" " alt="" coords="714,509,610,486,611,481,716,503"/>
+<area shape="rect" id="Node000017" href="$_d_p_s150___p_s_u_8pde.html#a7c24cf1920b170d901c633ee72da5950" title=" " alt="" coords="229,459,323,484"/>
+<area shape="poly" id="edge22_Node000016_Node000017" title=" " alt="" coords="477,474,323,474,323,469,477,469"/>
+<area shape="poly" id="edge24_Node000018_Node000006" title=" " alt="" coords="708,205,604,183,606,178,709,200"/>
+<area shape="poly" id="edge25_Node000018_Node000011" title=" " alt="" coords="722,241,715,246,701,258,692,272,683,285,667,298,633,312,631,307,664,293,679,281,687,269,697,255,712,241,719,237"/>
+<area shape="poly" id="edge27_Node000019_Node000016" title=" " alt="" coords="717,474,611,474,611,469,717,469"/>
+<area shape="rect" id="Node000021" href="$_d_p_s150___p_s_u_8pde.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="525,555,578,580"/>
+<area shape="poly" id="edge30_Node000020_Node000021" title=" " alt="" coords="739,572,579,570,579,565,739,567"/>
+<area shape="rect" id="Node000023" href="$class_d_p_s150_protocol.html#a1eab05a089d99a37e554f940208d2789" title=" " alt="" coords="438,604,665,645"/>
+<area shape="poly" id="edge32_Node000022_Node000023" title=" " alt="" coords="698,625,666,626,666,620,698,620"/>
+<area shape="rect" id="Node000024" href="$class_d_p_s150_protocol.html#aba364f984597cf7b656be229445cec6c" title=" " alt="" coords="162,612,390,638"/>
+<area shape="poly" id="edge33_Node000023_Node000024" title=" " alt="" coords="423,628,390,628,390,622,423,622"/>
+</map>

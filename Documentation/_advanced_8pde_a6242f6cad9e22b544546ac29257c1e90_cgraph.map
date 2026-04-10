@@ -1,0 +1,39 @@
+<map id="handleAdvancedClick" name="handleAdvancedClick">
+<area shape="rect" id="Node000001" title="Process mouse clicks on the Advanced overlay: buttons, mode tabs, table cells, sweep fields." alt="" coords="5,273,153,299"/>
+<area shape="rect" id="Node000002" href="$_advanced_8pde.html#ac82f921af0ef9e79582113113636f095" title="Resume execution from a paused state." alt="" coords="232,5,326,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="83,272,124,184,158,126,199,72,240,38,243,42,203,76,162,129,129,186,88,274"/>
+<area shape="rect" id="Node000004" href="$_advanced_8pde.html#afa348259f8443a095fda7bd2c50d21f7" title="Pause execution." alt="" coords="240,87,319,112"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="93,271,251,121,255,125,96,275"/>
+<area shape="rect" id="Node000005" href="$_advanced_8pde.html#ae530f54e012ea2b8d0f3f27d7f6cdfec" title="Execute a single step in sequential mode, then pause." alt="" coords="227,199,332,224"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="115,270,227,228,229,233,117,275"/>
+<area shape="rect" id="Node000006" href="$_advanced_8pde.html#a4999af9c723e970a2b43eaa892bdc9ef" title="Stop execution and reset state." alt="" coords="442,276,511,302"/>
+<area shape="poly" id="edge17_Node000001_Node000006" title=" " alt="" coords="153,284,426,286,426,291,153,289"/>
+<area shape="rect" id="Node000010" href="$_advanced_8pde.html#ae3151e425026a735ef4f4db32d7e1852" title="Start execution in the current mode." alt="" coords="441,325,511,351"/>
+<area shape="poly" id="edge14_Node000001_Node000010" title=" " alt="" coords="153,293,426,329,425,334,153,298"/>
+<area shape="rect" id="Node000011" href="$_advanced_8pde.html#a2f48fb89b63c485917b03617b387bf39" title="Handle clicks within the sequential output table (checkboxes and editable cells)." alt="" coords="208,375,351,400"/>
+<area shape="poly" id="edge18_Node000001_Node000011" title=" " alt="" coords="103,297,202,353,230,366,228,371,199,358,100,302"/>
+<area shape="rect" id="Node000013" href="$_advanced_8pde.html#a4481b5adb64a5b064740e593c78f206a" title="Handle clicks on sweep parameter input fields." alt="" coords="201,424,358,450"/>
+<area shape="poly" id="edge20_Node000001_Node000013" title=" " alt="" coords="91,298,135,352,166,384,202,411,210,415,207,420,199,415,163,388,131,356,87,301"/>
+<area shape="rect" id="Node000003" href="$_g_u_i_8pde.html#a59545d202afc6e613dff8e8f118fcc03" title="Update the status bar message and record the timestamp." alt="" coords="611,125,689,151"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="327,10,374,7,431,9,490,17,547,36,574,51,597,71,633,111,629,114,593,74,571,55,545,41,489,22,430,14,374,13,327,15"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="311,84,358,68,417,54,482,49,515,52,547,60,592,83,627,112,624,116,589,87,545,65,514,57,482,54,418,59,359,73,313,89"/>
+<area shape="poly" id="edge13_Node000005_Node000003" title=" " alt="" coords="332,200,546,160,596,148,597,154,547,165,333,205"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="315,222,428,267,426,272,314,227"/>
+<area shape="rect" id="Node000007" href="$_advanced_8pde.html#ae36ba9a36fd4a3caeadbe27436a126bc" title="Reset all step statuses to &#39;waiting&#39;." alt="" coords="594,276,706,302"/>
+<area shape="poly" id="edge12_Node000005_Node000007" title=" " alt="" coords="333,218,547,261,583,269,581,274,546,266,332,223"/>
+<area shape="rect" id="Node000008" href="$_advanced_8pde.html#acebf5e152c47178bd4f3938e740af06d" title="Apply voltage/current for a sequential step and turn output on." alt="" coords="406,75,546,100"/>
+<area shape="poly" id="edge9_Node000005_Node000008" title=" " alt="" coords="292,196,340,154,405,109,414,104,417,109,407,114,343,158,296,200"/>
+<area shape="rect" id="Node000009" href="$_advanced_8pde.html#aba329f9a0158cd1cc135aa9c2decd4cc" title="Find the next enabled step after the given index." alt="" coords="416,124,536,150"/>
+<area shape="poly" id="edge11_Node000005_Node000009" title=" " alt="" coords="314,196,425,153,427,158,316,201"/>
+<area shape="poly" id="edge8_Node000006_Node000003" title=" " alt="" coords="491,273,621,159,624,163,494,277"/>
+<area shape="poly" id="edge7_Node000006_Node000007" title=" " alt="" coords="511,286,579,286,579,292,511,292"/>
+<area shape="poly" id="edge10_Node000008_Node000003" title=" " alt="" coords="524,98,597,120,596,125,522,104"/>
+<area shape="poly" id="edge16_Node000010_Node000003" title=" " alt="" coords="511,329,529,322,545,312,577,278,604,238,624,198,637,165,642,167,628,201,608,241,582,281,548,316,531,327,513,334"/>
+<area shape="poly" id="edge15_Node000010_Node000007" title=" " alt="" coords="511,326,587,304,588,309,512,331"/>
+<area shape="rect" id="Node000012" href="$_advanced_8pde.html#a53141e2945b349010e11e0bae07499ba" title="Commit the current table cell edit buffer to the corresponding data array." alt="" coords="421,375,531,400"/>
+<area shape="poly" id="edge19_Node000011_Node000012" title=" " alt="" coords="351,385,405,385,405,390,351,390"/>
+<area shape="rect" id="Node000014" href="$_advanced_8pde.html#a881bfd15573cf1a90504e6efd312ad4c" title="Commit the current sweep field edit to the corresponding variable." alt="" coords="412,473,540,499"/>
+<area shape="poly" id="edge21_Node000013_Node000014" title=" " alt="" coords="334,448,408,466,407,472,333,453"/>
+<area shape="rect" id="Node000015" href="$_advanced_8pde.html#a3d86dbdeb133e575f093e6a3e0807530" title="Return the current value string for a sweep field." alt="" coords="406,424,546,450"/>
+<area shape="poly" id="edge22_Node000013_Node000015" title=" " alt="" coords="359,434,391,434,391,440,359,440"/>
+</map>

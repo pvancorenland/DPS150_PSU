@@ -1,0 +1,22 @@
+<map id="controlEvent" name="controlEvent">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,105,100,130"/>
+<area shape="rect" id="Node000002" href="$_g_u_i_8pde.html#ad765ea02aa0d8bfd7c5fa4de4ba8ca59" title="Central ControlP5 event dispatcher – routes button, slider, and textfield events to their handlers." alt="" coords="148,105,265,130"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="100,115,132,115,132,120,100,120"/>
+<area shape="rect" id="Node000003" href="$_g_u_i_8pde.html#ae19a314232006c2890491096af6a8a46" title="Increment or decrement a Textfield&#39;s value by delta, clamped to [lo, hi]." alt="" coords="334,30,403,56"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="234,102,312,64,322,60,324,65,314,69,236,106"/>
+<area shape="rect" id="Node000004" href="$_g_u_i_8pde.html#ad22c91a90578d7574edb9154b6fd963d" title="Parse a float from a ControlP5 Textfield, returning 0 on failure." alt="" coords="478,55,544,81"/>
+<area shape="poly" id="edge10_Node000002_Node000004" title=" " alt="" coords="214,102,252,57,280,33,312,15,343,5,368,3,425,15,456,27,483,44,480,48,453,32,424,20,368,8,344,10,314,20,283,37,256,61,218,106"/>
+<area shape="rect" id="Node000005" href="$_g_u_i_8pde.html#a86cd6dcdd1488d74903f6b8cbe66bada" title="Send all four protection limits (OVP, OCP, OPP, OTP) to the PSU." alt="" coords="313,79,424,105"/>
+<area shape="poly" id="edge4_Node000002_Node000005" title=" " alt="" coords="265,106,297,101,298,106,266,111"/>
+<area shape="rect" id="Node000006" href="$_g_u_i_8pde.html#a59545d202afc6e613dff8e8f118fcc03" title="Update the status bar message and record the timestamp." alt="" coords="472,129,550,154"/>
+<area shape="poly" id="edge12_Node000002_Node000006" title=" " alt="" coords="230,128,268,148,314,164,368,171,424,164,458,157,459,162,425,169,368,176,312,169,266,153,228,133"/>
+<area shape="rect" id="Node000007" href="$_g_u_i_8pde.html#a584f185a3838f20890ac44dcf4c8c3c7" title="Send the voltage and current values from the textfields to the PSU." alt="" coords="315,129,422,154"/>
+<area shape="poly" id="edge7_Node000002_Node000007" title=" " alt="" coords="266,123,300,129,299,134,265,129"/>
+<area shape="rect" id="Node000008" href="$_g_u_i_8pde.html#aee225078862735cba2bb4c830b7ea16e" title="Re&#45;scan available serial ports and select the preferred port if found." alt="" coords="322,230,415,256"/>
+<area shape="poly" id="edge11_Node000002_Node000008" title=" " alt="" coords="222,128,262,166,315,209,331,220,328,224,311,213,259,170,219,132"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="404,46,463,57,463,62,403,51"/>
+<area shape="poly" id="edge5_Node000005_Node000004" title=" " alt="" coords="424,80,463,73,464,79,425,85"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="409,103,459,121,457,126,407,108"/>
+<area shape="poly" id="edge8_Node000007_Node000004" title=" " alt="" coords="401,126,423,115,474,87,476,92,426,120,403,130"/>
+<area shape="poly" id="edge9_Node000007_Node000006" title=" " alt="" coords="423,139,457,139,457,144,423,144"/>
+</map>

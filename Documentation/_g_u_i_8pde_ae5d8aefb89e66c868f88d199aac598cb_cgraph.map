@@ -1,0 +1,5 @@
+<map id="onSetpointsReceived" name="onSetpointsReceived">
+<area shape="rect" id="Node000001" title="Callback invoked when set&#45;point data arrives from the PSU. Populates textfields on first connect or r..." alt="" coords="5,5,151,31"/>
+<area shape="rect" id="Node000002" href="$_g_u_i_8pde.html#a59545d202afc6e613dff8e8f118fcc03" title="Update the status bar message and record the timestamp." alt="" coords="199,5,276,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="151,16,183,16,183,21,151,21"/>
+</map>

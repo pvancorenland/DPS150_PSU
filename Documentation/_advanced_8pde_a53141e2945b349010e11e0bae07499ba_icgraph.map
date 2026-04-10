@@ -1,0 +1,13 @@
+<map id="commitSeqEdit" name="commitSeqEdit">
+<area shape="rect" id="Node000001" title="Commit the current table cell edit buffer to the corresponding data array." alt="" coords="548,31,659,56"/>
+<area shape="rect" id="Node000002" href="$_advanced_8pde.html#a6dbddf14619dcfe7757742a88d0d5189" title="Process keyboard input for the Advanced overlay: numeric editing, tab navigation, escape." alt="" coords="358,5,499,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="532,36,499,31,500,26,533,31"/>
+<area shape="rect" id="Node000004" href="$_advanced_8pde.html#a2f48fb89b63c485917b03617b387bf39" title="Handle clicks within the sequential output table (checkboxes and editable cells)." alt="" coords="357,55,500,80"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="533,56,501,60,500,55,532,51"/>
+<area shape="rect" id="Node000003" href="$_d_p_s150___p_s_u_8pde.html#a908174a144ef32ef52d3cd01b7194f59" title=" " alt="" coords="190,5,280,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="343,21,281,21,281,16,343,16"/>
+<area shape="rect" id="Node000005" href="$_advanced_8pde.html#a6242f6cad9e22b544546ac29257c1e90" title="Process mouse clicks on the Advanced overlay: buttons, mode tabs, table cells, sweep fields." alt="" coords="162,55,309,80"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="341,70,310,70,310,65,341,65"/>
+<area shape="rect" id="Node000006" href="$_d_p_s150___p_s_u_8pde.html#aa4a4c06267a1858937e7f65611bf4fcf" title=" " alt="" coords="5,55,114,80"/>
+<area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="146,70,114,70,114,65,146,65"/>
+</map>

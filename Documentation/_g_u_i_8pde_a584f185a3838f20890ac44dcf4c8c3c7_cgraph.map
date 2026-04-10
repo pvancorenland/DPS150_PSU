@@ -1,0 +1,7 @@
+<map id="applySetpoints" name="applySetpoints">
+<area shape="rect" id="Node000001" title="Send the voltage and current values from the textfields to the PSU." alt="" coords="5,31,113,56"/>
+<area shape="rect" id="Node000002" href="$_g_u_i_8pde.html#ad22c91a90578d7574edb9154b6fd963d" title="Parse a float from a ControlP5 Textfield, returning 0 on failure." alt="" coords="167,5,232,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="113,31,151,24,152,29,114,36"/>
+<area shape="rect" id="Node000003" href="$_g_u_i_8pde.html#a59545d202afc6e613dff8e8f118fcc03" title="Update the status bar message and record the timestamp." alt="" coords="161,55,238,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="114,50,146,56,145,61,113,55"/>
+</map>

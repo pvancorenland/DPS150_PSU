@@ -1,0 +1,22 @@
+<map id="initGUI" name="initGUI">
+<area shape="rect" id="Node000001" title="Build the entire GUI: top bar, panels, gauges, sliders, buttons, textfields, and attempt auto&#45;connect..." alt="" coords="5,181,68,207"/>
+<area shape="rect" id="Node000002" href="$_g_u_i_8pde.html#a425972c6685fa80ac4ee86cd14c712df" title="Apply the dark (default) theme to a controller." alt="" coords="119,5,240,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="39,180,65,119,86,82,114,48,128,37,132,41,118,52,91,85,70,121,44,182"/>
+<area shape="rect" id="Node000003" href="$_g_u_i_8pde.html#a8634398d933c0ed11a168b6572863276" title="Apply background, foreground, and active colors to a ControlP5 controller." alt="" coords="291,81,383,107"/>
+<area shape="poly" id="edge7_Node000001_Node000003" title=" " alt="" coords="41,180,67,134,88,110,114,92,155,78,197,73,238,73,276,78,275,83,238,79,197,78,156,83,117,97,92,114,72,137,46,182"/>
+<area shape="rect" id="Node000004" href="$_g_u_i_8pde.html#a8da174001fa6eb5a4889d81ee7703479" title="Apply the green (confirm) theme to a controller." alt="" coords="116,107,243,132"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="54,179,114,141,124,136,127,141,117,146,57,183"/>
+<area shape="rect" id="Node000005" href="$_g_u_i_8pde.html#a8e12f7862693411b88d521b1c5a93b99" title="Apply the red (warning) theme to a controller." alt="" coords="121,156,238,182"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="68,186,105,179,106,185,69,191"/>
+<area shape="rect" id="Node000006" href="$_advanced_8pde.html#acd707054e0543677ad27ecf59e31259e" title="Initialize the Advanced overlay: compute geometry, create buttons, set default sequential table value..." alt="" coords="131,205,228,231"/>
+<area shape="poly" id="edge8_Node000001_Node000006" title=" " alt="" coords="69,197,116,205,115,210,68,202"/>
+<area shape="rect" id="Node000007" href="$_g_u_i_8pde.html#aee225078862735cba2bb4c830b7ea16e" title="Re&#45;scan available serial ports and select the preferred port if found." alt="" coords="133,255,226,280"/>
+<area shape="poly" id="edge9_Node000001_Node000007" title=" " alt="" coords="58,205,117,241,127,246,125,251,114,246,55,210"/>
+<area shape="rect" id="Node000008" href="$_g_u_i_8pde.html#a59545d202afc6e613dff8e8f118fcc03" title="Update the status bar message and record the timestamp." alt="" coords="141,304,218,330"/>
+<area shape="poly" id="edge10_Node000001_Node000008" title=" " alt="" coords="47,206,75,247,95,271,117,291,128,297,125,302,114,295,91,274,71,251,43,209"/>
+<area shape="rect" id="Node000009" href="$_g_u_i_8pde.html#ad61e123b18f7e01dd0075da2a2956a82" title="Apply the standard dark text field style to a ControlP5 Textfield." alt="" coords="118,353,240,379"/>
+<area shape="poly" id="edge11_Node000001_Node000009" title=" " alt="" coords="44,207,68,270,89,308,118,340,121,343,117,347,114,344,85,311,63,272,39,209"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="209,29,296,72,294,77,207,34"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="243,107,275,101,276,107,244,112"/>
+<area shape="poly" id="edge6_Node000005_Node000003" title=" " alt="" coords="217,153,242,142,299,113,301,117,244,147,219,158"/>
+</map>

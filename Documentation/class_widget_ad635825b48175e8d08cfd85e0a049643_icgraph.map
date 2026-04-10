@@ -1,0 +1,5 @@
+<map id="Widget.drawTrace" name="Widget.drawTrace">
+<area shape="rect" id="Node000001" title="Plot one data trace as a connected line within the graph area." alt="" coords="148,5,275,31"/>
+<area shape="rect" id="Node000002" href="$class_widget.html#aef8eca26782583ea5441cc9827f5514f" title="Draw the graph background, grid, legend, traces, and border." alt="" coords="5,5,100,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="132,21,100,21,100,16,132,16"/>
+</map>

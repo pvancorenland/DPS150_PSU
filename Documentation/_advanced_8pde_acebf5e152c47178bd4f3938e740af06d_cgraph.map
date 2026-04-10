@@ -1,0 +1,5 @@
+<map id="applySequentialStep" name="applySequentialStep">
+<area shape="rect" id="Node000001" title="Apply voltage/current for a sequential step and turn output on." alt="" coords="5,5,146,31"/>
+<area shape="rect" id="Node000002" href="$_g_u_i_8pde.html#a59545d202afc6e613dff8e8f118fcc03" title="Update the status bar message and record the timestamp." alt="" coords="194,5,271,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="146,16,178,16,178,21,146,21"/>
+</map>

@@ -1,0 +1,7 @@
+<map id="advStart" name="advStart">
+<area shape="rect" id="Node000001" title="Start execution in the current mode." alt="" coords="5,31,76,56"/>
+<area shape="rect" id="Node000002" href="$_advanced_8pde.html#ae36ba9a36fd4a3caeadbe27436a126bc" title="Reset all step statuses to &#39;waiting&#39;." alt="" coords="124,5,235,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="76,34,108,28,109,34,77,40"/>
+<area shape="rect" id="Node000003" href="$_g_u_i_8pde.html#a59545d202afc6e613dff8e8f118fcc03" title="Update the status bar message and record the timestamp." alt="" coords="141,55,218,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="77,47,126,56,125,61,76,52"/>
+</map>

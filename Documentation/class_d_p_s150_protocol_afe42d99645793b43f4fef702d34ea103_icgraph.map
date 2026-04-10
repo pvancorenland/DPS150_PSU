@@ -1,0 +1,12 @@
+<map id="DPS150Protocol.sendReadRegister" name="DPS150Protocol.sendReadRegister">
+<area shape="rect" id="Node000001" title=" " alt="" coords="488,81,718,107"/>
+<area shape="rect" id="Node000002" href="$class_d_p_s150_protocol.html#a5bd210442c22e616d280c39b6fda0e46" title=" " alt="" coords="229,5,435,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="539,79,380,34,381,29,541,74"/>
+<area shape="rect" id="Node000003" href="$class_d_p_s150_protocol.html#af3ab238c8e250259e43b3df02d3dad8f" title=" " alt="" coords="5,107,176,132"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="472,91,351,90,224,97,150,109,149,103,223,92,351,85,472,85"/>
+<area shape="rect" id="Node000004" href="$class_d_p_s150_protocol.html#a00a32e0c392f72ca891537a6c9a2083d" title=" " alt="" coords="224,107,440,132"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="473,109,441,112,440,107,472,104"/>
+<area shape="rect" id="Node000005" href="$class_d_p_s150_protocol.html#a0b85e991fdeca6e731c6391874b028e6" title=" " alt="" coords="229,156,434,182"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="548,115,441,147,398,158,397,153,439,142,547,110"/>
+<area shape="poly" id="edge5_Node000005_Node000003" title=" " alt="" coords="250,155,156,136,158,130,251,150"/>
+</map>

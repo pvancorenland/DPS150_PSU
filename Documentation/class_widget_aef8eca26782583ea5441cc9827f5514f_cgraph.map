@@ -1,0 +1,5 @@
+<map id="Widget.draw" name="Widget.draw">
+<area shape="rect" id="Node000001" title="Draw the button with shadow, fill, hover highlight, and label." alt="" coords="5,5,100,31"/>
+<area shape="rect" id="Node000002" href="$class_widget.html#ac6807d3793dc1a8ed1bbaac8ae61851c" title="Test if the mouse cursor is within this widget&#39;s bounds." alt="" coords="148,5,253,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="100,16,132,16,132,21,100,21"/>
+</map>

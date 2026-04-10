@@ -1,0 +1,19 @@
+<map id="DPS150Protocol.floatToLE" name="DPS150Protocol.floatToLE">
+<area shape="rect" id="Node000001" title=" " alt="" coords="534,55,711,80"/>
+<area shape="rect" id="Node000002" href="$class_d_p_s150_protocol.html#a2f5b8a6523474014b1060351750d4e92" title=" " alt="" coords="272,5,486,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="540,54,445,34,447,29,541,48"/>
+<area shape="rect" id="Node000003" href="$class_d_p_s150_protocol.html#aa24730d20ca048b08dd7906e80e1e1ea" title=" " alt="" coords="272,55,486,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="518,70,486,70,486,65,518,65"/>
+<area shape="rect" id="Node000004" href="$class_d_p_s150_protocol.html#a938e24e7eb5442cdc6ecf80b497163aa" title=" " alt="" coords="289,104,469,145"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="551,87,469,106,468,101,550,82"/>
+<area shape="rect" id="Node000005" href="$class_d_p_s150_protocol.html#aa73d57b16d3eb2c80286974ee939365b" title=" " alt="" coords="5,13,224,39"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="281,100,270,95,255,84,246,73,237,62,222,53,196,42,198,37,225,48,240,58,250,69,259,80,273,91,283,96"/>
+<area shape="rect" id="Node000006" href="$class_d_p_s150_protocol.html#a3d9c367fc67d407b0d331734fda5eb23" title="Set over&#45;current limit." alt="" coords="15,63,214,88"/>
+<area shape="poly" id="edge5_Node000004_Node000006" title=" " alt="" coords="273,108,187,92,188,86,274,103"/>
+<area shape="rect" id="Node000007" href="$class_d_p_s150_protocol.html#a0d92760f3633b888d6288fea8f7038de" title="Set over&#45;power limit." alt="" coords="15,112,214,138"/>
+<area shape="poly" id="edge6_Node000004_Node000007" title=" " alt="" coords="273,128,214,128,214,122,273,122"/>
+<area shape="rect" id="Node000008" href="$class_d_p_s150_protocol.html#a0168532ba888c45e6ec1e9fc088c7f6b" title="Set over&#45;temperature limit." alt="" coords="16,161,213,187"/>
+<area shape="poly" id="edge7_Node000004_Node000008" title=" " alt="" coords="274,147,188,163,187,158,273,142"/>
+<area shape="rect" id="Node000009" href="$class_d_p_s150_protocol.html#a9fbb0bd28dffa5c0b1fe880d5aa0a0ba" title="Set over&#45;voltage limit." alt="" coords="15,211,214,236"/>
+<area shape="poly" id="edge8_Node000004_Node000009" title=" " alt="" coords="329,155,279,180,225,202,188,213,187,208,223,197,277,175,326,150"/>
+</map>

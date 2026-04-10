@@ -1,0 +1,5 @@
+<map id="Widget.clicked" name="Widget.clicked">
+<area shape="rect" id="Node000001" title="Return true if the button is enabled and the mouse is over it." alt="" coords="5,5,113,31"/>
+<area shape="rect" id="Node000002" href="$class_widget.html#ac6807d3793dc1a8ed1bbaac8ae61851c" title="Test if the mouse cursor is within this widget&#39;s bounds." alt="" coords="161,5,266,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="113,16,145,16,145,21,113,21"/>
+</map>

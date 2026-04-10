@@ -1,0 +1,11 @@
+<map id="refreshPorts" name="refreshPorts">
+<area shape="rect" id="Node000001" title="Re&#45;scan available serial ports and select the preferred port if found." alt="" coords="313,31,405,56"/>
+<area shape="rect" id="Node000002" href="$_g_u_i_8pde.html#ad765ea02aa0d8bfd7c5fa4de4ba8ca59" title="Central ControlP5 event dispatcher – routes button, slider, and textfield events to their handlers." alt="" coords="148,5,265,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="297,36,265,31,266,25,298,31"/>
+<area shape="rect" id="Node000004" href="$_g_u_i_8pde.html#a5a1d9af3e77f4b4034abad93f5b610ec" title="Build the entire GUI: top bar, panels, gauges, sliders, buttons, textfields, and attempt auto&#45;connect..." alt="" coords="175,55,238,80"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="298,56,238,65,237,60,297,50"/>
+<area shape="rect" id="Node000003" href="$_d_p_s150___p_s_u_8pde.html#a7c24cf1920b170d901c633ee72da5950" title=" " alt="" coords="5,5,100,31"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="132,21,100,21,100,16,132,16"/>
+<area shape="rect" id="Node000005" href="$_d_p_s150___p_s_u_8pde.html#a4fc01d736fe50cf5b977f755b675f11d" title=" " alt="" coords="26,55,79,80"/>
+<area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="160,70,79,70,79,65,160,65"/>
+</map>

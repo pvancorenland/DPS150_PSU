@@ -1,0 +1,5 @@
+<map id="handleSeqTableClick" name="handleSeqTableClick">
+<area shape="rect" id="Node000001" title="Handle clicks within the sequential output table (checkboxes and editable cells)." alt="" coords="5,5,149,31"/>
+<area shape="rect" id="Node000002" href="$_advanced_8pde.html#a53141e2945b349010e11e0bae07499ba" title="Commit the current table cell edit buffer to the corresponding data array." alt="" coords="197,5,307,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="149,16,181,16,181,21,149,21"/>
+</map>

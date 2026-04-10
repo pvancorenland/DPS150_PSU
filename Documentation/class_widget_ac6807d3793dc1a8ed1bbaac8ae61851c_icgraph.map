@@ -1,0 +1,7 @@
+<map id="Widget.hitTest" name="Widget.hitTest">
+<area shape="rect" id="Node000001" title="Test if the mouse cursor is within this widget&#39;s bounds." alt="" coords="161,31,266,56"/>
+<area shape="rect" id="Node000002" href="$class_widget.html#ac05ef3f4dc1b499be52d8ed5ab0a73b3" title="Return true if the button is enabled and the mouse is over it." alt="" coords="5,5,113,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="145,35,112,30,113,24,146,30"/>
+<area shape="rect" id="Node000003" href="$class_widget.html#aef8eca26782583ea5441cc9827f5514f" title="Draw the button with shadow, fill, hover highlight, and label." alt="" coords="12,55,106,80"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="146,57,107,63,106,58,145,51"/>
+</map>

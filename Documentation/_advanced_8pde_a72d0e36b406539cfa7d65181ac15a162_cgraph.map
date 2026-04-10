@@ -1,0 +1,22 @@
+<map id="updateAdvanced" name="updateAdvanced">
+<area shape="rect" id="Node000001" title="Per&#45;frame update: advance the active sequence or sweep if running." alt="" coords="5,132,124,158"/>
+<area shape="rect" id="Node000002" href="$_advanced_8pde.html#a0161c4d51da5bf8d395dc9fb858aad40" title="Advance the sequential output state machine by one tick." alt="" coords="172,107,332,132"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="124,134,156,130,157,135,125,139"/>
+<area shape="rect" id="Node000008" href="$_advanced_8pde.html#a55fe89898ba8c70d4429280135161281" title=" " alt="" coords="202,156,302,182"/>
+<area shape="poly" id="edge10_Node000001_Node000008" title=" " alt="" coords="125,150,187,158,186,163,124,155"/>
+<area shape="rect" id="Node000003" href="$_advanced_8pde.html#a4999af9c723e970a2b43eaa892bdc9ef" title="Stop execution and reset state." alt="" coords="416,156,485,182"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="307,130,401,154,400,159,306,136"/>
+<area shape="rect" id="Node000004" href="$_advanced_8pde.html#ae36ba9a36fd4a3caeadbe27436a126bc" title="Reset all step statuses to &#39;waiting&#39;." alt="" coords="568,132,680,158"/>
+<area shape="poly" id="edge8_Node000002_Node000004" title=" " alt="" coords="300,103,346,93,402,86,462,84,521,92,558,104,591,121,588,126,556,109,520,97,461,89,402,91,347,99,301,109"/>
+<area shape="rect" id="Node000005" href="$_g_u_i_8pde.html#a59545d202afc6e613dff8e8f118fcc03" title="Update the status bar message and record the timestamp." alt="" coords="585,181,663,207"/>
+<area shape="poly" id="edge9_Node000002_Node000005" title=" " alt="" coords="311,131,333,141,349,155,357,169,366,181,381,192,429,206,479,210,527,209,570,203,571,208,528,214,479,216,428,211,379,197,362,185,353,172,345,158,331,146,309,135"/>
+<area shape="rect" id="Node000006" href="$_advanced_8pde.html#acebf5e152c47178bd4f3938e740af06d" title="Apply voltage/current for a sequential step and turn output on." alt="" coords="380,107,520,132"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="332,117,365,117,365,122,332,122"/>
+<area shape="rect" id="Node000007" href="$_advanced_8pde.html#aba329f9a0158cd1cc135aa9c2decd4cc" title="Find the next enabled step after the given index." alt="" coords="390,5,510,31"/>
+<area shape="poly" id="edge7_Node000002_Node000007" title=" " alt="" coords="275,104,379,48,404,36,406,40,381,53,278,109"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="485,161,552,152,553,157,486,167"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="486,171,570,184,569,189,485,176"/>
+<area shape="poly" id="edge6_Node000006_Node000005" title=" " alt="" coords="495,130,521,141,570,168,578,172,576,177,567,173,519,146,493,135"/>
+<area shape="poly" id="edge11_Node000008_Node000003" title=" " alt="" coords="303,166,400,166,400,172,303,172"/>
+<area shape="poly" id="edge12_Node000008_Node000005" title=" " alt="" coords="272,180,320,210,349,225,381,236,419,244,450,246,520,236,554,225,585,212,587,217,555,230,521,241,450,251,418,249,379,241,347,230,317,215,269,185"/>
+</map>

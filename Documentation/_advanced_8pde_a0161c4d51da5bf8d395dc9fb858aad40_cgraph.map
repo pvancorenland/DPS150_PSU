@@ -1,0 +1,16 @@
+<map id="updateSequentialOutput" name="updateSequentialOutput">
+<area shape="rect" id="Node000001" title="Advance the sequential output state machine by one tick." alt="" coords="5,82,166,108"/>
+<area shape="rect" id="Node000002" href="$_advanced_8pde.html#a4999af9c723e970a2b43eaa892bdc9ef" title="Stop execution and reset state." alt="" coords="249,31,318,57"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="138,79,233,54,235,59,139,84"/>
+<area shape="rect" id="Node000003" href="$_advanced_8pde.html#ae36ba9a36fd4a3caeadbe27436a126bc" title="Reset all step statuses to &#39;waiting&#39;." alt="" coords="402,6,513,32"/>
+<area shape="poly" id="edge7_Node000001_Node000003" title=" " alt="" coords="101,79,149,45,180,29,213,16,257,7,303,4,387,6,387,12,303,9,258,13,214,21,182,34,152,50,104,84"/>
+<area shape="rect" id="Node000004" href="$_g_u_i_8pde.html#a59545d202afc6e613dff8e8f118fcc03" title="Update the status bar message and record the timestamp." alt="" coords="419,82,496,108"/>
+<area shape="poly" id="edge8_Node000001_Node000004" title=" " alt="" coords="166,92,403,92,403,97,166,97"/>
+<area shape="rect" id="Node000005" href="$_advanced_8pde.html#acebf5e152c47178bd4f3938e740af06d" title="Apply voltage/current for a sequential step and turn output on." alt="" coords="214,133,354,158"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="139,106,217,126,215,131,138,111"/>
+<area shape="rect" id="Node000006" href="$_advanced_8pde.html#aba329f9a0158cd1cc135aa9c2decd4cc" title="Find the next enabled step after the given index." alt="" coords="224,182,344,208"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="108,106,156,136,215,168,227,174,225,178,212,173,153,141,105,110"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="319,37,386,27,387,32,319,42"/>
+<area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="320,52,404,77,403,82,318,57"/>
+<area shape="poly" id="edge5_Node000005_Node000004" title=" " alt="" coords="330,129,404,108,405,113,331,135"/>
+</map>

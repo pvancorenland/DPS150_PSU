@@ -1,0 +1,20 @@
+<map id="handleCp5Event" name="handleCp5Event">
+<area shape="rect" id="Node000001" title="Central ControlP5 event dispatcher – routes button, slider, and textfield events to their handlers." alt="" coords="5,105,123,130"/>
+<area shape="rect" id="Node000002" href="$_g_u_i_8pde.html#ae19a314232006c2890491096af6a8a46" title="Increment or decrement a Textfield&#39;s value by delta, clamped to [lo, hi]." alt="" coords="192,30,260,56"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="91,102,170,64,180,60,182,65,172,69,94,106"/>
+<area shape="rect" id="Node000003" href="$_g_u_i_8pde.html#ad22c91a90578d7574edb9154b6fd963d" title="Parse a float from a ControlP5 Textfield, returning 0 on failure." alt="" coords="336,55,401,81"/>
+<area shape="poly" id="edge9_Node000001_Node000003" title=" " alt="" coords="72,102,110,57,138,33,170,15,200,5,226,3,283,15,313,27,340,44,337,48,311,32,281,20,226,8,201,10,172,20,141,37,114,61,76,106"/>
+<area shape="rect" id="Node000004" href="$_g_u_i_8pde.html#a86cd6dcdd1488d74903f6b8cbe66bada" title="Send all four protection limits (OVP, OCP, OPP, OTP) to the PSU." alt="" coords="171,79,282,105"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="123,106,155,101,156,106,123,111"/>
+<area shape="rect" id="Node000005" href="$_g_u_i_8pde.html#a59545d202afc6e613dff8e8f118fcc03" title="Update the status bar message and record the timestamp." alt="" coords="330,129,407,154"/>
+<area shape="poly" id="edge11_Node000001_Node000005" title=" " alt="" coords="88,128,126,148,171,164,226,171,282,164,315,157,316,162,282,169,226,176,170,169,124,153,85,133"/>
+<area shape="rect" id="Node000006" href="$_g_u_i_8pde.html#a584f185a3838f20890ac44dcf4c8c3c7" title="Send the voltage and current values from the textfields to the PSU." alt="" coords="173,129,280,154"/>
+<area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="123,123,157,129,157,134,123,129"/>
+<area shape="rect" id="Node000007" href="$_g_u_i_8pde.html#aee225078862735cba2bb4c830b7ea16e" title="Re&#45;scan available serial ports and select the preferred port if found." alt="" coords="180,230,272,256"/>
+<area shape="poly" id="edge10_Node000001_Node000007" title=" " alt="" coords="80,128,120,166,172,209,189,220,186,224,169,213,117,170,76,132"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="262,46,321,57,320,62,261,51"/>
+<area shape="poly" id="edge4_Node000004_Node000003" title=" " alt="" coords="282,80,320,73,321,79,283,85"/>
+<area shape="poly" id="edge5_Node000004_Node000005" title=" " alt="" coords="267,103,317,121,315,126,265,108"/>
+<area shape="poly" id="edge7_Node000006_Node000003" title=" " alt="" coords="258,126,281,115,331,87,334,92,283,120,261,130"/>
+<area shape="poly" id="edge8_Node000006_Node000005" title=" " alt="" coords="280,139,314,139,314,144,280,144"/>
+</map>

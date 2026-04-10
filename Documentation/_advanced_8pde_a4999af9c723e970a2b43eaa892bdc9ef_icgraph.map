@@ -1,0 +1,23 @@
+<map id="advStop" name="advStop">
+<area shape="rect" id="Node000001" title="Stop execution and reset state." alt="" coords="565,107,635,132"/>
+<area shape="rect" id="Node000002" href="$_advanced_8pde.html#ae530f54e012ea2b8d0f3f27d7f6cdfec" title="Execute a single step in sequential mode, then pause." alt="" coords="384,5,490,31"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="574,98,547,75,516,52,477,34,480,29,519,48,550,70,577,94"/>
+<area shape="rect" id="Node000003" href="$_advanced_8pde.html#a6242f6cad9e22b544546ac29257c1e90" title="Process mouse clicks on the Advanced overlay: buttons, mode tabs, table cells, sweep fields." alt="" coords="162,31,309,56"/>
+<area shape="poly" id="edge4_Node000001_Node000003" title=" " alt="" coords="550,106,517,97,408,74,309,57,310,51,409,68,518,92,551,101"/>
+<area shape="rect" id="Node000005" href="$_advanced_8pde.html#a6dbddf14619dcfe7757742a88d0d5189" title="Process keyboard input for the Advanced overlay: numeric editing, tab navigation, escape." alt="" coords="367,107,507,132"/>
+<area shape="poly" id="edge5_Node000001_Node000005" title=" " alt="" coords="550,122,507,122,507,117,550,117"/>
+<area shape="rect" id="Node000007" href="$_advanced_8pde.html#a0161c4d51da5bf8d395dc9fb858aad40" title="Advance the sequential output state machine by one tick." alt="" coords="357,156,517,182"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="551,137,518,147,483,158,482,153,517,142,550,132"/>
+<area shape="rect" id="Node000010" href="$_advanced_8pde.html#a55fe89898ba8c70d4429280135161281" title=" " alt="" coords="387,205,487,231"/>
+<area shape="poly" id="edge10_Node000001_Node000010" title=" " alt="" coords="579,146,552,172,519,196,489,209,487,204,516,192,549,168,576,142"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="369,29,310,37,309,32,369,24"/>
+<area shape="rect" id="Node000004" href="$_d_p_s150___p_s_u_8pde.html#aa4a4c06267a1858937e7f65611bf4fcf" title=" " alt="" coords="5,31,114,56"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="146,46,114,46,114,41,146,41"/>
+<area shape="rect" id="Node000006" href="$_d_p_s150___p_s_u_8pde.html#a908174a144ef32ef52d3cd01b7194f59" title=" " alt="" coords="190,107,280,132"/>
+<area shape="poly" id="edge6_Node000005_Node000006" title=" " alt="" coords="351,122,281,122,281,117,351,117"/>
+<area shape="rect" id="Node000008" href="$_advanced_8pde.html#a72d0e36b406539cfa7d65181ac15a162" title="Per&#45;frame update: advance the active sequence or sweep if running." alt="" coords="176,180,294,206"/>
+<area shape="poly" id="edge8_Node000007_Node000008" title=" " alt="" coords="342,183,295,188,294,183,341,178"/>
+<area shape="rect" id="Node000009" href="$_d_p_s150___p_s_u_8pde.html#a56c5cf8a568cff737ff95520cbe6b405" title=" " alt="" coords="35,180,84,206"/>
+<area shape="poly" id="edge9_Node000008_Node000009" title=" " alt="" coords="161,196,84,196,84,190,161,190"/>
+<area shape="poly" id="edge11_Node000010_Node000008" title=" " alt="" coords="371,213,295,203,295,198,372,207"/>
+</map>

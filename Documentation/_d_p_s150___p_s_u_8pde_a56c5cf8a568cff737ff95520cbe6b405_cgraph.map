@@ -1,0 +1,55 @@
+<map id="draw" name="draw">
+<area shape="rect" id="Node000001" title=" " alt="" coords="5,252,55,278"/>
+<area shape="rect" id="Node000002" href="$_advanced_8pde.html#ad6619d960609d22236578421d47d8810" title="Draw the Advanced overlay if open: dim background, window chrome, mode tabs, content area,..." alt="" coords="108,104,216,130"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="41,250,137,140,141,143,45,253"/>
+<area shape="rect" id="Node000011" href="$_g_u_i_8pde.html#a963883233cbc43d6d6bf64b1ec5437fd" title="Main draw routine – renders top bar, status bar, and delegates to drawConnectedGUI() when connected." alt="" coords="125,252,198,278"/>
+<area shape="poly" id="edge12_Node000001_Node000011" title=" " alt="" coords="55,262,109,262,109,268,55,268"/>
+<area shape="rect" id="Node000016" href="$_advanced_8pde.html#a72d0e36b406539cfa7d65181ac15a162" title="Per&#45;frame update: advance the active sequence or sweep if running." alt="" coords="103,351,221,376"/>
+<area shape="poly" id="edge18_Node000001_Node000016" title=" " alt="" coords="50,276,133,339,129,343,47,280"/>
+<area shape="rect" id="Node000003" href="$_advanced_8pde.html#a334b6b1fe3b629643d55860fc345abfe" title="Draw the current sweep configuration panel with input fields and preview graph." alt="" coords="283,55,415,80"/>
+<area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="213,101,282,82,284,87,214,106"/>
+<area shape="rect" id="Node000006" href="$_advanced_8pde.html#ad7d034125f821e349a646393e15069bc" title="Draw the sequential output table with headers, checkboxes, editable cells, status,..." alt="" coords="274,5,424,31"/>
+<area shape="poly" id="edge5_Node000002_Node000006" title=" " alt="" coords="177,101,217,71,268,40,280,34,282,39,270,45,220,75,180,106"/>
+<area shape="rect" id="Node000008" href="$_advanced_8pde.html#a17fe8578fb69f7a2b5dcdcf189497aa2" title="Draw the running/paused status indicator with pulsing LED and progress text." alt="" coords="284,153,414,179"/>
+<area shape="poly" id="edge7_Node000002_Node000008" title=" " alt="" coords="214,128,284,146,282,151,213,133"/>
+<area shape="rect" id="Node000010" href="$_advanced_8pde.html#a9423d01c53c85f9fe836037f9ba80642" title="Draw the voltage sweep configuration panel with input fields and preview graph." alt="" coords="282,104,416,130"/>
+<area shape="poly" id="edge9_Node000002_Node000010" title=" " alt="" coords="216,114,267,114,267,120,216,120"/>
+<area shape="rect" id="Node000004" href="$_advanced_8pde.html#af6a780e0d6600ae212c03845bd28102f" title="Draw a labeled input field for sweep parameters." alt="" coords="489,104,606,130"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="405,78,479,97,477,102,403,84"/>
+<area shape="rect" id="Node000005" href="$_advanced_8pde.html#a0a183403abd4e05a4d43620751e3b4b6" title="Draw the staircase preview graph for a sweep, with optional position marker." alt="" coords="479,55,616,80"/>
+<area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="416,65,464,65,464,70,416,70"/>
+<area shape="rect" id="Node000007" href="$_advanced_8pde.html#a66be81ffb58cd7138f50e4eb037a0bf7" title="Draw a single editable table cell with optional blinking cursor when active." alt="" coords="488,5,607,31"/>
+<area shape="poly" id="edge6_Node000006_Node000007" title=" " alt="" coords="424,16,472,16,472,21,424,21"/>
+<area shape="rect" id="Node000009" href="$_advanced_8pde.html#a0e8fd16076da90ab11013e60a41e57df" title="Count the number of enabled steps in the sequential table." alt="" coords="480,153,615,179"/>
+<area shape="poly" id="edge8_Node000008_Node000009" title=" " alt="" coords="415,164,465,164,465,169,415,169"/>
+<area shape="poly" id="edge10_Node000010_Node000004" title=" " alt="" coords="416,114,473,114,473,120,416,120"/>
+<area shape="poly" id="edge11_Node000010_Node000005" title=" " alt="" coords="403,101,477,82,479,87,405,106"/>
+<area shape="rect" id="Node000012" href="$_g_u_i_8pde.html#a8da174001fa6eb5a4889d81ee7703479" title="Apply the green (confirm) theme to a controller." alt="" coords="286,252,413,278"/>
+<area shape="poly" id="edge13_Node000011_Node000012" title=" " alt="" coords="199,262,270,262,270,268,199,268"/>
+<area shape="rect" id="Node000014" href="$_g_u_i_8pde.html#a8e12f7862693411b88d521b1c5a93b99" title="Apply the red (warning) theme to a controller." alt="" coords="291,203,407,228"/>
+<area shape="poly" id="edge15_Node000011_Node000014" title=" " alt="" coords="198,253,282,230,283,236,199,258"/>
+<area shape="rect" id="Node000015" href="$_g_u_i_8pde.html#a680c08ef9a0424a6a04635a77f7e2a3a" title=" " alt="" coords="281,301,417,327"/>
+<area shape="poly" id="edge17_Node000011_Node000015" title=" " alt="" coords="199,272,283,294,282,299,198,277"/>
+<area shape="rect" id="Node000013" href="$_g_u_i_8pde.html#a8634398d933c0ed11a168b6572863276" title="Apply background, foreground, and active colors to a ControlP5 controller." alt="" coords="501,225,594,251"/>
+<area shape="poly" id="edge14_Node000012_Node000013" title=" " alt="" coords="413,254,486,244,487,249,414,259"/>
+<area shape="poly" id="edge16_Node000014_Node000013" title=" " alt="" coords="408,219,486,229,486,234,407,225"/>
+<area shape="rect" id="Node000017" href="$_advanced_8pde.html#a0161c4d51da5bf8d395dc9fb858aad40" title="Advance the sequential output state machine by one tick." alt="" coords="269,425,429,451"/>
+<area shape="poly" id="edge19_Node000016_Node000017" title=" " alt="" coords="197,374,301,416,299,421,195,379"/>
+<area shape="rect" id="Node000023" href="$_advanced_8pde.html#a55fe89898ba8c70d4429280135161281" title=" " alt="" coords="299,351,399,376"/>
+<area shape="poly" id="edge28_Node000016_Node000023" title=" " alt="" coords="222,361,284,361,284,366,222,366"/>
+<area shape="rect" id="Node000018" href="$_advanced_8pde.html#a4999af9c723e970a2b43eaa892bdc9ef" title="Stop execution and reset state." alt="" coords="513,351,582,376"/>
+<area shape="poly" id="edge20_Node000017_Node000018" title=" " alt="" coords="382,422,476,385,497,377,499,382,478,390,384,427"/>
+<area shape="rect" id="Node000019" href="$_advanced_8pde.html#ae36ba9a36fd4a3caeadbe27436a126bc" title="Reset all step statuses to &#39;waiting&#39;." alt="" coords="666,476,777,502"/>
+<area shape="poly" id="edge26_Node000017_Node000019" title=" " alt="" coords="363,449,410,495,442,519,478,537,516,548,547,550,578,546,617,537,653,524,686,508,688,512,655,529,618,542,579,551,547,555,515,553,476,542,439,524,406,500,359,453"/>
+<area shape="rect" id="Node000020" href="$_g_u_i_8pde.html#a59545d202afc6e613dff8e8f118fcc03" title="Update the status bar message and record the timestamp." alt="" coords="683,376,760,402"/>
+<area shape="poly" id="edge27_Node000017_Node000020" title=" " alt="" coords="430,445,521,447,569,443,617,436,653,423,685,407,688,412,655,428,618,441,570,449,521,452,430,450"/>
+<area shape="rect" id="Node000021" href="$_advanced_8pde.html#acebf5e152c47178bd4f3938e740af06d" title="Apply voltage/current for a sequential step and turn output on." alt="" coords="477,400,618,426"/>
+<area shape="poly" id="edge23_Node000017_Node000021" title=" " alt="" coords="429,425,462,421,462,426,430,431"/>
+<area shape="rect" id="Node000022" href="$_advanced_8pde.html#aba329f9a0158cd1cc135aa9c2decd4cc" title="Find the next enabled step after the given index." alt="" coords="487,501,608,527"/>
+<area shape="poly" id="edge25_Node000017_Node000022" title=" " alt="" coords="386,449,499,493,497,498,384,454"/>
+<area shape="poly" id="edge21_Node000018_Node000019" title=" " alt="" coords="584,370,619,385,666,423,702,462,699,466,663,427,616,390,582,374"/>
+<area shape="poly" id="edge22_Node000018_Node000020" title=" " alt="" coords="583,366,667,378,667,384,582,371"/>
+<area shape="poly" id="edge24_Node000021_Node000020" title=" " alt="" coords="618,400,667,394,668,399,618,406"/>
+<area shape="poly" id="edge29_Node000023_Node000018" title=" " alt="" coords="400,361,497,361,497,366,400,366"/>
+<area shape="poly" id="edge30_Node000023_Node000020" title=" " alt="" coords="397,347,443,337,499,330,559,328,618,336,655,348,688,365,686,370,653,353,617,341,559,333,500,335,444,343,398,353"/>
+</map>
