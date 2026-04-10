@@ -7,50 +7,129 @@
 // STATE
 // ============================================================
 
+/// True when the Advanced overlay is visible
 boolean advancedOpen = false;
-int advMode = 0;  // 0=Sequential, 1=V Sweep, 2=I Sweep
+/// Active mode: 0=Sequential, 1=V Sweep, 2=I Sweep
+int advMode = 0;
 
-static final int ADV_IDLE = 0, ADV_RUNNING = 1, ADV_PAUSED = 2;
+/** @name Advanced State Codes
+ *  @{ */
+static final int ADV_IDLE = 0;     ///< No sequence or sweep is running
+static final int ADV_RUNNING = 1;  ///< Sequence or sweep is actively executing
+static final int ADV_PAUSED = 2;   ///< Execution is paused and can be resumed
+/** @} */
+
+/// Current execution state
 int advState = ADV_IDLE;
 
 // Sequential output
+/// Maximum number of rows in the sequential output table
 static final int SEQ_MAX_ROWS = 10;
+/// Voltage set-point for each sequential step (V)
 float[] seqVoltage = new float[SEQ_MAX_ROWS];
+/// Current set-point for each sequential step (A)
 float[] seqCurrent = new float[SEQ_MAX_ROWS];
+/// Delay duration for each sequential step (seconds)
 float[] seqDelay   = new float[SEQ_MAX_ROWS];
+/// Whether each sequential step is enabled
 boolean[] seqEnabled = new boolean[SEQ_MAX_ROWS];
-int[] seqStatus = new int[SEQ_MAX_ROWS];  // 0=waiting, 1=running, 2=done
-int seqLoopCount = 1, seqCurrentLoop = 0, seqCurrentStep = -1;
+/// Status of each step: 0=waiting, 1=running, 2=done
+int[] seqStatus = new int[SEQ_MAX_ROWS];
+/// Number of loops (0 = infinite)
+int seqLoopCount = 1;
+/// Current loop index during execution
+int seqCurrentLoop = 0;
+/// Current step index during execution
+int seqCurrentStep = -1;
+/// Timestamp when the current step began
 long seqStepStartTime = 0;
-int seqEditRow = -1, seqEditCol = -1;
+/// Row being edited (-1 = none)
+int seqEditRow = -1;
+/// Column being edited (-1 = none)
+int seqEditCol = -1;
+/// Text buffer for the active table cell editor
 String seqEditBuffer = "";
 
 // Voltage sweep
-float vsFixedCurrent = 1.0, vsStartVoltage = 1.0, vsEndVoltage = 12.0;
-float vsStepVoltage = 0.5, vsDelay = 2.0, vsCurrentValue = 0;
+/// Fixed current applied during voltage sweep (A)
+float vsFixedCurrent = 1.0;
+/// Start voltage for the sweep (V)
+float vsStartVoltage = 1.0;
+/// End voltage for the sweep (V)
+float vsEndVoltage = 12.0;
+/// Voltage increment per step (V)
+float vsStepVoltage = 0.5;
+/// Delay between sweep steps (seconds)
+float vsDelay = 2.0;
+/// Current sweep output value (V)
+float vsCurrentValue = 0;
+/// Sweep field currently being edited (-1 = none)
 int vsEditField = -1;
+/// Text buffer for the active voltage sweep field editor
 String vsEditBuffer = "";
 
 // Current sweep
-float csFixedVoltage = 5.0, csStartCurrent = 0.1, csEndCurrent = 3.0;
-float csStepCurrent = 0.1, csDelay = 2.0, csCurrentValue = 0;
+/// Fixed voltage applied during current sweep (V)
+float csFixedVoltage = 5.0;
+/// Start current for the sweep (A)
+float csStartCurrent = 0.1;
+/// End current for the sweep (A)
+float csEndCurrent = 3.0;
+/// Current increment per step (A)
+float csStepCurrent = 0.1;
+/// Delay between sweep steps (seconds)
+float csDelay = 2.0;
+/// Current sweep output value (A)
+float csCurrentValue = 0;
+/// Sweep field currently being edited (-1 = none)
 int csEditField = -1;
+/// Text buffer for the active current sweep field editor
 String csEditBuffer = "";
 
 // Window geometry & widgets
-float advX, advY, advW, advH;
+/// Advanced overlay X position (px)
+float advX;
+/// Advanced overlay Y position (px)
+float advY;
+/// Advanced overlay width (px)
+float advW;
+/// Advanced overlay height (px)
+float advH;
+/// Close button for the Advanced overlay
 AdvButton btnAdvClose;
-AdvButton btnAdvModeSeq, btnAdvModeVS, btnAdvModeCS;
-AdvButton btnAdvStart, btnAdvPause, btnAdvContinue, btnAdvStop;
-AdvButton btnAdvSingleStep, btnAdvClearTable;
-AdvButton btnLoopUp, btnLoopDown;
+/// Mode tab button: Sequential Output
+AdvButton btnAdvModeSeq;
+/// Mode tab button: Voltage Sweep
+AdvButton btnAdvModeVS;
+/// Mode tab button: Current Sweep
+AdvButton btnAdvModeCS;
+/// Control button: Start execution
+AdvButton btnAdvStart;
+/// Control button: Pause execution
+AdvButton btnAdvPause;
+/// Control button: Continue (resume) execution
+AdvButton btnAdvContinue;
+/// Control button: Stop execution
+AdvButton btnAdvStop;
+/// Control button: Execute a single sequential step
+AdvButton btnAdvSingleStep;
+/// Control button: Clear the sequential table
+AdvButton btnAdvClearTable;
+/// Loop count increment button
+AdvButton btnLoopUp;
+/// Loop count decrement button
+AdvButton btnLoopDown;
 
+/// Timestamp of the last sweep step
 long advLastStepTime = 0;
 
 // ============================================================
 // INIT
 // ============================================================
 
+/**
+ * @brief Initialize the Advanced overlay: compute geometry, create buttons, set default sequential table values.
+ */
 void initAdvanced() {
   advW = 780; advH = 520;
   advX = (WIN_W - advW) / 2;
@@ -90,6 +169,9 @@ void initAdvanced() {
 // DRAW
 // ============================================================
 
+/**
+ * @brief Draw the Advanced overlay if open: dim background, window chrome, mode tabs, content area, control buttons.
+ */
 void drawAdvanced() {
   if (!advancedOpen) return;
 
@@ -140,6 +222,9 @@ void drawAdvanced() {
   if (advMode == 0) btnAdvSingleStep.draw();
 }
 
+/**
+ * @brief Draw the running/paused status indicator with pulsing LED and progress text.
+ */
 void drawStateIndicator() {
   float sx = advX + 400, sy = advY + 45;
   if (advState == ADV_RUNNING) {
@@ -165,6 +250,14 @@ void drawStateIndicator() {
 // SEQUENTIAL OUTPUT TABLE
 // ============================================================
 
+/**
+ * @brief Draw the sequential output table with headers, checkboxes, editable cells, status, and progress bars.
+ *
+ * @param x  Left edge of the table area (px)
+ * @param y  Top edge of the table area (px)
+ * @param w  Width of the table area (px)
+ * @param h  Height of the table area (px)
+ */
 void drawSequentialOutput(float x, float y, float w, float h) {
   float[] colX = {x, x+35, x+130, x+250, x+370, x+480, x+580};
   String[] headers = {"En", "No.", "Voltage (V)", "Current (A)", "Delay (s)", "Status", "Progress"};
@@ -213,6 +306,18 @@ void drawSequentialOutput(float x, float y, float w, float h) {
   }
 }
 
+/**
+ * @brief Draw a single editable table cell with optional blinking cursor when active.
+ *
+ * @param x           Left edge of the cell (px)
+ * @param y           Top edge of the cell (px)
+ * @param w           Width of the cell (px)
+ * @param h           Height of the cell (px)
+ * @param displayVal  Formatted value to display when not editing
+ * @param row         Row index in the sequential table
+ * @param col         Column index (0=voltage, 1=current, 2=delay)
+ * @param suffix      Unit suffix string (e.g. "V", "A", "s")
+ */
 void drawEditableCell(float x, float y, float w, float h, String displayVal, int row, int col, String suffix) {
   boolean editing = (seqEditRow == row && seqEditCol == col);
   fill(editing ? #0D1B2A : COL_INPUT_BG);
@@ -228,6 +333,14 @@ void drawEditableCell(float x, float y, float w, float h, String displayVal, int
 // SWEEP PANELS
 // ============================================================
 
+/**
+ * @brief Draw the voltage sweep configuration panel with input fields and preview graph.
+ *
+ * @param x  Left edge of the panel area (px)
+ * @param y  Top edge of the panel area (px)
+ * @param w  Width of the panel area (px)
+ * @param h  Height of the panel area (px)
+ */
 void drawVoltageSweep(float x, float y, float w, float h) {
   fill(COL_TEXT_DIM); textAlign(LEFT, TOP); textSize(11);
   text("Scan voltage within range at fixed current.", x + 5, y + 5);
@@ -245,6 +358,14 @@ void drawVoltageSweep(float x, float y, float w, float h) {
   drawSweepPreview(x+20, y+h-150, w-40, 130, vsStartVoltage, vsEndVoltage, vsStepVoltage, vsCurrentValue, advMode==1);
 }
 
+/**
+ * @brief Draw the current sweep configuration panel with input fields and preview graph.
+ *
+ * @param x  Left edge of the panel area (px)
+ * @param y  Top edge of the panel area (px)
+ * @param w  Width of the panel area (px)
+ * @param h  Height of the panel area (px)
+ */
 void drawCurrentSweep(float x, float y, float w, float h) {
   fill(COL_TEXT_DIM); textAlign(LEFT, TOP); textSize(11);
   text("Scan current within range at fixed voltage.", x + 5, y + 5);
@@ -262,9 +383,24 @@ void drawCurrentSweep(float x, float y, float w, float h) {
   drawSweepPreview(x+20, y+h-150, w-40, 130, csStartCurrent, csEndCurrent, csStepCurrent, csCurrentValue, advMode==2);
 }
 
-// Shared sweep field layout constants
-static final float SF_LABEL_W = 110, SF_FIELD_W = 140, SF_FIELD_H = 28;
+/// Sweep field label width (px)
+static final float SF_LABEL_W = 110;
+/// Sweep field input width (px)
+static final float SF_FIELD_W = 140;
+/// Sweep field input height (px)
+static final float SF_FIELD_H = 28;
 
+/**
+ * @brief Draw a labeled input field for sweep parameters.
+ *
+ * @param x           Left edge of the field group (px)
+ * @param y           Top edge of the field group (px)
+ * @param label       Text label displayed to the left of the input
+ * @param displayVal  Formatted value shown when not editing
+ * @param suffix      Unit suffix string (e.g. "V", "A", "s")
+ * @param fieldIdx    Index of this field within the sweep (0-4)
+ * @param sweepType   Sweep type: 1 = voltage sweep, 2 = current sweep
+ */
 void drawSweepField(float x, float y, String label, String displayVal, String suffix, int fieldIdx, int sweepType) {
   boolean editing = (sweepType == 1 ? vsEditField : csEditField) == fieldIdx;
 
@@ -286,6 +422,19 @@ void drawSweepField(float x, float y, String label, String displayVal, String su
 // SWEEP PREVIEW
 // ============================================================
 
+/**
+ * @brief Draw the staircase preview graph for a sweep, with optional position marker.
+ *
+ * @param x           Left edge of the preview area (px)
+ * @param y           Top edge of the preview area (px)
+ * @param w           Width of the preview area (px)
+ * @param h           Height of the preview area (px)
+ * @param startVal    Sweep start value
+ * @param endVal      Sweep end value
+ * @param stepVal     Sweep step increment
+ * @param currentVal  Current output value (for the position marker)
+ * @param isActive    True if this sweep mode is currently selected and should show the marker
+ */
 void drawSweepPreview(float x, float y, float w, float h, float startVal, float endVal, float stepVal, float currentVal, boolean isActive) {
   fill(COL_GRAPH_BG); stroke(COL_BORDER); strokeWeight(1);
   rect(x, y, w, h, 3);
@@ -333,6 +482,9 @@ void drawSweepPreview(float x, float y, float w, float h, float startVal, float 
 // EXECUTION ENGINE
 // ============================================================
 
+/**
+ * @brief Per-frame update: advance the active sequence or sweep if running.
+ */
 void updateAdvanced() {
   if (advState != ADV_RUNNING || !psu.connected) return;
   long now = millis();
@@ -342,6 +494,11 @@ void updateAdvanced() {
   }
 }
 
+/**
+ * @brief Advance the sequential output state machine by one tick.
+ *
+ * @param now  Current timestamp in milliseconds
+ */
 void updateSequentialOutput(long now) {
   if (seqCurrentStep < 0) {
     seqCurrentStep = nextEnabledStep(-1);
@@ -394,6 +551,11 @@ void updateSweep(long now) {
   }
 }
 
+/**
+ * @brief Apply voltage/current for a sequential step and turn output on.
+ *
+ * @param step  Index of the sequential step to apply
+ */
 void applySequentialStep(int step) {
   seqStatus[step] = 1;
   seqStepStartTime = millis();
@@ -403,23 +565,40 @@ void applySequentialStep(int step) {
   setStatus("Seq step " + (step+1) + ": " + nf(seqVoltage[step],0,3) + "V / " + nf(seqCurrent[step],0,3) + "A");
 }
 
+/**
+ * @brief Find the next enabled step after the given index.
+ *
+ * @param after  Index to search after (-1 to start from the beginning)
+ * @return       Index of the next enabled step, or -1 if none found
+ */
 int nextEnabledStep(int after) {
   for (int i = after + 1; i < SEQ_MAX_ROWS; i++) if (seqEnabled[i]) return i;
   return -1;
 }
 
+/**
+ * @brief Count the number of enabled steps in the sequential table.
+ *
+ * @return  Number of steps with seqEnabled[i] == true
+ */
 int countEnabledSteps() {
   int n = 0;
   for (int i = 0; i < SEQ_MAX_ROWS; i++) if (seqEnabled[i]) n++;
   return n;
 }
 
+/**
+ * @brief Reset all step statuses to 'waiting'.
+ */
 void resetSeqStatus() { for (int i = 0; i < SEQ_MAX_ROWS; i++) seqStatus[i] = 0; }
 
 // ============================================================
 // START / PAUSE / CONTINUE / STOP
 // ============================================================
 
+/**
+ * @brief Start execution in the current mode.
+ */
 void advStart() {
   if (!psu.connected) return;
   advState = ADV_RUNNING;
@@ -430,8 +609,14 @@ void advStart() {
   }
 }
 
+/**
+ * @brief Pause execution.
+ */
 void advPause() { advState = ADV_PAUSED; setStatus("Advanced output paused."); }
 
+/**
+ * @brief Resume execution from a paused state.
+ */
 void advContinue() {
   if (advState != ADV_PAUSED) return;
   advState = ADV_RUNNING;
@@ -440,6 +625,9 @@ void advContinue() {
   setStatus("Advanced output resumed.");
 }
 
+/**
+ * @brief Stop execution and reset state.
+ */
 void advStop() {
   advState = ADV_IDLE;
   seqCurrentStep = -1;
@@ -447,6 +635,9 @@ void advStop() {
   setStatus("Advanced output stopped.");
 }
 
+/**
+ * @brief Execute a single step in sequential mode, then pause.
+ */
 void advSingleStep() {
   if (advMode != 0) return;
   if (advState == ADV_IDLE) {
@@ -468,6 +659,9 @@ void advSingleStep() {
 // INPUT HANDLING
 // ============================================================
 
+/**
+ * @brief Process mouse clicks on the Advanced overlay: buttons, mode tabs, table cells, sweep fields.
+ */
 void handleAdvancedClick() {
   if (!advancedOpen) return;
 
@@ -505,6 +699,9 @@ void handleAdvancedClick() {
   else handleSweepFieldClick(advMode == 1 ? 1 : 2);
 }
 
+/**
+ * @brief Handle clicks within the sequential output table (checkboxes and editable cells).
+ */
 void handleSeqTableClick() {
   float tableY = advY + 64 + 26, rowH = 32;
   commitSeqEdit();
@@ -525,6 +722,9 @@ void handleSeqTableClick() {
   }
 }
 
+/**
+ * @brief Commit the current table cell edit buffer to the corresponding data array.
+ */
 void commitSeqEdit() {
   if (seqEditRow < 0 || seqEditCol < 0) return;
   float val = 0;
@@ -536,6 +736,11 @@ void commitSeqEdit() {
   }
 }
 
+/**
+ * @brief Handle clicks on sweep parameter input fields.
+ *
+ * @param sweepType  Sweep type: 1 = voltage sweep, 2 = current sweep
+ */
 void handleSweepFieldClick(int sweepType) {
   float x = advX + 8, sY = advY + 64 + 45, gap = 55;
   float col1 = x + 20 + SF_LABEL_W, col2 = x + 300 + SF_LABEL_W;
@@ -554,6 +759,13 @@ void handleSweepFieldClick(int sweepType) {
   }
 }
 
+/**
+ * @brief Return the current value string for a sweep field.
+ *
+ * @param type   Sweep type: 1 = voltage sweep, 2 = current sweep
+ * @param field  Field index (0-4)
+ * @return       Formatted numeric string for the requested field
+ */
 String getSweepFieldValue(int type, int field) {
   if (type == 1) {
     switch (field) {
@@ -575,6 +787,11 @@ String getSweepFieldValue(int type, int field) {
   return "0";
 }
 
+/**
+ * @brief Commit the current sweep field edit to the corresponding variable.
+ *
+ * @param sweepType  Sweep type: 1 = voltage sweep, 2 = current sweep
+ */
 void commitSweepEdit(int sweepType) {
   int field = (sweepType == 1) ? vsEditField : csEditField;
   if (field < 0) return;
@@ -618,6 +835,12 @@ String editNumericBuffer(String buf, char k) {
   return null;  // not a numeric key
 }
 
+/**
+ * @brief Process keyboard input for the Advanced overlay: numeric editing, tab navigation, escape.
+ *
+ * @param k      The character of the key pressed
+ * @param kCode  The key code of the key pressed
+ */
 void handleAdvancedKey(char k, int kCode) {
   if (!advancedOpen) return;
 

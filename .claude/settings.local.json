@@ -39,7 +39,8 @@
       "WebFetch(domain:sojamo.de)",
       "WebFetch(domain:www.kasperkamperman.com)",
       "WebFetch(domain:thenewstack.io)",
-      "WebFetch(domain:diyusthad.com)"
+      "WebFetch(domain:diyusthad.com)",
+      "Bash(which doxygen:*)"
     ]
   }
 }

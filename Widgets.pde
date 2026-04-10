@@ -12,19 +12,34 @@
  */
 
 // ============================================================
-// Widget base class
+/**
+ * @class Widget
+ * @brief Abstract base class for all custom widgets.
+ *
+ * Provides position/size storage and a basic rectangular hit-test.
+ * Subclasses override draw() to render themselves.
+ */
 // ============================================================
 class Widget {
   float x, y, w, h;
 
+  /**
+   * Construct a widget with the given bounding rectangle.
+   * @param x Horizontal position (left edge, in pixels)
+   * @param y Vertical position (top edge, in pixels)
+   * @param w Width in pixels
+   * @param h Height in pixels
+   */
   Widget(float x, float y, float w, float h) {
     this.x = x; this.y = y; this.w = w; this.h = h;
   }
 
+  /** @brief Test if the mouse cursor is within this widget's bounds. */
   boolean hitTest() {
     return mouseX >= x && mouseX <= x+w && mouseY >= y && mouseY <= y+h;
   }
 
+  /** @brief Draw the widget (no-op in base class, override in subclasses). */
   void draw() {}
 }
 
@@ -32,35 +47,46 @@ class Widget {
 // COLOR PALETTE
 // ============================================================
 
-static final color COL_BG           = #1C1C28;
-static final color COL_PANEL        = #232336;
-static final color COL_PANEL_HEADER = #2A2A44;
-static final color COL_PANEL_LITE   = #2E2E4A;
-static final color COL_BORDER       = #3A3A5C;
-static final color COL_ACCENT       = #4A90D9;
-static final color COL_ACCENT_LITE  = #6BB0FF;
-static final color COL_TEXT         = #E0E0E8;
-static final color COL_TEXT_DIM     = #888899;
-static final color COL_DIM          = #555566;
-static final color COL_VOLT         = #FFD54F;
-static final color COL_VOLT_DIM     = #664D00;
-static final color COL_CURR         = #4DD0E1;
-static final color COL_CURR_DIM     = #005662;
-static final color COL_POWER        = #81C784;
-static final color COL_POWER_DIM    = #1B5E20;
-static final color COL_ON           = #00E676;
-static final color COL_OFF          = #FF5252;
-static final color COL_WARN         = #FF9800;
-static final color COL_BTN          = #2E3B55;
-static final color COL_BTN_HOVER    = #3D5070;
-static final color COL_BTN_ACTIVE   = #4A6590;
-static final color COL_INPUT_BG     = #171722;
-static final color COL_INPUT_BORDER = #3A3A5C;
-static final color COL_GRAPH_BG     = #14141E;
-static final color COL_GRID         = #252538;
+/** @name Color Palette
+ *  UI color constants used across all widgets and tabs.
+ *  @{ */
+static final color COL_BG           = #1C1C28;  ///< Main window background
+static final color COL_PANEL        = #232336;  ///< Panel body fill
+static final color COL_PANEL_HEADER = #2A2A44;  ///< Panel header bar fill
+static final color COL_PANEL_LITE   = #2E2E4A;  ///< Lighter panel variant
+static final color COL_BORDER       = #3A3A5C;  ///< General border / outline color
+static final color COL_ACCENT       = #4A90D9;  ///< Primary accent (selection, focus)
+static final color COL_ACCENT_LITE  = #6BB0FF;  ///< Light accent highlight
+static final color COL_TEXT         = #E0E0E8;  ///< Primary text color
+static final color COL_TEXT_DIM     = #888899;  ///< Dimmed / secondary text
+static final color COL_DIM          = #555566;  ///< Subtle UI elements (minor ticks, dividers)
+static final color COL_VOLT         = #FFD54F;  ///< Voltage trace / gauge color
+static final color COL_VOLT_DIM     = #664D00;  ///< Voltage dimmed arc background
+static final color COL_CURR         = #4DD0E1;  ///< Current trace / gauge color
+static final color COL_CURR_DIM     = #005662;  ///< Current dimmed arc background
+static final color COL_POWER        = #81C784;  ///< Power trace color
+static final color COL_POWER_DIM    = #1B5E20;  ///< Power dimmed background
+static final color COL_ON           = #00E676;  ///< Output-ON indicator
+static final color COL_OFF          = #FF5252;  ///< Output-OFF indicator
+static final color COL_WARN         = #FF9800;  ///< Warning / protection alert
+static final color COL_BTN          = #2E3B55;  ///< Button default background
+static final color COL_BTN_HOVER    = #3D5070;  ///< Button hovered background
+static final color COL_BTN_ACTIVE   = #4A6590;  ///< Button active / pressed background
+static final color COL_INPUT_BG     = #171722;  ///< Text input field background
+static final color COL_INPUT_BORDER = #3A3A5C;  ///< Text input field border
+static final color COL_GRAPH_BG     = #14141E;  ///< Scrolling graph background
+static final color COL_GRID         = #252538;  ///< Graph grid lines
+/** @} */
 
 // ============================================================
-// CircularGauge
+/**
+ * @class CircularGauge
+ * @brief Analog-style circular gauge with needle, arc, tick marks, and digital readout.
+ *
+ * Renders a 270-degree sweep arc with major/minor tick marks, a needle
+ * that tracks the current value, and a centered digital readout showing
+ * the numeric value, unit, and label.
+ */
 // ============================================================
 class CircularGauge {
   float cx, cy, radius;
@@ -72,6 +98,18 @@ class CircularGauge {
   float startAngle = PI * 0.75;
   float sweepAngle = PI * 1.5;
 
+  /**
+   * Construct a circular gauge.
+   * @param cx         Center X coordinate (pixels)
+   * @param cy         Center Y coordinate (pixels)
+   * @param radius     Outer radius of the gauge (pixels)
+   * @param label      Display name shown below the readout (e.g. "Voltage")
+   * @param unit       Display unit shown below the value (e.g. "V")
+   * @param minVal     Minimum value of the gauge range
+   * @param maxVal     Maximum value of the gauge range
+   * @param gaugeColor Primary arc and needle color
+   * @param gaugeDim   Dimmed arc background color
+   */
   CircularGauge(float cx, float cy, float radius, String label, String unit,
                 float minVal, float maxVal, color gaugeColor, color gaugeDim) {
     this.cx = cx; this.cy = cy; this.radius = radius;
@@ -81,6 +119,7 @@ class CircularGauge {
     this.majorTicks = 6; this.minorTicks = 5;
   }
 
+  /** @brief Draw the gauge: bezel, arc, ticks, needle, and digital readout. */
   void draw() {
     pushMatrix();
     translate(cx, cy);
@@ -159,17 +198,32 @@ class CircularGauge {
 }
 
 // ============================================================
-// ScrollingGraph
+/**
+ * @class ScrollingGraph
+ * @brief Real-time scrolling strip chart for voltage, current, and power traces.
+ *
+ * Draws a titled graph area with grid, Y-axis scale labels, time-axis
+ * labels, a color-coded legend, and up to three data traces pulled from
+ * the global @c psu history ring-buffers.
+ */
 // ============================================================
 class ScrollingGraph extends Widget {
   String title = "Waveform";
   boolean showVoltage = true, showCurrent = true, showPower = false;
   float voltScale = 30.0, currScale = 5.0, powerScale = 150.0;
 
+  /**
+   * Construct a scrolling graph widget.
+   * @param x Left edge position (pixels)
+   * @param y Top edge position (pixels)
+   * @param w Width in pixels
+   * @param h Height in pixels
+   */
   ScrollingGraph(float x, float y, float w, float h) {
     super(x, y, w, h);
   }
 
+  /** @brief Draw the graph background, grid, legend, traces, and border. */
   void draw() {
     fill(COL_GRAPH_BG); stroke(COL_BORDER); strokeWeight(1);
     rect(x, y, w, h, 4);
@@ -223,12 +277,32 @@ class ScrollingGraph extends Widget {
     rect(gx, gy, gw, gh);
   }
 
+  /**
+   * @brief Draw a single legend entry with color swatch and label.
+   * @param lx    Left edge of the swatch
+   * @param ly    Vertical center of the entry
+   * @param c     Swatch color
+   * @param label Text label
+   */
   void drawLegendItem(float lx, float ly, color c, String label) {
     fill(c); noStroke(); rect(lx, ly-4, 8, 8);
     fill(COL_TEXT_DIM); textAlign(LEFT, CENTER);
     text(label, lx+12, ly);
   }
 
+  /**
+   * @brief Plot one data trace as a connected line within the graph area.
+   * @param gx     Graph area left edge
+   * @param gy     Graph area top edge
+   * @param gw     Graph area width
+   * @param gh     Graph area height
+   * @param xScale Horizontal pixels per sample
+   * @param start  Ring-buffer start index
+   * @param data   Sample data array (ring-buffer)
+   * @param scale  Y-axis full-scale value
+   * @param c      Trace color
+   * @param sw     Stroke weight
+   */
   void drawTrace(float gx, float gy, float gw, float gh, float xScale, int start, float[] data, float scale, color c, float sw) {
     noFill(); stroke(c); strokeWeight(sw);
     beginShape();
@@ -241,16 +315,32 @@ class ScrollingGraph extends Widget {
 }
 
 // ============================================================
-// Panel
+/**
+ * @class Panel
+ * @brief Titled container panel with header bar and content area.
+ *
+ * Draws a rounded rectangle with a colored header strip containing the
+ * title text.  Helper methods return the usable content region inside
+ * the panel's padding.
+ */
 // ============================================================
 class Panel extends Widget {
   String title;
 
+  /**
+   * Construct a panel.
+   * @param x     Left edge position (pixels)
+   * @param y     Top edge position (pixels)
+   * @param w     Width in pixels
+   * @param h     Height in pixels
+   * @param title Header text displayed in the title bar
+   */
   Panel(float x, float y, float w, float h, String title) {
     super(x, y, w, h);
     this.title = title;
   }
 
+  /** @brief Draw the panel background, header bar, and title text. */
   void draw() {
     fill(0, 30); noStroke();
     rect(x+2, y+2, w, h, 5);
@@ -262,25 +352,44 @@ class Panel extends Widget {
     text(title, x + 10, y + 13);
   }
 
+  /** @brief Return the content area X position (inside padding). */
   float contentX() { return x + 8; }
+  /** @brief Return the content area Y position (inside padding). */
   float contentY() { return y + 30; }
+  /** @brief Return the content area width (inside padding). */
   float contentW() { return w - 16; }
+  /** @brief Return the content area height (inside padding). */
   float contentH() { return h - 36; }
 }
 
 // ============================================================
-// AdvButton — used only in Advanced.pde
+/**
+ * @class AdvButton
+ * @brief Clickable button widget used in the Advanced overlay.
+ *
+ * Renders a rounded button with hover highlight and shadow.
+ * Can be disabled to grey out and ignore clicks.
+ */
 // ============================================================
 class AdvButton extends Widget {
   String label;
   color bgColor = COL_BTN, hoverColor = COL_BTN_HOVER, textColor = COL_TEXT;
   boolean enabled = true;
 
+  /**
+   * Construct a button.
+   * @param x     Left edge position (pixels)
+   * @param y     Top edge position (pixels)
+   * @param w     Width in pixels
+   * @param h     Height in pixels
+   * @param label Text displayed on the button face
+   */
   AdvButton(float x, float y, float w, float h, String label) {
     super(x, y, w, h);
     this.label = label;
   }
 
+  /** @brief Draw the button with shadow, fill, hover highlight, and label. */
   void draw() {
     boolean hovered = enabled && hitTest();
     float r = 4;
@@ -296,22 +405,39 @@ class AdvButton extends Widget {
     text(label, x + w/2, y + h/2);
   }
 
+  /** @brief Return true if the button is enabled and the mouse is over it. */
   boolean clicked() { return enabled && hitTest(); }
 }
 
 // ============================================================
-// StatusBadge
+/**
+ * @class StatusBadge
+ * @brief Small mode indicator badge (e.g. CV/CC).
+ *
+ * When active, draws a glowing colored rectangle with dark text;
+ * when inactive, draws a muted outline with dimmed text.
+ */
 // ============================================================
 class StatusBadge extends Widget {
   String label;
   color activeColor;
   boolean active = false;
 
+  /**
+   * Construct a status badge.
+   * @param x           Left edge position (pixels)
+   * @param y           Top edge position (pixels)
+   * @param w           Width in pixels
+   * @param h           Height in pixels
+   * @param label       Text shown inside the badge (e.g. "CV", "CC")
+   * @param activeColor Fill and border color when the badge is active
+   */
   StatusBadge(float x, float y, float w, float h, String label, color activeColor) {
     super(x, y, w, h);
     this.label = label; this.activeColor = activeColor;
   }
 
+  /** @brief Draw the badge in its active or inactive state. */
   void draw() {
     if (active) { fill(activeColor, 20); noStroke(); rect(x-2, y-2, w+4, h+4, 6); }
     fill(active ? activeColor : #2A2A35);
@@ -324,17 +450,34 @@ class StatusBadge extends Widget {
 }
 
 // ============================================================
-// DigitalReadout
+/**
+ * @class DigitalReadout
+ * @brief Seven-segment style numeric display with label and unit.
+ *
+ * Renders a dark recessed rectangle containing a left-aligned label,
+ * a large right-aligned numeric value, and a smaller unit suffix.
+ */
 // ============================================================
 class DigitalReadout extends Widget {
   String value = "0.000", unit = "V", label = "";
   color displayColor;
 
+  /**
+   * Construct a digital readout.
+   * @param x     Left edge position (pixels)
+   * @param y     Top edge position (pixels)
+   * @param w     Width in pixels
+   * @param h     Height in pixels
+   * @param unit  Unit suffix displayed after the value (e.g. "V", "A")
+   * @param label Descriptive label shown at the left edge
+   * @param c     Display color for the value, unit, and label text
+   */
   DigitalReadout(float x, float y, float w, float h, String unit, String label, color c) {
     super(x, y, w, h);
     this.unit = unit; this.label = label; this.displayColor = c;
   }
 
+  /** @brief Draw the recessed background, label, numeric value, and unit. */
   void draw() {
     fill(#08080F); stroke(COL_BORDER, 80); strokeWeight(1);
     rect(x, y, w, h, 3);
@@ -348,17 +491,42 @@ class DigitalReadout extends Widget {
     text(unit, x + w - 26, y + h/2);
   }
 
+  /**
+   * @brief Format and store a float value for display.
+   * @param v    The float value to format
+   * @param intD Number of integer digits (zero-padded)
+   * @param decD Number of decimal places
+   */
   void setValue(float v, int intD, int decD) { value = nf(v, intD, decD); }
 }
 
 // ============================================================
-// VerticalBar
+/**
+ * @class VerticalBar
+ * @brief Vertical bar indicator for displaying a bounded value (e.g. Vmax, Imax).
+ *
+ * Draws a narrow vertical track with a filled portion proportional to
+ * the current value, plus tick marks, a numeric readout at the top,
+ * and a label at the bottom.
+ */
 // ============================================================
 class VerticalBar extends Widget {
   float minVal, maxVal, value = 0;
   String label, unit;
   color barColor;
 
+  /**
+   * Construct a vertical bar indicator.
+   * @param x        Left edge position (pixels)
+   * @param y        Top edge position (pixels)
+   * @param w        Width in pixels
+   * @param h        Height in pixels
+   * @param label    Text label shown below the bar
+   * @param unit     Unit suffix appended to the numeric readout
+   * @param minVal   Minimum value of the range
+   * @param maxVal   Maximum value of the range
+   * @param barColor Fill color for the active portion of the bar
+   */
   VerticalBar(float x, float y, float w, float h, String label, String unit,
               float minVal, float maxVal, color barColor) {
     super(x, y, w, h);
@@ -366,6 +534,7 @@ class VerticalBar extends Widget {
     this.minVal = minVal; this.maxVal = maxVal; this.barColor = barColor;
   }
 
+  /** @brief Draw the bar track, filled portion, tick marks, value, and label. */
   void draw() {
     float trackX = x + w/2 - 4, trackW = 8;
     float trackY = y + 14, trackH = h - 38;

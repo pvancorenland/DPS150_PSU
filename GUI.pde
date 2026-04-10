@@ -9,55 +9,70 @@
 // GUI WIDGETS — Display-only (custom)
 // ============================================================
 
-String[] availablePorts;
-int selectedPortIndex = 0;
-String selectedPortName = "";
+String[] availablePorts;              ///< List of available serial port names
+int selectedPortIndex = 0;            ///< Index into availablePorts for the currently selected port
+String selectedPortName = "";         ///< Name of the currently selected port
 
-CircularGauge gaugeVoltage, gaugeCurrent;
-Slider sliderVset, sliderIset;
-DigitalReadout readoutPower, readoutSetV, readoutSetA;
-ScrollingGraph graph;
-StatusBadge badgeCV, badgeCC;
-Panel panelGauges, panelOutput, panelSetControls, panelPresets, panelInfo, panelProtection;
+CircularGauge gaugeVoltage,           ///< Gauge displaying live output voltage
+              gaugeCurrent;           ///< Gauge displaying live output current
+Slider sliderVset,                    ///< Vertical slider for voltage set-point
+       sliderIset;                    ///< Vertical slider for current set-point
+DigitalReadout readoutPower,          ///< Digital readout displaying live power (W)
+               readoutSetV,           ///< Digital readout displaying set voltage (V)
+               readoutSetA;           ///< Digital readout displaying set current (A)
+ScrollingGraph graph;                 ///< Scrolling time-series graph for V, A, and W
+StatusBadge badgeCV,                  ///< Status badge indicating constant-voltage mode
+            badgeCC;                  ///< Status badge indicating constant-current mode
+Panel panelGauges,                    ///< Panel framing the gauge area
+      panelOutput,                    ///< Panel framing the output toggle and mode badges
+      panelSetControls,               ///< Panel framing the set-point textfields and adjust buttons
+      panelPresets,                   ///< Panel framing the six preset slots
+      panelInfo,                      ///< Panel displaying device information
+      panelProtection;                ///< Panel framing the protection limit controls
 
-String statusMessage = "Ready";
-long statusTime = 0;
-long outputToggleTime = 0;
+String statusMessage = "Ready";       ///< Current status bar message
+long statusTime = 0;                  ///< Timestamp when status message was last set
+long outputToggleTime = 0;            ///< Timestamp of last output toggle (debounce guard)
 
 // ============================================================
 // LAYOUT CONSTANTS
 // ============================================================
-static final int WIN_W = 1100, WIN_H = 720;
-static final int TOP_BAR_H = 40;
+static final int WIN_W = 1100, WIN_H = 720;  ///< Window dimensions (width x height)
+static final int TOP_BAR_H = 40;             ///< Height of the top connection bar
 
 // Left column
-static final float LX = 8, LW = 612;
-static final float GAUGE_Y = 44, GAUGE_H = 260;
-static final float RDO_Y = 308, RDO_H = 44;
-static final float GRAPH_Y = 356, GRAPH_H = 254;
+static final float LX = 8, LW = 612;                 ///< Left column X position and width
+static final float GAUGE_Y = 44, GAUGE_H = 260;       ///< Gauge panel Y position and height
+static final float RDO_Y = 308, RDO_H = 44;           ///< Readouts strip Y position and height
+static final float GRAPH_Y = 356, GRAPH_H = 254;      ///< Graph area Y position and height
 
 // Right column
-static final float RX = 630, RW = 462;
-static final float OUT_Y = 44, OUT_H = 90;
-static final float SET_Y = 138, SET_H = 96;
-static final float PRE_Y = 238, PRE_H = 176;
-static final float BOT_Y = 418, BOT_H = 192;
-static final float INFO_W = 227, PROT_W = 231;
+static final float RX = 630, RW = 462;                ///< Right column X position and width
+static final float OUT_Y = 44, OUT_H = 90;            ///< Output panel Y position and height
+static final float SET_Y = 138, SET_H = 96;           ///< Set-points panel Y position and height
+static final float PRE_Y = 238, PRE_H = 176;          ///< Presets panel Y position and height
+static final float BOT_Y = 418, BOT_H = 192;          ///< Bottom panels Y position and height
+static final float INFO_W = 227, PROT_W = 231;        ///< Info panel width and protection panel width
 
 // ============================================================
 // Cached CP5 controller references (avoid per-frame string lookups)
 // ============================================================
-Group grpConnected;
-Controller cPortPrev, cPortNext, cConnToggle, cRefreshPorts, cOpenAdvanced;
-Controller cGraphV, cGraphA, cGraphW, cStartLog, cStopLog;
-Toggle cOutput;
-Textfield cTfSetV, cTfSetA, cTfOVP, cTfOCP, cTfOPP, cTfOTP;
-Slider cBrightness;
+Group grpConnected;                                                    ///< Group shown only when connected
+Controller cPortPrev, cPortNext, cConnToggle, cRefreshPorts, cOpenAdvanced;  ///< Top bar navigation and action buttons
+Controller cGraphV, cGraphA, cGraphW, cStartLog, cStopLog;            ///< Graph trace toggles and logging buttons
+Toggle cOutput;                                                        ///< Output ON/OFF toggle switch
+Textfield cTfSetV, cTfSetA, cTfOVP, cTfOCP, cTfOPP, cTfOTP;          ///< Textfields for set-points and protection limits
+Slider cBrightness;                                                    ///< Slider for display brightness level
 
-// Previous state — avoid redundant updates every frame
+/// Previous graph-trace visibility — avoids redundant button color updates every frame
 boolean prevShowV = true, prevShowA = true, prevShowW = false;
+/// Previous connection state — avoids redundant show/hide updates every frame
 boolean prevConnState = false;
 
+/**
+ * @brief Update the status bar message and record the timestamp.
+ * @param msg  The message to display in the status bar.
+ */
 void setStatus(String msg) {
   statusMessage = msg;
   statusTime = millis();
@@ -67,6 +82,13 @@ void setStatus(String msg) {
 // THEME HELPERS
 // ============================================================
 
+/**
+ * @brief Apply background, foreground, and active colors to a ControlP5 controller.
+ * @param c       The controller to style.
+ * @param bg      Background color.
+ * @param fg      Foreground (hover) color.
+ * @param active  Active (pressed) color.
+ */
 void applyTheme(Controller c, int bg, int fg, int active) {
   c.setColorBackground(bg);
   c.setColorForeground(fg);
@@ -75,14 +97,21 @@ void applyTheme(Controller c, int bg, int fg, int active) {
 }
 
 // Pre-computed theme colors
-static final int TH_DARK_BG = 0xFF2E3B55, TH_DARK_FG = 0xFF3D5070, TH_DARK_ACT = 0xFF4A6590;
-static final int TH_GREEN_BG = 0xFF1B5E20, TH_GREEN_FG = 0xFF2E7D32, TH_GREEN_ACT = 0xFF43A047;
-static final int TH_RED_BG = 0xFF7F1D1D, TH_RED_FG = 0xFFB71C1C, TH_RED_ACT = 0xFFD32F2F;
+static final int TH_DARK_BG = 0xFF2E3B55, TH_DARK_FG = 0xFF3D5070, TH_DARK_ACT = 0xFF4A6590;    ///< Dark (default) theme colors
+static final int TH_GREEN_BG = 0xFF1B5E20, TH_GREEN_FG = 0xFF2E7D32, TH_GREEN_ACT = 0xFF43A047;  ///< Green (confirm/connect) theme colors
+static final int TH_RED_BG = 0xFF7F1D1D, TH_RED_FG = 0xFFB71C1C, TH_RED_ACT = 0xFFD32F2F;       ///< Red (warning/disconnect) theme colors
 
+/** @brief Apply the dark (default) theme to a controller. */
 void applyDarkTheme(Controller c)  { applyTheme(c, TH_DARK_BG, TH_DARK_FG, TH_DARK_ACT); }
+/** @brief Apply the green (confirm) theme to a controller. */
 void applyGreenTheme(Controller c) { applyTheme(c, TH_GREEN_BG, TH_GREEN_FG, TH_GREEN_ACT); }
+/** @brief Apply the red (warning) theme to a controller. */
 void applyRedTheme(Controller c)   { applyTheme(c, TH_RED_BG, TH_RED_FG, TH_RED_ACT); }
 
+/**
+ * @brief Apply the standard dark text field style to a ControlP5 Textfield.
+ * @param tf  The Textfield to style.
+ */
 void styleCp5Textfield(Textfield tf) {
   tf.setColorBackground(color(0x17, 0x17, 0x22));
   tf.setColorForeground(color(0x4A, 0x90, 0xD9));
@@ -96,6 +125,10 @@ void styleCp5Textfield(Textfield tf) {
 // INIT
 // ============================================================
 
+/**
+ * @brief Build the entire GUI: top bar, panels, gauges, sliders, buttons,
+ *        textfields, and attempt auto-connect.
+ */
 void initGUI() {
   refreshPorts();
 
@@ -263,6 +296,9 @@ void initGUI() {
   initAdvanced();
 }
 
+/**
+ * @brief Re-scan available serial ports and select the preferred port if found.
+ */
 void refreshPorts() {
   availablePorts = Serial.list();
   selectedPortIndex = 0;
@@ -279,6 +315,10 @@ void refreshPorts() {
 // DRAW
 // ============================================================
 
+/**
+ * @brief Main draw routine -- renders top bar, status bar, and delegates
+ *        to drawConnectedGUI() when connected.
+ */
 void drawGUI() {
   background(COL_BG);
 
@@ -528,6 +568,11 @@ void drawConnectedGUI() {
 // CP5 EVENT HANDLING
 // ============================================================
 
+/**
+ * @brief Central ControlP5 event dispatcher -- routes button, slider,
+ *        and textfield events to their handlers.
+ * @param e  The ControlP5 event to process.
+ */
 void handleCp5Event(ControlEvent e) {
   String name = e.getController().getName();
 
@@ -674,15 +719,30 @@ void handleCp5Event(ControlEvent e) {
 // HELPERS
 // ============================================================
 
+/**
+ * @brief Parse a float from a ControlP5 Textfield, returning 0 on failure.
+ * @param tf  The Textfield to read.
+ * @return    The parsed float value, or 0 if parsing fails.
+ */
 float parseTf(Textfield tf) {
   try { return Float.parseFloat(tf.getText().trim()); }
   catch (Exception e) { return 0; }
 }
 
+/**
+ * @brief Increment or decrement a Textfield's value by delta, clamped to [lo, hi].
+ * @param tf     The Textfield to adjust.
+ * @param delta  The amount to add (positive) or subtract (negative).
+ * @param lo     Minimum allowed value.
+ * @param hi     Maximum allowed value.
+ */
 void adjustTf(Textfield tf, float delta, float lo, float hi) {
   tf.setText(nf(constrain(parseTf(tf) + delta, lo, hi), 0, 3));
 }
 
+/**
+ * @brief Send the voltage and current values from the textfields to the PSU.
+ */
 void applySetpoints() {
   if (!psu.connected) return;
   float v = constrain(parseTf(cTfSetV), 0, psu.maxVoltage);
@@ -699,6 +759,9 @@ void applySetpoints() {
   setStatus("Applied: " + nf(v,0,3) + "V / " + nf(a,0,3) + "A");
 }
 
+/**
+ * @brief Send all four protection limits (OVP, OCP, OPP, OTP) to the PSU.
+ */
 void applyProtection() {
   if (!psu.connected) return;
   psu.sendSetOVP(parseTf(cTfOVP));
@@ -708,8 +771,13 @@ void applyProtection() {
   setStatus("Protection limits applied.");
 }
 
+/// True once textfields have been populated from the device (prevents per-frame overwrite).
 boolean setpointsPopulated = false;
 
+/**
+ * @brief Callback invoked when set-point data arrives from the PSU.
+ *        Populates textfields on first connect or refresh.
+ */
 void onSetpointsReceived() {
   // Only populate textfields on first receive or explicit refresh —
   // otherwise the user can't type without values being overwritten.
@@ -736,6 +804,10 @@ void onSetpointsReceived() {
   setStatus("Set: " + nf(psu.setVoltage, 0, 3) + "V / " + nf(psu.setCurrent, 0, 3) + "A");
 }
 
+/**
+ * @brief Zoom the graph Y-axis scales when scrolling over the graph area.
+ * @param e  The mouse wheel delta (positive = zoom out, negative = zoom in).
+ */
 void handleMouseWheel(float e) {
   if (mouseX >= graph.x && mouseX <= graph.x + graph.w &&
       mouseY >= graph.y && mouseY <= graph.y + graph.h) {
